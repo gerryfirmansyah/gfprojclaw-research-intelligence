@@ -1,6 +1,8 @@
 -- GFPROJCLAW — Migration 001 negative integrity tests
 -- J2 Disposable PostgreSQL Test Cycle v0
 -- Requires Migration 001 + deterministic fixture. Test-only; never production data.
+-- This file covers invariants expected to be rejected directly by DDL constraints.
+-- Verifier-level negative cases are exercised separately by the workflow.
 
 CREATE OR REPLACE FUNCTION pg_temp.expect_failure(test_name text, statement text)
 RETURNS void
@@ -54,9 +56,6 @@ SELECT pg_temp.expect_failure('N11 invalid HumanDecision type',
 
 SELECT pg_temp.expect_failure('N12 quarantined EvidenceFragment requires reason',
     $q$UPDATE evidence_fragment SET quarantine_state='QUARANTINED', quarantine_reason=NULL WHERE id='01000000-0000-0000-0000-000000000001'$q$);
-
-SELECT pg_temp.expect_failure('N15 CoverageContext Profile version from wrong Profile',
-    $q$UPDATE coverage_context SET profile_version_id='b1000000-0000-0000-0000-000000000001' WHERE id='04000000-0000-0000-0000-000000000001'$q$);
 
 SELECT pg_temp.expect_failure('N16 EvidenceFragment SourceRecord normalized to another Work',
     $q$UPDATE evidence_fragment SET source_record_id='d0000000-0000-0000-0000-000000000002' WHERE id='01000000-0000-0000-0000-000000000001'$q$);
