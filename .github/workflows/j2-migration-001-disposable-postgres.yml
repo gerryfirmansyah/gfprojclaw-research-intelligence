@@ -1,0 +1,78 @@
+name: J2 Migration 001 Disposable PostgreSQL Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'db/migrations/001_canonical_vertical_slice.sql'
+      - 'db/fixtures/001_vertical_slice_reference.sql'
+      - 'db/verify/001_schema_verify.sql'
+      - 'db/verify/001_fixture_verify.sql'
+      - '.github/workflows/j2-migration-001-disposable-postgres.yml'
+
+jobs:
+  disposable-postgres-16:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create disposable test database
+        run: createdb gfprojclaw_j2_test
+
+      - name: T1 apply migration
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_test -f db/migrations/001_canonical_vertical_slice.sql
+
+      - name: T2 production-safe schema verification
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_test -f db/verify/001_schema_verify.sql
+
+      - name: T3 apply synthetic cross-domain fixture
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_test -f db/fixtures/001_vertical_slice_reference.sql
+
+      - name: T4 fixture verification
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_test -f db/verify/001_fixture_verify.sql
+
+      - name: Assert canonical table count
+        run: |
+          count=$(psql -At -d gfprojclaw_j2_test -c "select count(*) from information_schema.tables where table_schema='public' and table_type='BASE TABLE' and table_name in ('research_profile','research_profile_version','research_project','research_project_version','literature_source','source_record','work','work_identifier','work_source_record','project_work_relevance','evidence_fragment','claim','research_object_identity','gap_candidate','evidence_relationship','coverage_context','coverage_source_state','assessment','assessment_dimension','change_event','human_decision');")
+          test "$count" = "21"
+
+      - name: T6 clean rebuild database
+        run: |
+          createdb gfprojclaw_j2_rebuild
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_rebuild -f db/migrations/001_canonical_vertical_slice.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_rebuild -f db/verify/001_schema_verify.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_rebuild -f db/fixtures/001_vertical_slice_reference.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_rebuild -f db/verify/001_fixture_verify.sql
+
+      - name: T7 verify migration re-apply is rejected
+        run: |
+          if psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_test -f db/migrations/001_canonical_vertical_slice.sql; then
+            echo 'ERROR: Migration 001 unexpectedly re-applied successfully.'
+            exit 1
+          fi
+          echo 'Expected engineering conflict confirmed on re-apply.'
