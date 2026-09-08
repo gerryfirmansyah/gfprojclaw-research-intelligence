@@ -1,0 +1,4 @@
+BEGIN;
+GRANT SELECT, INSERT, UPDATE ON research_profile,research_project,literature_source,source_record,work,project_work_relevance,evidence_fragment,claim,research_object_identity,gap_candidate,evidence_relationship TO gfproj_app;
+GRANT SELECT, INSERT ON research_profile_version,research_project_version,work_identifier,work_source_record,coverage_context,coverage_source_state,assessment,assessment_dimension,change_event,human_decision TO gfproj_app;
+COMMIT;
