@@ -1,5 +1,5 @@
 -- GFPROJCLAW — Migration 001: Canonical Vertical Slice
--- J2 SQL Draft v0
+-- J2 SQL Draft v1 — Pre-Test Corrections
 -- Created: 2026-09-08
 -- PostgreSQL: 16.x target family
 -- Policy: forward-only versioned migration; ordinary transaction rollback on DDL failure.
@@ -24,12 +24,17 @@ CREATE TABLE research_profile_version (
     version_no integer NOT NULL CHECK (version_no > 0),
     summary text NULL,
     configuration_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
-    supersedes_version_id uuid NULL REFERENCES research_profile_version(id) ON DELETE RESTRICT,
+    supersedes_version_id uuid NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     created_by text NULL,
     CONSTRAINT research_profile_version_no_uk UNIQUE (profile_id, version_no),
+    CONSTRAINT research_profile_version_id_profile_uk UNIQUE (id, profile_id),
     CONSTRAINT research_profile_version_profile_id_id_uk UNIQUE (profile_id, id),
-    CONSTRAINT research_profile_version_no_self_supersede_ck CHECK (supersedes_version_id IS NULL OR supersedes_version_id <> id)
+    CONSTRAINT research_profile_version_no_self_supersede_ck CHECK (supersedes_version_id IS NULL OR supersedes_version_id <> id),
+    CONSTRAINT research_profile_version_supersedes_same_profile_fk
+        FOREIGN KEY (supersedes_version_id, profile_id)
+        REFERENCES research_profile_version(id, profile_id)
+        ON DELETE RESTRICT
 );
 
 ALTER TABLE research_profile
@@ -48,7 +53,8 @@ CREATE TABLE research_project (
     status text NOT NULL CHECK (status IN ('ACTIVE','PAUSED','ARCHIVED')),
     current_version_id uuid NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
-    created_by text NULL
+    created_by text NULL,
+    CONSTRAINT research_project_id_profile_uk UNIQUE (id, profile_id)
 );
 
 CREATE INDEX research_project_profile_status_idx
@@ -61,12 +67,17 @@ CREATE TABLE research_project_version (
     research_intent text NULL,
     provisional_rq_text text NULL,
     project_configuration_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
-    supersedes_version_id uuid NULL REFERENCES research_project_version(id) ON DELETE RESTRICT,
+    supersedes_version_id uuid NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     created_by text NULL,
     CONSTRAINT research_project_version_no_uk UNIQUE (project_id, version_no),
+    CONSTRAINT research_project_version_id_project_uk UNIQUE (id, project_id),
     CONSTRAINT research_project_version_project_id_id_uk UNIQUE (project_id, id),
-    CONSTRAINT research_project_version_no_self_supersede_ck CHECK (supersedes_version_id IS NULL OR supersedes_version_id <> id)
+    CONSTRAINT research_project_version_no_self_supersede_ck CHECK (supersedes_version_id IS NULL OR supersedes_version_id <> id),
+    CONSTRAINT research_project_version_supersedes_same_project_fk
+        FOREIGN KEY (supersedes_version_id, project_id)
+        REFERENCES research_project_version(id, project_id)
+        ON DELETE RESTRICT
 );
 
 ALTER TABLE research_project
@@ -118,8 +129,7 @@ CREATE TABLE work (
     updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX work_publication_year_idx
-    ON work(publication_year DESC);
+CREATE INDEX work_publication_year_idx ON work(publication_year DESC);
 
 CREATE TABLE work_identifier (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -132,8 +142,7 @@ CREATE TABLE work_identifier (
     CONSTRAINT work_identifier_work_uk UNIQUE (work_id, identifier_type, identifier_value)
 );
 
-CREATE INDEX work_identifier_work_idx
-    ON work_identifier(work_id);
+CREATE INDEX work_identifier_work_idx ON work_identifier(work_id);
 
 CREATE TABLE work_source_record (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -146,8 +155,7 @@ CREATE TABLE work_source_record (
     CONSTRAINT work_source_record_pair_uk UNIQUE (work_id, source_record_id)
 );
 
-CREATE INDEX work_source_record_work_idx
-    ON work_source_record(work_id);
+CREATE INDEX work_source_record_work_idx ON work_source_record(work_id);
 
 CREATE TABLE project_work_relevance (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -165,15 +173,13 @@ CREATE TABLE project_work_relevance (
     CONSTRAINT project_work_relevance_time_ck CHECK (last_seen_at >= first_seen_at)
 );
 
-CREATE INDEX project_work_relevance_project_state_idx
-    ON project_work_relevance(project_id, relevance_state);
-CREATE INDEX project_work_relevance_project_seen_idx
-    ON project_work_relevance(project_id, last_seen_at DESC);
+CREATE INDEX project_work_relevance_project_state_idx ON project_work_relevance(project_id, relevance_state);
+CREATE INDEX project_work_relevance_project_seen_idx ON project_work_relevance(project_id, last_seen_at DESC);
 
 CREATE TABLE evidence_fragment (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     work_id uuid NOT NULL REFERENCES work(id) ON DELETE RESTRICT,
-    source_record_id uuid NULL REFERENCES source_record(id) ON DELETE RESTRICT,
+    source_record_id uuid NULL,
     access_level text NOT NULL CHECK (access_level IN ('FULL_TEXT','ABSTRACT_ONLY')),
     fragment_type text NOT NULL CHECK (fragment_type IN ('PASSAGE','ABSTRACT_SEGMENT','STRUCTURED_RECORD_EXCERPT')),
     locator_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -183,6 +189,10 @@ CREATE TABLE evidence_fragment (
     quarantine_state text NOT NULL DEFAULT 'ACTIVE' CHECK (quarantine_state IN ('ACTIVE','QUARANTINED')),
     quarantine_reason text NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT evidence_fragment_work_source_fk
+        FOREIGN KEY (work_id, source_record_id)
+        REFERENCES work_source_record(work_id, source_record_id)
+        ON DELETE RESTRICT,
     CONSTRAINT evidence_fragment_quarantine_ck CHECK (
         (quarantine_state = 'ACTIVE' AND quarantine_reason IS NULL)
         OR
@@ -190,12 +200,9 @@ CREATE TABLE evidence_fragment (
     )
 );
 
-CREATE INDEX evidence_fragment_work_idx
-    ON evidence_fragment(work_id);
-CREATE INDEX evidence_fragment_source_record_idx
-    ON evidence_fragment(source_record_id) WHERE source_record_id IS NOT NULL;
-CREATE INDEX evidence_fragment_content_hash_idx
-    ON evidence_fragment(content_hash) WHERE content_hash IS NOT NULL;
+CREATE INDEX evidence_fragment_work_idx ON evidence_fragment(work_id);
+CREATE INDEX evidence_fragment_source_record_idx ON evidence_fragment(source_record_id) WHERE source_record_id IS NOT NULL;
+CREATE INDEX evidence_fragment_content_hash_idx ON evidence_fragment(content_hash) WHERE content_hash IS NOT NULL;
 
 CREATE TABLE claim (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -205,11 +212,16 @@ CREATE TABLE claim (
     scope_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
     extraction_origin text NOT NULL CHECK (btrim(extraction_origin) <> ''),
     review_state text NOT NULL CHECK (review_state IN ('MACHINE_EXTRACTED','NEEDS_REVIEW','HUMAN_REVIEWED','CONTESTED','QUARANTINED')),
-    supersedes_claim_id uuid NULL REFERENCES claim(id) ON DELETE RESTRICT,
+    supersedes_claim_id uuid NULL,
     quarantine_state text NOT NULL DEFAULT 'ACTIVE' CHECK (quarantine_state IN ('ACTIVE','QUARANTINED')),
     quarantine_reason text NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT claim_id_fragment_uk UNIQUE (id, evidence_fragment_id),
     CONSTRAINT claim_no_self_supersede_ck CHECK (supersedes_claim_id IS NULL OR supersedes_claim_id <> id),
+    CONSTRAINT claim_supersedes_same_fragment_fk
+        FOREIGN KEY (supersedes_claim_id, evidence_fragment_id)
+        REFERENCES claim(id, evidence_fragment_id)
+        ON DELETE RESTRICT,
     CONSTRAINT claim_quarantine_ck CHECK (
         (quarantine_state = 'ACTIVE' AND quarantine_reason IS NULL AND review_state <> 'QUARANTINED')
         OR
@@ -217,27 +229,29 @@ CREATE TABLE claim (
     )
 );
 
-CREATE INDEX claim_fragment_idx
-    ON claim(evidence_fragment_id);
-CREATE INDEX claim_review_state_idx
-    ON claim(review_state);
+CREATE INDEX claim_fragment_idx ON claim(evidence_fragment_id);
+CREATE INDEX claim_review_state_idx ON claim(review_state);
 
 CREATE TABLE research_object_identity (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     object_type text NOT NULL CHECK (object_type IN ('GAP_CANDIDATE')),
-    profile_id uuid NULL REFERENCES research_profile(id) ON DELETE RESTRICT,
-    project_id uuid NULL REFERENCES research_project(id) ON DELETE RESTRICT,
+    profile_id uuid NULL,
+    project_id uuid NULL,
     canonical_label text NOT NULL CHECK (btrim(canonical_label) <> ''),
     lifecycle_state text NOT NULL CHECK (lifecycle_state IN ('ACTIVE','INACTIVE','SUPERSEDED','QUARANTINED')),
     origin text NOT NULL CHECK (btrim(origin) <> ''),
     created_at timestamptz NOT NULL DEFAULT now(),
     created_by text NULL,
     CONSTRAINT research_object_identity_project_scope_ck CHECK (object_type <> 'GAP_CANDIDATE' OR project_id IS NOT NULL),
+    CONSTRAINT research_object_identity_project_profile_fk
+        FOREIGN KEY (project_id, profile_id)
+        REFERENCES research_project(id, profile_id)
+        MATCH FULL
+        ON DELETE RESTRICT,
     CONSTRAINT research_object_identity_id_project_uk UNIQUE (id, project_id)
 );
 
-CREATE INDEX research_object_identity_project_type_state_idx
-    ON research_object_identity(project_id, object_type, lifecycle_state);
+CREATE INDEX research_object_identity_project_type_state_idx ON research_object_identity(project_id, object_type, lifecycle_state);
 
 CREATE TABLE gap_candidate (
     id uuid PRIMARY KEY,
@@ -257,10 +271,8 @@ CREATE TABLE gap_candidate (
         ON DELETE RESTRICT
 );
 
-CREATE INDEX gap_candidate_project_state_idx
-    ON gap_candidate(project_id, current_evolution_state);
-CREATE INDEX gap_candidate_project_type_idx
-    ON gap_candidate(project_id, gap_type);
+CREATE INDEX gap_candidate_project_state_idx ON gap_candidate(project_id, current_evolution_state);
+CREATE INDEX gap_candidate_project_type_idx ON gap_candidate(project_id, gap_type);
 
 CREATE TABLE evidence_relationship (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -270,17 +282,19 @@ CREATE TABLE evidence_relationship (
     rationale text NULL,
     origin text NOT NULL CHECK (btrim(origin) <> ''),
     review_state text NOT NULL CHECK (review_state IN ('MACHINE_SUGGESTED','NEEDS_REVIEW','HUMAN_REVIEWED','CONTESTED','QUARANTINED')),
-    supersedes_relationship_id uuid NULL REFERENCES evidence_relationship(id) ON DELETE RESTRICT,
+    supersedes_relationship_id uuid NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT evidence_relationship_no_self_supersede_ck CHECK (supersedes_relationship_id IS NULL OR supersedes_relationship_id <> id)
+    CONSTRAINT evidence_relationship_id_lineage_uk UNIQUE (id, claim_id, target_research_object_id),
+    CONSTRAINT evidence_relationship_no_self_supersede_ck CHECK (supersedes_relationship_id IS NULL OR supersedes_relationship_id <> id),
+    CONSTRAINT evidence_relationship_supersedes_same_lineage_fk
+        FOREIGN KEY (supersedes_relationship_id, claim_id, target_research_object_id)
+        REFERENCES evidence_relationship(id, claim_id, target_research_object_id)
+        ON DELETE RESTRICT
 );
 
-CREATE INDEX evidence_relationship_target_semantic_idx
-    ON evidence_relationship(target_research_object_id, semantic_type);
-CREATE INDEX evidence_relationship_claim_idx
-    ON evidence_relationship(claim_id);
-CREATE INDEX evidence_relationship_review_state_idx
-    ON evidence_relationship(review_state);
+CREATE INDEX evidence_relationship_target_semantic_idx ON evidence_relationship(target_research_object_id, semantic_type);
+CREATE INDEX evidence_relationship_claim_idx ON evidence_relationship(claim_id);
+CREATE INDEX evidence_relationship_review_state_idx ON evidence_relationship(review_state);
 
 CREATE TABLE coverage_context (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -294,13 +308,12 @@ CREATE TABLE coverage_context (
     extraction_summary_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
     counter_search_state text NOT NULL CHECK (counter_search_state IN ('NOT_RUN','PARTIAL','RUN','DEGRADED')),
     limitations text NULL,
-    created_at timestamptz NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT coverage_context_id_project_uk UNIQUE (id, project_id)
 );
 
-CREATE INDEX coverage_context_project_observed_idx
-    ON coverage_context(project_id, observed_at DESC);
-CREATE INDEX coverage_context_profile_version_idx
-    ON coverage_context(profile_version_id);
+CREATE INDEX coverage_context_project_observed_idx ON coverage_context(project_id, observed_at DESC);
+CREATE INDEX coverage_context_profile_version_idx ON coverage_context(profile_version_id);
 
 CREATE TABLE coverage_source_state (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -315,44 +328,45 @@ CREATE TABLE coverage_source_state (
     CONSTRAINT coverage_source_state_pair_uk UNIQUE (coverage_context_id, literature_source_id)
 );
 
-CREATE INDEX coverage_source_state_source_created_idx
-    ON coverage_source_state(literature_source_id, created_at DESC);
+CREATE INDEX coverage_source_state_source_created_idx ON coverage_source_state(literature_source_id, created_at DESC);
 
 CREATE TABLE assessment (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL REFERENCES research_project(id) ON DELETE RESTRICT,
     target_research_object_id uuid NOT NULL,
-    coverage_context_id uuid NULL REFERENCES coverage_context(id) ON DELETE RESTRICT,
+    coverage_context_id uuid NULL,
     assessment_type text NOT NULL CHECK (btrim(assessment_type) <> ''),
     model_or_agent text NULL,
     model_version text NULL,
     explanation_summary text NULL,
     assessed_at timestamptz NOT NULL,
-    supersedes_assessment_id uuid NULL REFERENCES assessment(id) ON DELETE RESTRICT,
+    supersedes_assessment_id uuid NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT assessment_id_lineage_uk UNIQUE (id, project_id, target_research_object_id),
     CONSTRAINT assessment_no_self_supersede_ck CHECK (supersedes_assessment_id IS NULL OR supersedes_assessment_id <> id),
     CONSTRAINT assessment_target_project_fk
         FOREIGN KEY (target_research_object_id, project_id)
         REFERENCES research_object_identity(id, project_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT assessment_coverage_project_fk
+        FOREIGN KEY (coverage_context_id, project_id)
+        REFERENCES coverage_context(id, project_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT assessment_supersedes_same_lineage_fk
+        FOREIGN KEY (supersedes_assessment_id, project_id, target_research_object_id)
+        REFERENCES assessment(id, project_id, target_research_object_id)
         ON DELETE RESTRICT
 );
 
-CREATE INDEX assessment_target_assessed_idx
-    ON assessment(target_research_object_id, assessed_at DESC);
-CREATE INDEX assessment_project_assessed_idx
-    ON assessment(project_id, assessed_at DESC);
+CREATE INDEX assessment_target_assessed_idx ON assessment(target_research_object_id, assessed_at DESC);
+CREATE INDEX assessment_project_assessed_idx ON assessment(project_id, assessed_at DESC);
 
 CREATE TABLE assessment_dimension (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     assessment_id uuid NOT NULL REFERENCES assessment(id) ON DELETE RESTRICT,
     dimension_type text NOT NULL CHECK (dimension_type IN (
-        'GAP_EVIDENCE_STRENGTH',
-        'COUNTER_EVIDENCE_RISK',
-        'EVIDENCE_COVERAGE_CONTEXT',
-        'REVIEW_PRIORITY',
-        'NOVELTY_POTENTIAL',
-        'THEORETICAL_SIGNIFICANCE',
-        'METHODOLOGICAL_FEASIBILITY'
+        'GAP_EVIDENCE_STRENGTH','COUNTER_EVIDENCE_RISK','EVIDENCE_COVERAGE_CONTEXT','REVIEW_PRIORITY',
+        'NOVELTY_POTENTIAL','THEORETICAL_SIGNIFICANCE','METHODOLOGICAL_FEASIBILITY'
     )),
     value_numeric numeric(6,2) NULL,
     value_text text NULL,
@@ -362,25 +376,16 @@ CREATE TABLE assessment_dimension (
     CONSTRAINT assessment_dimension_value_ck CHECK (value_numeric IS NOT NULL OR value_text IS NOT NULL)
 );
 
-CREATE INDEX assessment_dimension_assessment_idx
-    ON assessment_dimension(assessment_id);
+CREATE INDEX assessment_dimension_assessment_idx ON assessment_dimension(assessment_id);
 
 CREATE TABLE change_event (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL REFERENCES research_project(id) ON DELETE RESTRICT,
     primary_research_object_id uuid NOT NULL,
-    coverage_context_id uuid NULL REFERENCES coverage_context(id) ON DELETE RESTRICT,
+    coverage_context_id uuid NULL,
     change_type text NOT NULL CHECK (change_type IN (
-        'EVIDENCE_ADDED',
-        'EVIDENCE_CHALLENGED',
-        'EVIDENCE_CONTRADICTED',
-        'GAP_STRENGTHENED',
-        'GAP_WEAKENED',
-        'GAP_CONTESTED',
-        'GAP_POSSIBLY_CLOSED',
-        'GAP_REOPENED',
-        'ASSESSMENT_CHANGED',
-        'COVERAGE_CHANGED'
+        'EVIDENCE_ADDED','EVIDENCE_CHALLENGED','EVIDENCE_CONTRADICTED','GAP_STRENGTHENED','GAP_WEAKENED',
+        'GAP_CONTESTED','GAP_POSSIBLY_CLOSED','GAP_REOPENED','ASSESSMENT_CHANGED','COVERAGE_CHANGED'
     )),
     observed_at timestamptz NOT NULL,
     previous_state_jsonb jsonb NULL,
@@ -390,38 +395,50 @@ CREATE TABLE change_event (
     CONSTRAINT change_event_object_project_fk
         FOREIGN KEY (primary_research_object_id, project_id)
         REFERENCES research_object_identity(id, project_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT change_event_coverage_project_fk
+        FOREIGN KEY (coverage_context_id, project_id)
+        REFERENCES coverage_context(id, project_id)
         ON DELETE RESTRICT
 );
 
-CREATE INDEX change_event_project_observed_idx
-    ON change_event(project_id, observed_at DESC);
-CREATE INDEX change_event_object_observed_idx
-    ON change_event(primary_research_object_id, observed_at DESC);
-CREATE INDEX change_event_type_observed_idx
-    ON change_event(change_type, observed_at DESC);
+CREATE INDEX change_event_project_observed_idx ON change_event(project_id, observed_at DESC);
+CREATE INDEX change_event_object_observed_idx ON change_event(primary_research_object_id, observed_at DESC);
+CREATE INDEX change_event_type_observed_idx ON change_event(change_type, observed_at DESC);
 
 CREATE TABLE human_decision (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id uuid NOT NULL REFERENCES research_project(id) ON DELETE RESTRICT,
     primary_research_object_id uuid NOT NULL,
-    assessment_id uuid NULL REFERENCES assessment(id) ON DELETE RESTRICT,
-    coverage_context_id uuid NULL REFERENCES coverage_context(id) ON DELETE RESTRICT,
+    assessment_id uuid NULL,
+    coverage_context_id uuid NULL,
     decision_type text NOT NULL CHECK (decision_type IN ('REVIEW','MODIFY','ACCEPT_DIRECTION','REJECT_CANDIDATE','NEED_MORE_EVIDENCE')),
     rationale text NOT NULL CHECK (btrim(rationale) <> ''),
     actor text NOT NULL CHECK (btrim(actor) <> ''),
     decided_at timestamptz NOT NULL,
-    supersedes_decision_id uuid NULL REFERENCES human_decision(id) ON DELETE RESTRICT,
+    supersedes_decision_id uuid NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT human_decision_id_lineage_uk UNIQUE (id, project_id, primary_research_object_id),
     CONSTRAINT human_decision_no_self_supersede_ck CHECK (supersedes_decision_id IS NULL OR supersedes_decision_id <> id),
     CONSTRAINT human_decision_object_project_fk
         FOREIGN KEY (primary_research_object_id, project_id)
         REFERENCES research_object_identity(id, project_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT human_decision_coverage_project_fk
+        FOREIGN KEY (coverage_context_id, project_id)
+        REFERENCES coverage_context(id, project_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT human_decision_assessment_lineage_fk
+        FOREIGN KEY (assessment_id, project_id, primary_research_object_id)
+        REFERENCES assessment(id, project_id, target_research_object_id)
+        ON DELETE RESTRICT,
+    CONSTRAINT human_decision_supersedes_same_lineage_fk
+        FOREIGN KEY (supersedes_decision_id, project_id, primary_research_object_id)
+        REFERENCES human_decision(id, project_id, primary_research_object_id)
         ON DELETE RESTRICT
 );
 
-CREATE INDEX human_decision_object_decided_idx
-    ON human_decision(primary_research_object_id, decided_at DESC);
-CREATE INDEX human_decision_project_decided_idx
-    ON human_decision(project_id, decided_at DESC);
+CREATE INDEX human_decision_object_decided_idx ON human_decision(primary_research_object_id, decided_at DESC);
+CREATE INDEX human_decision_project_decided_idx ON human_decision(project_id, decided_at DESC);
 
 COMMIT;
