@@ -65,6 +65,16 @@ jobs:
       - name: T5 hard negative integrity tests
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_test -f db/verify/001_negative_integrity_tests.sql
 
+      - name: T5 verifier catches wrong CoverageContext Profile lineage
+        run: |
+          createdb -T gfprojclaw_j2_test gfprojclaw_j2_bad_coverage
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_bad_coverage -c "update coverage_context set profile_version_id='b1000000-0000-0000-0000-000000000001' where id='04000000-0000-0000-0000-000000000001';"
+          if psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_bad_coverage -f db/verify/001_schema_verify.sql; then
+            echo 'ERROR: verifier failed to detect CoverageContext Profile lineage mismatch.'
+            exit 1
+          fi
+          echo 'Expected CoverageContext lineage rejection confirmed.'
+
       - name: T5 verifier catches quarantined upstream evidence
         run: |
           createdb -T gfprojclaw_j2_test gfprojclaw_j2_bad_quarantine
