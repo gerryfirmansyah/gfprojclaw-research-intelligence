@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GFPROJCLAW Research Cockpit Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">GF</div>
+        <div>
+          <strong>GFPROJCLAW</strong>
+          <span>Research Intelligence</span>
+        </div>
+      </div>
+
+      <nav id="main-nav" class="nav-list">
+        <button class="nav-item active" data-view="today">Today</button>
+        <button class="nav-item" data-view="journey">Research Journey</button>
+        <button class="nav-item" data-view="opportunities">Opportunities</button>
+        <button class="nav-item" data-view="evidence">Evidence Explorer</button>
+        <button class="nav-item" data-view="evolution">Knowledge Evolution</button>
+        <button class="nav-item" data-view="review">Human Review <span class="badge">3</span></button>
+        <button class="nav-item" data-view="coverage">Coverage & Health</button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-title">Profile</div>
+      <nav class="nav-list small">
+        <button class="nav-item" data-view="profiles">Profiles & Projects</button>
+        <button class="nav-item" data-view="telegram">Telegram Radar</button>
+      </nav>
+
+      <div class="researcher-card">
+        <div class="avatar">GF</div>
+        <div>
+          <strong>Gerry Firmansyah</strong>
+          <span>Researcher</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="context-switchers">
+          <label>Profile
+            <select id="profile-select">
+              <option value="A">A — Computer / Information Systems</option>
+              <option value="B">B — Management / Organization Studies</option>
+            </select>
+          </label>
+          <label>Project
+            <select id="project-select"></select>
+          </label>
+        </div>
+        <div class="topbar-actions">
+          <input id="global-search" type="search" placeholder="Search papers, concepts, gaps…" />
+          <span class="sync-status">Updated 10:24</span>
+        </div>
+      </header>
+
+      <section id="view-today" class="view active-view">
+        <div class="page-heading">
+          <div>
+            <h1>Today</h1>
+            <p>What changed, why it matters, and where HUMAN attention is useful.</p>
+          </div>
+          <div class="coverage-pill">2 sources healthy · 1 degraded</div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card"><span>New Papers</span><strong>42</strong><small>+12 since yesterday</small></article>
+          <article class="metric-card warning"><span>Needs Attention</span><strong>7</strong><small>3 high priority</small></article>
+          <article class="metric-card"><span>Knowledge Changes</span><strong>5</strong><small>2 strengthened</small></article>
+          <article class="metric-card warning"><span>Coverage Alerts</span><strong>2</strong><small>1 affects novelty search</small></article>
+          <article class="metric-card"><span>Telegram Updates</span><strong>6</strong><small>Last 2 hours ago</small></article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="panel span-2">
+            <div class="panel-header"><h2>Recent Important Changes</h2><button class="text-button" data-open="evolution">View all</button></div>
+            <div id="change-list" class="change-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>R0–R16 Research Stages</h2><button class="text-button" data-open="journey">View all</button></div>
+            <div id="journey-mini" class="journey-mini"></div>
+          </article>
+
+          <article class="panel span-2">
+            <div class="panel-header"><h2>Top Research Opportunities</h2><button class="text-button" data-open="opportunities">View all</button></div>
+            <div id="opportunity-table"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Latest Papers</h2><button class="text-button" data-open="evidence">View all</button></div>
+            <div id="paper-list" class="paper-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Coverage & Health</h2><button class="text-button" data-open="coverage">View all</button></div>
+            <div id="health-mini"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Knowledge Evolution</h2><button class="text-button" data-open="evolution">View all</button></div>
+            <div id="evolution-mini"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2>Telegram Research Radar</h2><button class="text-button" data-open="telegram">View all</button></div>
+            <div id="telegram-mini"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-journey" class="view"></section>
+      <section id="view-opportunities" class="view"></section>
+      <section id="view-evidence" class="view"></section>
+      <section id="view-evolution" class="view"></section>
+      <section id="view-review" class="view"></section>
+      <section id="view-coverage" class="view"></section>
+      <section id="view-profiles" class="view"></section>
+      <section id="view-telegram" class="view"></section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
