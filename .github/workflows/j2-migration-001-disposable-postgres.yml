@@ -9,6 +9,7 @@ on:
       - 'db/fixtures/001_vertical_slice_reference.sql'
       - 'db/verify/001_schema_verify.sql'
       - 'db/verify/001_fixture_verify.sql'
+      - 'db/verify/001_negative_integrity_tests.sql'
       - '.github/workflows/j2-migration-001-disposable-postgres.yml'
 
 jobs:
@@ -60,6 +61,19 @@ jobs:
         run: |
           count=$(psql -At -d gfprojclaw_j2_test -c "select count(*) from information_schema.tables where table_schema='public' and table_type='BASE TABLE' and table_name in ('research_profile','research_profile_version','research_project','research_project_version','literature_source','source_record','work','work_identifier','work_source_record','project_work_relevance','evidence_fragment','claim','research_object_identity','gap_candidate','evidence_relationship','coverage_context','coverage_source_state','assessment','assessment_dimension','change_event','human_decision');")
           test "$count" = "21"
+
+      - name: T5 hard negative integrity tests
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_test -f db/verify/001_negative_integrity_tests.sql
+
+      - name: T5 verifier catches quarantined upstream evidence
+        run: |
+          createdb -T gfprojclaw_j2_test gfprojclaw_j2_bad_quarantine
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_bad_quarantine -c "update evidence_fragment set quarantine_state='QUARANTINED', quarantine_reason='negative test' where id='01000000-0000-0000-0000-000000000001';"
+          if psql -v ON_ERROR_STOP=1 -d gfprojclaw_j2_bad_quarantine -f db/verify/001_schema_verify.sql; then
+            echo 'ERROR: verifier failed to detect active Claim depending on quarantined EvidenceFragment.'
+            exit 1
+          fi
+          echo 'Expected local verifier rejection confirmed.'
 
       - name: T6 clean rebuild database
         run: |
