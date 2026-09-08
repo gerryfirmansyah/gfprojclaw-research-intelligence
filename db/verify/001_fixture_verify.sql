@@ -4,23 +4,23 @@
 -- Never run this verifier as a reason to load synthetic fixtures into production.
 
 DO $$
-DECLARE bad_count integer;
+DECLARE row_count integer;
 BEGIN
-    SELECT count(*) INTO bad_count
+    SELECT count(*) INTO row_count
     FROM research_profile
     WHERE id IN (
         'a0000000-0000-0000-0000-000000000001',
         'b0000000-0000-0000-0000-000000000001'
-    ) AND current_version_id IS NULL;
-    IF bad_count <> 0 THEN RAISE EXCEPTION 'Fixture Profile current-version pointer missing'; END IF;
+    ) AND current_version_id IS NOT NULL;
+    IF row_count <> 2 THEN RAISE EXCEPTION 'Fixture requires two Profiles with current-version pointers'; END IF;
 
-    SELECT count(*) INTO bad_count
+    SELECT count(*) INTO row_count
     FROM research_project
     WHERE id IN (
         'a2000000-0000-0000-0000-000000000001',
         'b2000000-0000-0000-0000-000000000001'
-    ) AND current_version_id IS NULL;
-    IF bad_count <> 0 THEN RAISE EXCEPTION 'Fixture Project current-version pointer missing'; END IF;
+    ) AND current_version_id IS NOT NULL;
+    IF row_count <> 2 THEN RAISE EXCEPTION 'Fixture requires two Projects with current-version pointers'; END IF;
 END $$;
 
 DO $$
@@ -81,9 +81,11 @@ BEGIN
         'a2000000-0000-0000-0000-000000000001',
         'b2000000-0000-0000-0000-000000000001'
     )
-      AND NOT EXISTS (SELECT 1 FROM human_decision h WHERE h.project_id = p.id)
-      AND NOT EXISTS (SELECT 1 FROM assessment a WHERE a.project_id = p.id);
-    IF bad_count <> 0 THEN RAISE EXCEPTION 'Fixture lacks separate Assessment/HumanDecision rows'; END IF;
+      AND (
+        NOT EXISTS (SELECT 1 FROM human_decision h WHERE h.project_id = p.id)
+        OR NOT EXISTS (SELECT 1 FROM assessment a WHERE a.project_id = p.id)
+      );
+    IF bad_count <> 0 THEN RAISE EXCEPTION 'Each fixture Project requires separate Assessment and HumanDecision rows'; END IF;
 END $$;
 
 DO $$
