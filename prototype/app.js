@@ -199,9 +199,17 @@ document.getElementById("main-nav").addEventListener("click", e => {
   if (button) showView(button.dataset.view);
 });
 document.querySelectorAll(".nav-list.small [data-view]").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
-profileSelect.addEventListener("change", () => { renderProjects(); renderDashboard(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (active && active !== "today") showView(active); });
+
 projectSelect.addEventListener("change", () => { const active = document.querySelector(".active-view")?.id.replace("view-",""); if (active && active !== "today") showView(active); });
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
-renderProjects();
-renderDashboard();
+fetch("/api/context").then(r => r.json()).then(rows => {
+  const profiles = [...new Map(rows.map(r => [r.profile_id, r])).values()];
+  profileSelect.innerHTML = profiles.map(r => `<option value="${r.profile_id}">${r.profile_name}</option>`).join("");
+  const bindProjects = () => {
+    const projects = rows.filter(r => r.profile_id === profileSelect.value);
+    projectSelect.innerHTML = projects.map(r => `<option value="${r.project_id}">${r.project_name}</option>`).join("");
+  };
+  profileSelect.onchange = () => { bindProjects(); };
+  bindProjects();
+}).catch(console.error);
