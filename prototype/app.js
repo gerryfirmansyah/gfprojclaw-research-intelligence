@@ -86,6 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
+const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
   const idx = Math.max(0, profileSelect.selectedIndex);
@@ -134,7 +135,7 @@ async function renderLatestPapers() {
   if (!box || !projectId) return;
   box.innerHTML = `<div class="paper-row"><div><strong>Loading real project works…</strong></div></div>`;
   try {
-    const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/papers`);
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectId)}/papers`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const papers = await response.json();
     box.innerHTML = papers.length ? papers.map(p => {
@@ -233,7 +234,7 @@ document.querySelectorAll(".nav-list.small [data-view]").forEach(b => b.addEvent
 projectSelect.addEventListener("change", () => { renderLatestPapers(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (active && active !== "today") showView(active); });
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
-fetch("/api/context").then(r => r.json()).then(rows => {
+fetch(`${API_BASE}/api/context`).then(r => r.json()).then(rows => {
   const profiles = [...new Map(rows.map(r => [r.profile_id, r])).values()];
   profileSelect.innerHTML = profiles.map(r => `<option value="${r.profile_id}">${r.profile_name}</option>`).join("");
   const bindProjects = () => {

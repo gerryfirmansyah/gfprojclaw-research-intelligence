@@ -1,0 +1,23 @@
+api.116.212.72.79.nip.io {
+	@preflight {
+		method OPTIONS
+		path /api/*
+	}
+	handle @preflight {
+		header Access-Control-Allow-Origin "https://gerryfirmansyah.github.io"
+		header Access-Control-Allow-Methods "GET, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type"
+		header Vary "Origin"
+		respond "" 204
+	}
+
+	handle /api/* {
+		header Access-Control-Allow-Origin "https://gerryfirmansyah.github.io"
+		header Access-Control-Allow-Methods "GET, OPTIONS"
+		header Vary "Origin"
+		header X-Content-Type-Options "nosniff"
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	respond 404
+}
