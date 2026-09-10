@@ -87,6 +87,15 @@ const telegram = [
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
 
+function selectedDummyData() {
+  const idx = Math.max(0, profileSelect.selectedIndex);
+  return Object.values(data)[idx] || Object.values(data)[0];
+}
+
+function selectedProjectLabel() {
+  return projectSelect.selectedOptions[0]?.textContent || "Selected project";
+}
+
 function stateClass(label) {
   if (/CONTESTED|CHALLENGED|NEEDS ATTENTION/i.test(label)) return "red";
   if (/STRENGTH|MATURE|HUMAN REVIEWED|HEALTHY/i.test(label)) return "green";
@@ -100,7 +109,7 @@ function renderProjects() {
 }
 
 function renderDashboard() {
-  const d = data[profileSelect.value];
+  const d = selectedDummyData();
   document.getElementById("change-list").innerHTML = d.changes.map(([id, text, state, cls]) => `
     <div class="change-row"><div class="change-main"><strong>${id} — ${text}</strong><small>Evidence-aware dummy ChangeEvent</small></div><span class="state ${cls}">${state}</span></div>`).join("");
 
@@ -112,11 +121,32 @@ function renderDashboard() {
     ${d.opportunities.map(([id, title, score, evidence, status]) => `<tr><td><strong>${id}</strong></td><td>${title}</td><td><span class="score">${score}</span></td><td>${evidence}</td><td><span class="state ${stateClass(status)}">${status}</span></td></tr>`).join("")}
     </tbody></table>`;
 
-  document.getElementById("paper-list").innerHTML = d.papers.map(([title, year, venue, relevance]) => `<div class="paper-row"><div><strong>${title}</strong><small>${year} · ${venue}</small></div><span class="relevance">${relevance}</span></div>`).join("");
+  renderLatestPapers();
   document.getElementById("health-mini").innerHTML = health.map(([source,status,cls,detail]) => `<div class="health-row"><div><strong>${source}</strong><small>${detail}</small></div><span class="state ${cls}">${status}</span></div>`).join("");
   document.getElementById("evolution-mini").innerHTML = evolution.map(([id,change,when]) => `<div class="evolution-row"><div><strong>${id}</strong><small>${change}</small></div><small>${when}</small></div>`).join("");
   document.getElementById("telegram-mini").innerHTML = telegram.map(([time,text]) => `<div class="telegram-row"><time>${time}</time><strong>${text}</strong></div>`).join("");
   bindOpenButtons();
+}
+
+async function renderLatestPapers() {
+  const box = document.getElementById("paper-list");
+  const projectId = projectSelect.value;
+  if (!box || !projectId) return;
+  box.innerHTML = `<div class="paper-row"><div><strong>Loading real project works…</strong></div></div>`;
+  try {
+    const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/papers`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const papers = await response.json();
+    box.innerHTML = papers.length ? papers.map(p => {
+      const year = p.publication_year || "Year unknown";
+      const venue = p.venue_name || "Venue unknown";
+      const status = p.human_review_state || p.relevance_state || "UNREVIEWED";
+      return `<div class="paper-row"><div><strong>${p.title}</strong><small>${year} · ${venue} · ${p.current_access_level} · ${p.source_key || "source unknown"}</small></div><span class="state ${stateClass(status)}">${status}</span></div>`;
+    }).join("") : `<div class="paper-row"><div><strong>No real works stored for this project yet.</strong><small>Latest Papers is reading PostgreSQL, not dummy scientific evidence.</small></div></div>`;
+  } catch (error) {
+    console.error(error);
+    box.innerHTML = `<div class="paper-row"><div><strong>Real paper data unavailable</strong><small>${error.message}</small></div></div>`;
+  }
 }
 
 function commonHeader(title, subtitle) {
@@ -131,7 +161,7 @@ function renderJourney() {
 }
 
 function renderOpportunities() {
-  const d = data[profileSelect.value];
+  const d = selectedDummyData();
   return commonHeader("Research Opportunities", "Investigate candidate opportunities only after known evidence and existing solutions are visible.") + `
   <div class="card"><table class="table"><thead><tr><th>ID</th><th>Candidate</th><th>Gap evidence</th><th>Novelty</th><th>Counter risk</th><th>Theory value</th><th>Method feasibility</th><th>State</th></tr></thead><tbody>${d.opportunities.map(([id,title,score,,status],i)=>`<tr><td><strong>${id}</strong></td><td>${title}</td><td>${score}</td><td>${[52,78,44,61][i]}</td><td>${[68,31,74,46][i]}</td><td>${[82,71,69,58][i]}</td><td>${[73,80,66,75][i]}</td><td><span class="state ${stateClass(status)}">${status}</span></td></tr>`).join("")}</tbody></table></div>
   <div class="detail-grid" style="margin-top:14px"><div class="card"><h3>What We Know</h3><p>Current evidence suggests the candidate mechanism matters in several contexts, but findings are not uniform.</p><div class="callout">Traceable synthesis: 7 supports · 3 challenges · 2 addresses</div></div><div class="card"><h3>Existing Solutions — before Novelty</h3><ul><li>SOL-003 — adjacent framework</li><li>SOL-008 — partial mechanism overlap</li><li>SOL-011 — related boundary-condition solution</li></ul><p><strong>Residual question:</strong> Is the unresolved issue a mechanism, boundary condition, or terminology overlap?</p></div><div class="card"><h3>HUMAN Judgment</h3><div class="decision-bar"><button>Review</button><button>Modify</button><button class="primary">Accept direction</button><button>Reject candidate</button><button>Need more evidence</button></div></div></div>`;
@@ -166,16 +196,16 @@ function renderCoverage() {
 }
 
 function renderProfiles() {
-  const isA = profileSelect.value === "A";
+  const isA = profileSelect.selectedIndex === 0;
   return commonHeader("Research Profile / Project Configuration", "Domain context is configuration; scientific intent belongs to a Project.") + `
   <div class="detail-grid"><div class="card"><h3>${isA ? "Profile A — Computer / Information Systems" : "Profile B — Management / Organization Studies"}</h3><p><strong>Core interests</strong></p><ul>${(isA ? ["IT Governance","e-Government / Digital Government","Enterprise Architecture"] : ["Organizational Resilience","Human Behaviour","Human Capability"]).map(x=>`<li>${x}</li>`).join("")}</ul><p><strong>Seed literature:</strong> 12 works</p><p><strong>Watchlists:</strong> 4 active</p></div>
-  <div class="card"><h3>Selected Project</h3><p><strong>${projectSelect.value}</strong></p><p>Research intent is provisional and feeds R0 rather than pre-completing the research journey.</p><div class="callout">AI suggestions: 3 concepts · 2 theory candidates · 2 method candidates. HUMAN Accept / Modify / Reject.</div></div>
+  <div class="card"><h3>Selected Project</h3><p><strong>${selectedProjectLabel()}</strong></p><p>Research intent is provisional and feeds R0 rather than pre-completing the research journey.</p><div class="callout">AI suggestions: 3 concepts · 2 theory candidates · 2 method candidates. HUMAN Accept / Modify / Reject.</div></div>
   <div class="card"><h3>Generality Check</h3><ul><li>Same core objects</li><li>Same R0–R16 journey</li><li>Same Evidence Explorer</li><li>Same ChangeEvent logic</li><li>Same Human Review</li></ul><p><strong>No domain-specific core branch required.</strong></p></div></div>`;
 }
 
 function renderTelegram() {
   return commonHeader("Telegram Research Radar", "A compressed, non-canonical attention channel that points back to the cockpit.") + `
-  <div class="detail-grid"><div class="card"><h3>Daily Research Radar</h3><p><strong>${projectSelect.value}</strong></p><ul><li>14 new relevant works</li><li>5 new evidence-backed claims</li><li>GAP-014 became CONTESTED</li><li>1 competing theory deserves review</li><li>R5 and R12 need HUMAN attention</li></ul><div class="callout warning">Coverage: 2 sources healthy · 1 degraded.</div></div>
+  <div class="detail-grid"><div class="card"><h3>Daily Research Radar</h3><p><strong>${selectedProjectLabel()}</strong></p><ul><li>14 new relevant works</li><li>5 new evidence-backed claims</li><li>GAP-014 became CONTESTED</li><li>1 competing theory deserves review</li><li>R5 and R12 need HUMAN attention</li></ul><div class="callout warning">Coverage: 2 sources healthy · 1 degraded.</div></div>
   <div class="card"><h3>High-value alert</h3><p><strong>EXISTING SOLUTION DISCOVERED</strong></p><p>SOL-008 may address part of GAP-014. The contribution may need a narrower boundary condition.</p><p>Evidence: 1 new full-text paper · 2 linked claims.</p><button class="text-button">Open Gap–Solution Workspace</button></div>
   <div class="card"><h3>Radar Rules</h3><ul><li>No raw crawler logs</li><li>No automatic scientific decisions</li><li>No canonical state in Telegram</li><li>Delivery failure stays local</li><li>Deep-link back to Dashboard</li></ul></div></div>`;
 }
@@ -200,7 +230,7 @@ document.getElementById("main-nav").addEventListener("click", e => {
 });
 document.querySelectorAll(".nav-list.small [data-view]").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
-projectSelect.addEventListener("change", () => { const active = document.querySelector(".active-view")?.id.replace("view-",""); if (active && active !== "today") showView(active); });
+projectSelect.addEventListener("change", () => { renderLatestPapers(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (active && active !== "today") showView(active); });
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
 fetch("/api/context").then(r => r.json()).then(rows => {
@@ -209,6 +239,7 @@ fetch("/api/context").then(r => r.json()).then(rows => {
   const bindProjects = () => {
     const projects = rows.filter(r => r.profile_id === profileSelect.value);
     projectSelect.innerHTML = projects.map(r => `<option value="${r.project_id}">${r.project_name}</option>`).join("");
+    renderLatestPapers();
   };
   profileSelect.onchange = () => { bindProjects(); };
   bindProjects();
