@@ -74,3 +74,31 @@ def list_project_evidence(project_id, limit=50):
             LIMIT %s
         """, (project_id, limit)).fetchall()
     return rows
+
+
+def get_project_coverage(project_id):
+    with db() as conn:
+        row = conn.execute("""
+            SELECT cc.id AS coverage_context_id, cc.observed_at,
+                   cc.access_summary_jsonb, cc.extraction_summary_jsonb,
+                   cc.counter_search_state, cc.limitations,
+                   COALESCE(src.sources, '[]'::jsonb) AS sources
+            FROM coverage_context cc
+            LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object(
+                    'source_key', ls.source_key,
+                    'health_state', css.health_state,
+                    'observed_record_count', css.observed_record_count,
+                    'attempted_record_count', css.attempted_record_count,
+                    'access_limitations', css.access_limitations,
+                    'degradation_reason', css.degradation_reason
+                ) ORDER BY ls.source_key) AS sources
+                FROM coverage_source_state css
+                JOIN literature_source ls ON ls.id = css.literature_source_id
+                WHERE css.coverage_context_id = cc.id
+            ) src ON TRUE
+            WHERE cc.project_id = %s
+            ORDER BY cc.observed_at DESC
+            LIMIT 1
+        """, (project_id,)).fetchone()
+    return row

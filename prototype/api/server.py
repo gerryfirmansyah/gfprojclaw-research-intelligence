@@ -3,7 +3,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-from context import list_context, list_project_evidence, list_project_papers
+from context import get_project_coverage, list_context, list_project_evidence, list_project_papers
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,6 +35,12 @@ class Handler(SimpleHTTPRequestHandler):
         if len(parts) == 4 and parts[0] == "api" and parts[1] == "projects" and parts[3] == "evidence":
             try:
                 self.send_json(list_project_evidence(parts[2]))
+            except Exception as exc:
+                self.send_json({"error": str(exc)}, status=400)
+            return
+        if len(parts) == 4 and parts[0] == "api" and parts[1] == "projects" and parts[3] == "coverage":
+            try:
+                self.send_json(get_project_coverage(parts[2]) or {})
             except Exception as exc:
                 self.send_json({"error": str(exc)}, status=400)
             return

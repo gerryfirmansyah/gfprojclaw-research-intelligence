@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.6.0";
+const PROTOTYPE_VERSION = "0.7.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -125,9 +125,10 @@ function renderDashboard() {
 
   renderLatestPapers();
   document.querySelectorAll(".metric-card").forEach(el => el.classList.add("dummy-surface"));
-  ["change-list","journey-mini","opportunity-table","health-mini","evolution-mini","telegram-mini"].forEach(id => document.getElementById(id)?.closest(".panel")?.classList.add("dummy-surface"));
+  ["change-list","journey-mini","opportunity-table","evolution-mini","telegram-mini"].forEach(id => document.getElementById(id)?.closest(".panel")?.classList.add("dummy-surface"));
   document.getElementById("paper-list")?.closest(".panel")?.classList.add("real-surface");
-  document.getElementById("health-mini").innerHTML = health.map(([source,status,cls,detail]) => `<div class="health-row"><div><strong>${source}</strong><small>${detail}</small></div><span class="state ${cls}">${status}</span></div>`).join("");
+  document.getElementById("health-mini")?.closest(".panel")?.classList.add("real-surface");
+  loadProjectCoverageSummary();
   document.getElementById("evolution-mini").innerHTML = evolution.map(([id,change,when]) => `<div class="evolution-row"><div><strong>${id}</strong><small>${change}</small></div><small>${when}</small></div>`).join("");
   document.getElementById("telegram-mini").innerHTML = telegram.map(([time,text]) => `<div class="telegram-row"><time>${time}</time><strong>${text}</strong></div>`).join("");
   bindOpenButtons();
@@ -154,8 +155,9 @@ async function renderLatestPapers() {
   }
 }
 
-function commonHeader(title, subtitle) {
-  return `<div class="detail-header"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="coverage-pill">Dummy data · HUMAN scientific authority</div></div>`;
+function commonHeader(title, subtitle, mode = "dummy") {
+  const label = mode === "real" ? "REAL DATA · PostgreSQL / API" : "DUMMY DATA · illustrative";
+  return `<div class="detail-header"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="coverage-pill ${mode === "real" ? "real-surface" : "dummy-surface"}">${label}</div></div>`;
 }
 
 function renderJourney() {
@@ -177,7 +179,7 @@ function escapeHtml(value) {
 }
 
 function renderEvidence() {
-  return commonHeader("Evidence Explorer", "Real EvidenceFragment and Claim records for the selected Project.") + `
+  return commonHeader("Evidence Explorer", "Real EvidenceFragment and Claim records for the selected Project.", "real") + `
   <div class="detail-grid"><div class="card"><h3>Evidence Results</h3><div id="real-evidence-list">Loading canonical evidence…</div></div>
   <div class="card"><h3>Evidence Detail</h3><div id="real-evidence-detail">Select a persisted claim.</div></div>
   <div class="card"><h3>Canonical boundary</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>No EvidenceRelationship is implied until one is persisted.</p></div></div>`;
@@ -214,7 +216,7 @@ function renderEvolution() {
 }
 
 function renderReview() {
-  return commonHeader("Human Review", "Canonical claims needing HUMAN scientific review for the selected Project.") + `
+  return commonHeader("Human Review", "Canonical claims needing HUMAN scientific review for the selected Project.", "real") + `
   <div class="detail-grid"><div class="card real-surface"><h3>Review Queue <span class="data-badge real">REAL DATA</span></h3><div id="real-review-list">Loading canonical review queue…</div></div>
   <div class="card real-surface"><h3>Review Context</h3><div id="real-review-detail">Select a persisted claim.</div></div>
   <div class="card"><h3>Decision boundary</h3><p>This view is read-only for now. No HumanDecision is created until an explicit persisted review action exists.</p><div class="callout warning">NEEDS_REVIEW is an attention state, not scientific acceptance or rejection.</div></div></div>`;
@@ -237,10 +239,34 @@ async function loadHumanReview() {
 }
 
 function renderCoverage() {
-  return commonHeader("Coverage & Health", "Distinguish what the system could observe from what the science actually means.") + `
-  <div class="detail-grid"><div class="card"><h3>Source Health</h3>${health.map(([s,status,cls,detail])=>`<div class="health-row"><div><strong>${s}</strong><small>${detail}</small></div><span class="state ${cls}">${status}</span></div>`).join("")}</div>
-  <div class="card"><h3>Evidence Access Coverage</h3><p><strong>Project corpus denominator:</strong> 312 normalized works</p><ul><li>FULL_TEXT — 150 (48.1%)</li><li>ABSTRACT_ONLY — 121 (38.8%)</li><li>METADATA_ONLY — 41 (13.1%)</li></ul><div class="callout warning">Absence of discovered evidence is not evidence of absence.</div></div>
-  <div class="card"><h3>Scientific Impact</h3><p><strong>Prior-solution search:</strong> LIMITED</p><p><strong>Gap falsification:</strong> LIMITED</p><p><strong>Existing stored evidence:</strong> PRESERVED</p><p><strong>Healthy crawling:</strong> CONTINUING</p><div class="callout">Semantic Scholar degradation does not automatically strengthen GAP-014.</div></div></div>`;
+  return commonHeader("Coverage & Health", "Observed coverage state from the latest persisted CoverageContext.", "real") + `
+  <div id="real-coverage-detail" class="detail-grid"><div class="card real-surface"><h3>Loading coverage…</h3></div></div>`;
+}
+
+async function loadProjectCoverage(targetId = "real-coverage-detail") {
+  const box = document.getElementById(targetId);
+  if (!box || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/coverage`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Coverage HTTP ${response.status}`);
+    const c = await response.json();
+    if (!c.coverage_context_id) { box.innerHTML = `<div class="card real-surface"><p>No persisted CoverageContext for this project yet.</p></div>`; return; }
+    const access = c.access_summary_jsonb || {};
+    const extraction = c.extraction_summary_jsonb || {};
+    const sources = c.sources || [];
+    box.innerHTML = `<div class="card real-surface"><h3>Source observations <span class="data-badge real">REAL DATA</span></h3>${sources.length ? sources.map(src => `<div class="health-row"><div><strong>${escapeHtml(src.source_key)}</strong><small>${escapeHtml(src.access_limitations || "No access limitation recorded")}</small></div><span class="state yellow">${escapeHtml(src.health_state)}</span></div>`).join("") : `<p>No source observations persisted.</p>`}</div><div class="card real-surface"><h3>Persisted corpus coverage</h3><ul><li>FULL_TEXT — ${access.FULL_TEXT || 0}</li><li>ABSTRACT_ONLY — ${access.ABSTRACT_ONLY || 0}</li><li>METADATA_ONLY — ${access.METADATA_ONLY || 0}</li><li>Claims — ${extraction.claims || 0}</li><li>Quarantined claims — ${extraction.quarantined || 0}</li></ul><p><strong>Counter-search:</strong> ${escapeHtml(c.counter_search_state)}</p></div><div class="card real-surface"><h3>Boundary</h3><p><strong>Observed:</strong> ${escapeHtml(c.observed_at)}</p><div class="callout warning">${escapeHtml(c.limitations || "No limitations recorded.")}</div></div>`;
+  } catch (error) { box.innerHTML = `<div class="card"><p>Coverage API unavailable: ${escapeHtml(error.message)}</p></div>`; }
+}
+
+async function loadProjectCoverageSummary() {
+  const box = document.getElementById("health-mini");
+  if (!box) return;
+  box.innerHTML = `<div class="health-row"><div><strong>Loading real coverage…</strong></div></div>`;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/coverage`, { cache: "no-store" });
+    const c = response.ok ? await response.json() : {};
+    box.innerHTML = c.coverage_context_id ? (c.sources || []).map(src => `<div class="health-row"><div><strong>${escapeHtml(src.source_key)}</strong><small>${escapeHtml(src.observed_record_count)} observed record(s)</small></div><span class="state yellow">${escapeHtml(src.health_state)}</span></div>`).join("") + `<div class="callout">Counter-search: ${escapeHtml(c.counter_search_state)}</div>` : `<p>No persisted coverage snapshot yet.</p>`;
+  } catch (error) { box.innerHTML = `<p>Coverage unavailable.</p>`; }
 }
 
 function renderProfiles() {
@@ -268,7 +294,7 @@ function showView(name) {
   view.classList.add("active-view");
   if (name === "evidence") loadProjectEvidence();
   if (name === "review") loadHumanReview();
-  if (name === "evidence") loadProjectEvidence();
+  if (name === "coverage") loadProjectCoverage();
 }
 
 function bindOpenButtons() {
