@@ -1,0 +1,14 @@
+[Unit]
+Description=GFPROJCLAW Cockpit API
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/gfprojclaw-research-intelligence/prototype/api
+ExecStart=/opt/gfprojclaw/.venv/bin/python /opt/gfprojclaw-research-intelligence/prototype/api/server.py
+Restart=on-failure
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target
