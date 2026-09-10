@@ -51,3 +51,26 @@ def list_project_papers(project_id, limit=20):
             LIMIT %s
         """, (project_id, limit)).fetchall()
     return rows
+
+
+def list_project_evidence(project_id, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT c.id AS claim_id, c.claim_text, c.claim_type,
+                   c.review_state, c.extraction_origin, c.scope_jsonb,
+                   ef.id AS evidence_fragment_id, ef.fragment_type,
+                   ef.access_level, ef.locator_jsonb,
+                   left(ef.text_or_reference, 280) AS fragment_preview,
+                   ef.extraction_version, ef.quarantine_state,
+                   w.id AS work_id, w.title AS work_title,
+                   w.publication_year, w.venue
+            FROM research_project p
+            JOIN project_work_relevance pwr ON pwr.project_id = p.id
+            JOIN work w ON w.id = pwr.work_id
+            JOIN evidence_fragment ef ON ef.work_id = w.id
+            JOIN claim c ON c.evidence_fragment_id = ef.id
+            WHERE p.id = %s AND p.status = 'ACTIVE'
+            ORDER BY c.created_at DESC
+            LIMIT %s
+        """, (project_id, limit)).fetchall()
+    return rows

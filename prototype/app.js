@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.4.0";
+const PROTOTYPE_VERSION = "0.5.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -169,11 +169,38 @@ function renderOpportunities() {
   <div class="detail-grid" style="margin-top:14px"><div class="card"><h3>What We Know</h3><p>Current evidence suggests the candidate mechanism matters in several contexts, but findings are not uniform.</p><div class="callout">Traceable synthesis: 7 supports · 3 challenges · 2 addresses</div></div><div class="card"><h3>Existing Solutions — before Novelty</h3><ul><li>SOL-003 — adjacent framework</li><li>SOL-008 — partial mechanism overlap</li><li>SOL-011 — related boundary-condition solution</li></ul><p><strong>Residual question:</strong> Is the unresolved issue a mechanism, boundary condition, or terminology overlap?</p></div><div class="card"><h3>HUMAN Judgment</h3><div class="decision-bar"><button>Review</button><button>Modify</button><button class="primary">Accept direction</button><button>Reject candidate</button><button>Need more evidence</button></div></div></div>`;
 }
 
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
 function renderEvidence() {
-  return commonHeader("Evidence Explorer", "Trace research interpretation back to Paper/Work, Passage/Record, Claim and Evidence Relationship.") + `
-  <div class="detail-grid"><div class="card"><h3>Evidence Results</h3><div class="change-row"><div class="change-main"><strong>CLM-142</strong><small>CHALLENGES GAP-014 · FULL_TEXT</small></div><span class="state red">CONTESTED</span></div><div class="change-row"><div class="change-main"><strong>CLM-151</strong><small>SUPPORTS GAP-014 · ABSTRACT_ONLY</small></div><span class="state green">REVIEWED</span></div><div class="change-row"><div class="change-main"><strong>CLM-166</strong><small>ADDRESSES GAP-014 · FULL_TEXT</small></div><span class="state blue">EXTRACTED</span></div></div>
-  <div class="card"><h3>Evidence Detail — CLM-142</h3><p><strong>Paper:</strong> Example study of governance/capability under disruption</p><p><strong>Access:</strong> FULL_TEXT</p><p><strong>Relevant passage:</strong> [bounded dummy passage displayed here]</p><p><strong>Extracted claim:</strong> An established mechanism explains part of the phenomenon currently attributed to GAP-014.</p><div class="callout warning">Audit flag: claim scope should remain bounded to the studied context.</div></div>
-  <div class="card"><h3>Research Context / Backlinks</h3><div class="trace">Source<br>↓<br>Paper/Work<br>↓<br>EVF-0092<br>↓<br>CLM-142<br>↓<br>CHALLENGES GAP-014<br>↓<br>R4 · R5 · R12<br>↓<br>Human Decision HD-0031</div></div></div>`;
+  return commonHeader("Evidence Explorer", "Real EvidenceFragment and Claim records for the selected Project.") + `
+  <div class="detail-grid"><div class="card"><h3>Evidence Results</h3><div id="real-evidence-list">Loading canonical evidence…</div></div>
+  <div class="card"><h3>Evidence Detail</h3><div id="real-evidence-detail">Select a persisted claim.</div></div>
+  <div class="card"><h3>Canonical boundary</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>No EvidenceRelationship is implied until one is persisted.</p></div></div>`;
+}
+
+async function loadProjectEvidence() {
+  const list = document.getElementById("real-evidence-list");
+  const detail = document.getElementById("real-evidence-detail");
+  if (!list || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/evidence`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Evidence HTTP ${response.status}`);
+    const rows = await response.json();
+    if (!rows.length) {
+      list.innerHTML = "<p>No persisted EvidenceFragment / Claim records for this project yet.</p>";
+      detail.innerHTML = "<p>Nothing to review yet.</p>";
+      return;
+    }
+    list.innerHTML = rows.map((r, i) => `<div class="change-row" data-evidence-index="${i}"><div class="change-main"><strong>${escapeHtml(r.claim_text)}</strong><small>${escapeHtml(r.work_title)} · ${escapeHtml(r.access_level)}</small></div><span class="state ${stateClass(r.review_state)}">${escapeHtml(r.review_state)}</span></div>`).join("");
+    const show = r => { detail.innerHTML = `<p><strong>Paper:</strong> ${escapeHtml(r.work_title)}</p><p><strong>Fragment:</strong> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><strong>Evidence preview:</strong> ${escapeHtml(r.fragment_preview)}…</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p><p><strong>Extraction:</strong> ${escapeHtml(r.extraction_origin)} · ${escapeHtml(r.extraction_version)}</p><div class="callout warning">${escapeHtml(r.review_state)} — HUMAN validation required before scientific acceptance.</div>`; };
+    document.querySelectorAll("[data-evidence-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.evidenceIndex)]));
+    show(rows[0]);
+  } catch (error) {
+    console.error(error);
+    list.innerHTML = `<p>Evidence API unavailable: ${escapeHtml(error.message)}</p>`;
+  }
 }
 
 function renderEvolution() {
@@ -220,6 +247,7 @@ function showView(name) {
   const view = document.getElementById(`view-${name}`);
   if (name !== "today" && renderers[name]) view.innerHTML = renderers[name]();
   view.classList.add("active-view");
+  if (name === "evidence") loadProjectEvidence();
 }
 
 function bindOpenButtons() {
