@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.7.0";
+const PROTOTYPE_VERSION = "0.8.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -168,10 +168,26 @@ function renderJourney() {
 }
 
 function renderOpportunities() {
-  const d = selectedDummyData();
-  return commonHeader("Research Opportunities", "Investigate candidate opportunities only after known evidence and existing solutions are visible.") + `
-  <div class="card"><table class="table"><thead><tr><th>ID</th><th>Candidate</th><th>Gap evidence</th><th>Novelty</th><th>Counter risk</th><th>Theory value</th><th>Method feasibility</th><th>State</th></tr></thead><tbody>${d.opportunities.map(([id,title,score,,status],i)=>`<tr><td><strong>${id}</strong></td><td>${title}</td><td>${score}</td><td>${[52,78,44,61][i]}</td><td>${[68,31,74,46][i]}</td><td>${[82,71,69,58][i]}</td><td>${[73,80,66,75][i]}</td><td><span class="state ${stateClass(status)}">${status}</span></td></tr>`).join("")}</tbody></table></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card"><h3>What We Know</h3><p>Current evidence suggests the candidate mechanism matters in several contexts, but findings are not uniform.</p><div class="callout">Traceable synthesis: 7 supports · 3 challenges · 2 addresses</div></div><div class="card"><h3>Existing Solutions — before Novelty</h3><ul><li>SOL-003 — adjacent framework</li><li>SOL-008 — partial mechanism overlap</li><li>SOL-011 — related boundary-condition solution</li></ul><p><strong>Residual question:</strong> Is the unresolved issue a mechanism, boundary condition, or terminology overlap?</p></div><div class="card"><h3>HUMAN Judgment</h3><div class="decision-bar"><button>Review</button><button>Modify</button><button class="primary">Accept direction</button><button>Reject candidate</button><button>Need more evidence</button></div></div></div>`;
+  return commonHeader("Research Opportunities", "Canonical GapCandidate records for the selected Project.", "real") + `
+  <div class="card real-surface"><h3>Gap Candidates <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading canonical gaps…</div></div>
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>Evidence Relationship</h3><div id="real-gap-relationship">No relationship loaded yet.</div></div><div class="card"><h3>Scientific boundary</h3><div class="callout warning">A CANDIDATE gap and MACHINE_SUGGESTED relationship are hypotheses for HUMAN review, not accepted scientific conclusions.</div></div></div>`;
+}
+
+async function loadProjectGaps() {
+  const list = document.getElementById("real-gap-list");
+  const detail = document.getElementById("real-gap-detail");
+  const relation = document.getElementById("real-gap-relationship");
+  if (!list || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/gaps`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Gaps HTTP ${response.status}`);
+    const rows = await response.json();
+    if (!rows.length) { list.innerHTML = "<p>No persisted GapCandidate records for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No EvidenceRelationship persisted.</p>"; return; }
+    list.innerHTML = rows.map((r,i) => `<div class="change-row" data-gap-index="${i}"><div class="change-main"><strong>${escapeHtml(r.canonical_label)}</strong><small>${escapeHtml(r.gap_type)} · ${escapeHtml(r.current_evolution_state)}</small></div><span class="state ${stateClass(r.current_evolution_state)}">${escapeHtml(r.current_evolution_state)}</span></div>`).join("");
+    const show = r => { detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>Scope:</strong> ${escapeHtml(r.scope_jsonb?.evidence_scope || "unspecified")}</p>`; relation.innerHTML = r.relationship_id ? `<p><strong>${escapeHtml(r.semantic_type)}</strong></p><p>${escapeHtml(r.relationship_rationale)}</p><p><strong>Review:</strong> ${escapeHtml(r.relationship_review_state)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p>` : `<p>No EvidenceRelationship persisted.</p>`; };
+    document.querySelectorAll("[data-gap-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.gapIndex)]));
+    show(rows[0]);
+  } catch (error) { console.error(error); list.innerHTML = `<p>Gap API unavailable: ${escapeHtml(error.message)}</p>`; }
 }
 
 function escapeHtml(value) {
@@ -294,6 +310,7 @@ function showView(name) {
   view.classList.add("active-view");
   if (name === "evidence") loadProjectEvidence();
   if (name === "review") loadHumanReview();
+  if (name === "opportunities") loadProjectGaps();
   if (name === "coverage") loadProjectCoverage();
 }
 

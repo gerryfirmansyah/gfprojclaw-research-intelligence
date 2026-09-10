@@ -102,3 +102,26 @@ def get_project_coverage(project_id):
             LIMIT 1
         """, (project_id,)).fetchone()
     return row
+
+
+def list_project_gaps(project_id, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT gc.id AS gap_id, roi.canonical_label, gc.gap_type,
+                   gc.statement, gc.scope_jsonb, gc.current_evolution_state,
+                   er.id AS relationship_id, er.semantic_type,
+                   er.rationale AS relationship_rationale,
+                   er.review_state AS relationship_review_state,
+                   c.id AS claim_id, c.claim_text, c.review_state AS claim_review_state,
+                   w.id AS work_id, w.title AS work_title
+            FROM gap_candidate gc
+            JOIN research_object_identity roi ON roi.id = gc.id
+            LEFT JOIN evidence_relationship er ON er.target_research_object_id = gc.id
+            LEFT JOIN claim c ON c.id = er.claim_id
+            LEFT JOIN evidence_fragment ef ON ef.id = c.evidence_fragment_id
+            LEFT JOIN work w ON w.id = ef.work_id
+            WHERE gc.project_id = %s AND roi.lifecycle_state = 'ACTIVE'
+            ORDER BY gc.created_at DESC, er.created_at DESC NULLS LAST
+            LIMIT %s
+        """, (project_id, limit)).fetchall()
+    return rows
