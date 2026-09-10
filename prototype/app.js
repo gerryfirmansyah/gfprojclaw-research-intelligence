@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.5.0";
+const PROTOTYPE_VERSION = "0.6.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -124,6 +124,9 @@ function renderDashboard() {
     </tbody></table>`;
 
   renderLatestPapers();
+  document.querySelectorAll(".metric-card").forEach(el => el.classList.add("dummy-surface"));
+  ["change-list","journey-mini","opportunity-table","health-mini","evolution-mini","telegram-mini"].forEach(id => document.getElementById(id)?.closest(".panel")?.classList.add("dummy-surface"));
+  document.getElementById("paper-list")?.closest(".panel")?.classList.add("real-surface");
   document.getElementById("health-mini").innerHTML = health.map(([source,status,cls,detail]) => `<div class="health-row"><div><strong>${source}</strong><small>${detail}</small></div><span class="state ${cls}">${status}</span></div>`).join("");
   document.getElementById("evolution-mini").innerHTML = evolution.map(([id,change,when]) => `<div class="evolution-row"><div><strong>${id}</strong><small>${change}</small></div><small>${when}</small></div>`).join("");
   document.getElementById("telegram-mini").innerHTML = telegram.map(([time,text]) => `<div class="telegram-row"><time>${time}</time><strong>${text}</strong></div>`).join("");
@@ -211,10 +214,26 @@ function renderEvolution() {
 }
 
 function renderReview() {
-  return commonHeader("Human Review", "Scientific attention and reasoned HUMAN judgment — never an operational gate.") + `
-  <div class="detail-grid"><div class="card"><h3>Review Queue</h3><div class="change-row"><div class="change-main"><strong>GAP-014 — Existing solution overlap</strong><small>R5 · R11 · R12</small></div><span class="state red">NEED REVIEW</span></div><div class="change-row"><div class="change-main"><strong>THEORY-006 — Competing explanation</strong><small>R6 · R14</small></div><span class="state yellow">NEED REVIEW</span></div><div class="change-row"><div class="change-main"><strong>CLM-204 — Provenance uncertain</strong><small>R2 · R13</small></div><span class="state red">NEED REVIEW</span></div></div>
-  <div class="card"><h3>Why Now?</h3><p>GAP-014 changed from STRENGTHENING to CONTESTED after SOL-008 was discovered.</p><h3>Supporting Evidence</h3><p>3 papers / 7 evidence relationships.</p><h3>Counter-Evidence</h3><p>2 papers directly challenge the broad formulation.</p><h3>Coverage</h3><p>Prior-solution search remains LIMITED because one discovery source is degraded.</p></div>
-  <div class="card"><h3>HUMAN Judgment</h3><p>Previous: <strong>ACCEPT DIRECTION</strong></p><label>Rationale<textarea style="width:100%;min-height:110px;margin-top:6px;border:1px solid #dfe6f1;border-radius:8px;padding:9px">The narrower formulation appears defensible, but more counter-search is needed.</textarea></label><div class="decision-bar" style="margin-top:10px"><button>Review</button><button>Modify</button><button class="primary">Accept direction</button><button>Reject</button><button>Need more evidence</button></div></div></div>`;
+  return commonHeader("Human Review", "Canonical claims needing HUMAN scientific review for the selected Project.") + `
+  <div class="detail-grid"><div class="card real-surface"><h3>Review Queue <span class="data-badge real">REAL DATA</span></h3><div id="real-review-list">Loading canonical review queue…</div></div>
+  <div class="card real-surface"><h3>Review Context</h3><div id="real-review-detail">Select a persisted claim.</div></div>
+  <div class="card"><h3>Decision boundary</h3><p>This view is read-only for now. No HumanDecision is created until an explicit persisted review action exists.</p><div class="callout warning">NEEDS_REVIEW is an attention state, not scientific acceptance or rejection.</div></div></div>`;
+}
+
+async function loadHumanReview() {
+  const list = document.getElementById("real-review-list");
+  const detail = document.getElementById("real-review-detail");
+  if (!list || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/evidence`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Review HTTP ${response.status}`);
+    const rows = (await response.json()).filter(r => r.review_state === "NEEDS_REVIEW" || r.review_state === "CONTESTED");
+    if (!rows.length) { list.innerHTML = "<p>No persisted claims currently need review.</p>"; detail.innerHTML = "<p>Nothing to review yet.</p>"; return; }
+    list.innerHTML = rows.map((r,i) => `<div class="change-row" data-review-index="${i}"><div class="change-main"><strong>${escapeHtml(r.claim_text)}</strong><small>${escapeHtml(r.work_title)} · ${escapeHtml(r.access_level)}</small></div><span class="state ${stateClass(r.review_state)}">${escapeHtml(r.review_state)}</span></div>`).join("");
+    const show = r => { detail.innerHTML = `<p><strong>Paper:</strong> ${escapeHtml(r.work_title)}</p><p><strong>Evidence basis:</strong> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p><p><strong>Extraction origin:</strong> ${escapeHtml(r.extraction_origin)}</p><div class="callout warning">HUMAN review required. No EvidenceRelationship or HumanDecision is implied.</div>`; };
+    document.querySelectorAll("[data-review-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.reviewIndex)]));
+    show(rows[0]);
+  } catch (error) { console.error(error); list.innerHTML = `<p>Review API unavailable: ${escapeHtml(error.message)}</p>`; }
 }
 
 function renderCoverage() {
@@ -247,6 +266,8 @@ function showView(name) {
   const view = document.getElementById(`view-${name}`);
   if (name !== "today" && renderers[name]) view.innerHTML = renderers[name]();
   view.classList.add("active-view");
+  if (name === "evidence") loadProjectEvidence();
+  if (name === "review") loadHumanReview();
   if (name === "evidence") loadProjectEvidence();
 }
 
