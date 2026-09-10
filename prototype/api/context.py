@@ -185,3 +185,31 @@ def create_human_decision(project_id, object_id, decision_type, rationale, actor
             previous["id"] if previous else None,
         )).fetchone()
     return row
+
+
+def list_project_assessments(project_id, object_id=None, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT a.id AS assessment_id, a.target_research_object_id,
+                   roi.canonical_label, a.coverage_context_id,
+                   a.assessment_type, a.model_or_agent, a.model_version,
+                   a.explanation_summary, a.assessed_at,
+                   a.supersedes_assessment_id,
+                   COALESCE(d.dimensions, '[]'::jsonb) AS dimensions
+            FROM assessment a
+            JOIN research_object_identity roi ON roi.id = a.target_research_object_id
+            LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object(
+                    'dimension_type', ad.dimension_type,
+                    'value_numeric', ad.value_numeric,
+                    'value_text', ad.value_text,
+                    'explanation', ad.explanation
+                ) ORDER BY ad.dimension_type) AS dimensions
+                FROM assessment_dimension ad WHERE ad.assessment_id = a.id
+            ) d ON TRUE
+            WHERE a.project_id = %s
+              AND (%s::uuid IS NULL OR a.target_research_object_id = %s::uuid)
+            ORDER BY a.assessed_at DESC, a.created_at DESC
+            LIMIT %s
+        """, (project_id, object_id, object_id, limit)).fetchall()
+    return rows

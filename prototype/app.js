@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.9.0";
+const PROTOTYPE_VERSION = "0.10.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -170,7 +170,7 @@ function renderJourney() {
 function renderOpportunities() {
   return commonHeader("Research Opportunities", "Canonical GapCandidate records for the selected Project.", "real") + `
   <div class="card real-surface"><h3>Gap Candidates <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading canonical gaps…</div></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>Evidence Relationship</h3><div id="real-gap-relationship">No relationship loaded yet.</div></div><div class="card real-surface"><h3>HUMAN Decision</h3><div id="real-gap-decision">Select a persisted GapCandidate.</div></div></div>`;
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>Evidence Relationship</h3><div id="real-gap-relationship">No relationship loaded yet.</div></div><div class="card real-surface"><h3>Machine Assessment</h3><div id="real-gap-assessment">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>HUMAN Decision</h3><div id="real-gap-decision">Select a persisted GapCandidate.</div></div></div>`;
 }
 
 async function loadProjectGaps() {
@@ -185,7 +185,7 @@ async function loadProjectGaps() {
     const rows = await response.json();
     if (!rows.length) { list.innerHTML = "<p>No persisted GapCandidate records for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No EvidenceRelationship persisted.</p>"; decision.innerHTML = "<p>No target object available.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-gap-index="${i}"><div class="change-main"><strong>${escapeHtml(r.canonical_label)}</strong><small>${escapeHtml(r.gap_type)} · ${escapeHtml(r.current_evolution_state)}</small></div><span class="state ${stateClass(r.current_evolution_state)}">${escapeHtml(r.current_evolution_state)}</span></div>`).join("");
-    const show = async r => { detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>Scope:</strong> ${escapeHtml(r.scope_jsonb?.evidence_scope || "unspecified")}</p>`; relation.innerHTML = r.relationship_id ? `<p><strong>${escapeHtml(r.semantic_type)}</strong></p><p>${escapeHtml(r.relationship_rationale)}</p><p><strong>Review:</strong> ${escapeHtml(r.relationship_review_state)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p>` : `<p>No EvidenceRelationship persisted.</p>`; await renderGapDecision(r); };
+    const show = async r => { detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>Scope:</strong> ${escapeHtml(r.scope_jsonb?.evidence_scope || "unspecified")}</p>`; relation.innerHTML = r.relationship_id ? `<p><strong>${escapeHtml(r.semantic_type)}</strong></p><p>${escapeHtml(r.relationship_rationale)}</p><p><strong>Review:</strong> ${escapeHtml(r.relationship_review_state)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p>` : `<p>No EvidenceRelationship persisted.</p>`; await renderGapAssessment(r); await renderGapDecision(r); };
     document.querySelectorAll("[data-gap-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.gapIndex)]));
     show(rows[0]);
   } catch (error) { console.error(error); list.innerHTML = `<p>Gap API unavailable: ${escapeHtml(error.message)}</p>`; }
@@ -375,4 +375,22 @@ async function submitHumanDecision(row, decisionType) {
   const payload = await response.json();
   if (!response.ok) { window.alert(payload.error || `Decision HTTP ${response.status}`); return; }
   await renderGapDecision(row);
+}
+
+async function renderGapAssessment(gap) {
+  const box = document.getElementById("real-gap-assessment");
+  if (!box) return;
+  box.innerHTML = "<p>Loading machine assessment…</p>";
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/assessments`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Assessments HTTP ${response.status}`);
+    const rows = (await response.json()).filter(a => a.target_research_object_id === gap.gap_id);
+    if (!rows.length) { box.innerHTML = "<p>No persisted Assessment for this GapCandidate yet.</p>"; return; }
+    const a = rows[0];
+    const dims = (a.dimensions || []).map(d => `<li><strong>${escapeHtml(d.dimension_type)}</strong>: ${escapeHtml(d.value_text ?? d.value_numeric)}<br><small>${escapeHtml(d.explanation || "")}</small></li>`).join("");
+    box.innerHTML = `<p><strong>${escapeHtml(a.assessment_type)}</strong></p><p>${escapeHtml(a.explanation_summary || "")}</p><ul>${dims}</ul><div class="callout warning">Machine dimensions are contextual advice, not probabilities or scientific acceptance.</div>`;
+  } catch (error) {
+    console.error(error);
+    box.innerHTML = `<p>Assessment API unavailable: ${escapeHtml(error.message)}</p>`;
+  }
 }
