@@ -213,3 +213,25 @@ def list_project_assessments(project_id, object_id=None, limit=50):
             LIMIT %s
         """, (project_id, object_id, object_id, limit)).fetchall()
     return rows
+
+
+def list_project_changes(project_id, object_id=None, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT ce.id AS change_event_id,
+                   ce.primary_research_object_id,
+                   roi.canonical_label,
+                   ce.coverage_context_id,
+                   ce.change_type, ce.observed_at,
+                   ce.previous_state_jsonb,
+                   ce.current_state_jsonb,
+                   ce.reasoning_delta
+            FROM change_event ce
+            JOIN research_object_identity roi
+              ON roi.id = ce.primary_research_object_id
+            WHERE ce.project_id = %s
+              AND (%s::uuid IS NULL OR ce.primary_research_object_id = %s::uuid)
+            ORDER BY ce.observed_at DESC, ce.created_at DESC
+            LIMIT %s
+        """, (project_id, object_id, object_id, limit)).fetchall()
+    return rows

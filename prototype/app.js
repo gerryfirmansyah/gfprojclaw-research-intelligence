@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.10.0";
+const PROTOTYPE_VERSION = "0.11.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -199,7 +199,7 @@ function renderEvidence() {
   return commonHeader("Evidence Explorer", "Real EvidenceFragment and Claim records for the selected Project.", "real") + `
   <div class="detail-grid"><div class="card"><h3>Evidence Results</h3><div id="real-evidence-list">Loading canonical evidence…</div></div>
   <div class="card"><h3>Evidence Detail</h3><div id="real-evidence-detail">Select a persisted claim.</div></div>
-  <div class="card"><h3>Canonical boundary</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>No EvidenceRelationship is implied until one is persisted.</p></div></div>`;
+  <div class="card"><h3>Canonical boundary</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>Only persisted EvidenceRelationships are shown or implied; no additional relationship is inferred.</p></div></div>`;
 }
 
 async function loadProjectEvidence() {
@@ -226,10 +226,26 @@ async function loadProjectEvidence() {
 }
 
 function renderEvolution() {
-  return commonHeader("Knowledge Evolution", "Track how understanding changed, which evidence caused it, and what needs renewed HUMAN attention.") + `
-  <div class="detail-grid"><div class="card"><h3>GAP-014 Timeline</h3><div class="timeline"><div class="timeline-item"><time>Sep 01</time><strong>CANDIDATE</strong><p>Initial synthesis identified mechanism uncertainty.</p></div><div class="timeline-item"><time>Sep 04</time><strong>STRENGTHENING</strong><p>Two supporting claims were added.</p></div><div class="timeline-item"><time>Sep 06</time><strong>CONTESTED</strong><p>SOL-008 discovered.</p></div><div class="timeline-item"><time>Sep 08</time><strong>CONTESTED — formulation narrowed</strong><p>Boundary condition found; HUMAN review requested.</p></div></div></div>
-  <div class="card"><h3>Reasoning Delta</h3><p><strong>Before</strong><br>The broad gap looked plausible.</p><p><strong>New information</strong><br>A prior solution overlaps part of the proposed mechanism.</p><p><strong>After</strong><br>The gap may remain defensible only under a narrower boundary condition.</p><p><strong>Uncertainty</strong><br>Full-text and adjacent-domain coverage remain incomplete.</p></div>
-  <div class="card"><h3>Human Context</h3><p>Previous decision: <strong>ACCEPT DIRECTION</strong> on Sep 04.</p><div class="callout warning">New evidence may affect the previous decision. The decision has not been changed automatically.</div><div class="decision-bar" style="margin-top:10px"><button class="primary">Open Human Review</button></div></div></div>`;
+  return commonHeader("Knowledge Evolution", "Persisted ChangeEvents explain what changed and why without rewriting HUMAN decisions.", "real") + `
+  <div class="detail-grid"><div class="card real-surface"><h3>ChangeEvent Timeline <span class="data-badge real">REAL DATA</span></h3><div id="real-change-list">Loading canonical ChangeEvents…</div></div>
+  <div class="card real-surface"><h3>Reasoning Delta</h3><div id="real-change-detail">Select a persisted ChangeEvent.</div></div>
+  <div class="card real-surface"><h3>Scientific Authority Boundary</h3><div class="callout warning">ChangeEvents record historical knowledge evolution. They do not automatically mutate GapCandidate state or HumanDecision.</div></div></div>`;
+}
+
+async function loadProjectChanges() {
+  const list = document.getElementById("real-change-list");
+  const detail = document.getElementById("real-change-detail");
+  if (!list || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/changes`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Changes HTTP ${response.status}`);
+    const rows = await response.json();
+    if (!rows.length) { list.innerHTML = "<p>No persisted ChangeEvents for this project yet.</p>"; detail.innerHTML = "<p>Nothing has been recorded yet.</p>"; return; }
+    list.innerHTML = rows.map((r,i) => `<div class="change-row" data-change-index="${i}"><div class="change-main"><strong>${escapeHtml(r.change_type)}</strong><small>${escapeHtml(r.canonical_label)} · ${escapeHtml(r.observed_at)}</small></div></div>`).join("");
+    const show = r => { detail.innerHTML = `<p><strong>Why:</strong> ${escapeHtml(r.reasoning_delta)}</p><p><strong>Previous:</strong> ${escapeHtml(JSON.stringify(r.previous_state_jsonb ?? null))}</p><p><strong>Current:</strong> ${escapeHtml(JSON.stringify(r.current_state_jsonb ?? null))}</p><div class="callout warning">Historical observation only; no HUMAN decision was changed automatically.</div>`; };
+    document.querySelectorAll("[data-change-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.changeIndex)]));
+    show(rows[0]);
+  } catch (error) { console.error(error); list.innerHTML = `<p>ChangeEvent API unavailable: ${escapeHtml(error.message)}</p>`; }
 }
 
 function renderReview() {
@@ -249,7 +265,7 @@ async function loadHumanReview() {
     const rows = (await response.json()).filter(r => r.review_state === "NEEDS_REVIEW" || r.review_state === "CONTESTED");
     if (!rows.length) { list.innerHTML = "<p>No persisted claims currently need review.</p>"; detail.innerHTML = "<p>Nothing to review yet.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-review-index="${i}"><div class="change-main"><strong>${escapeHtml(r.claim_text)}</strong><small>${escapeHtml(r.work_title)} · ${escapeHtml(r.access_level)}</small></div><span class="state ${stateClass(r.review_state)}">${escapeHtml(r.review_state)}</span></div>`).join("");
-    const show = r => { detail.innerHTML = `<p><strong>Paper:</strong> ${escapeHtml(r.work_title)}</p><p><strong>Evidence basis:</strong> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p><p><strong>Extraction origin:</strong> ${escapeHtml(r.extraction_origin)}</p><div class="callout warning">HUMAN review required. No EvidenceRelationship or HumanDecision is implied.</div>`; };
+    const show = r => { detail.innerHTML = `<p><strong>Paper:</strong> ${escapeHtml(r.work_title)}</p><p><strong>Evidence basis:</strong> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p><p><strong>Extraction origin:</strong> ${escapeHtml(r.extraction_origin)}</p><div class="callout warning">HUMAN review required. Persisted machine-suggested relationships are not HUMAN decisions or accepted scientific conclusions.</div>`; };
     document.querySelectorAll("[data-review-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.reviewIndex)]));
     show(rows[0]);
   } catch (error) { console.error(error); list.innerHTML = `<p>Review API unavailable: ${escapeHtml(error.message)}</p>`; }
@@ -313,6 +329,7 @@ function showView(name) {
   if (name === "review") loadHumanReview();
   if (name === "opportunities") loadProjectGaps();
   if (name === "coverage") loadProjectCoverage();
+  if (name === "evolution") loadProjectChanges();
 }
 
 function bindOpenButtons() {
