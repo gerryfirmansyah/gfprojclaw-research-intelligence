@@ -3,7 +3,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-from context import get_project_coverage, list_context, list_project_evidence, list_project_gaps, list_project_papers
+from context import create_human_decision, get_project_coverage, list_context, list_project_decisions, list_project_evidence, list_project_gaps, list_project_papers
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -50,8 +50,29 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as exc:
                 self.send_json({"error": str(exc)}, status=400)
             return
+        if len(parts) == 4 and parts[0] == "api" and parts[1] == "projects" and parts[3] == "decisions":
+            try:
+                self.send_json(list_project_decisions(parts[2]))
+            except Exception as exc:
+                self.send_json({"error": str(exc)}, status=400)
+            return
 
         super().do_GET()
+
+
+    def do_POST(self):
+        path = urlparse(self.path).path
+        parts = path.strip("/").split("/")
+        if len(parts) == 4 and parts[0] == "api" and parts[1] == "projects" and parts[3] == "decisions":
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                payload = json.loads(self.rfile.read(length) or b"{}")
+                row = create_human_decision(parts[2], payload.get("object_id"), payload.get("decision_type"), payload.get("rationale"), payload.get("actor"))
+                self.send_json(row, status=201)
+            except Exception as exc:
+                self.send_json({"error": str(exc)}, status=400)
+            return
+        self.send_json({"error": "Not found"}, status=404)
 
 
 ThreadingHTTPServer(("127.0.0.1", 8080), Handler).serve_forever()

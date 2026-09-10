@@ -125,3 +125,63 @@ def list_project_gaps(project_id, limit=50):
             LIMIT %s
         """, (project_id, limit)).fetchall()
     return rows
+
+
+ALLOWED_DECISIONS = {"REVIEW", "MODIFY", "ACCEPT_DIRECTION", "REJECT_CANDIDATE", "NEED_MORE_EVIDENCE"}
+
+
+def list_project_decisions(project_id, object_id=None, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT hd.id AS decision_id, hd.primary_research_object_id,
+                   roi.canonical_label, hd.decision_type, hd.rationale,
+                   hd.actor, hd.decided_at, hd.supersedes_decision_id,
+                   hd.coverage_context_id, hd.assessment_id
+            FROM human_decision hd
+            JOIN research_object_identity roi ON roi.id = hd.primary_research_object_id
+            WHERE hd.project_id = %s
+              AND (%s::uuid IS NULL OR hd.primary_research_object_id = %s::uuid)
+            ORDER BY hd.decided_at DESC, hd.created_at DESC
+            LIMIT %s
+        """, (project_id, object_id, object_id, limit)).fetchall()
+    return rows
+
+
+def create_human_decision(project_id, object_id, decision_type, rationale, actor):
+    if decision_type not in ALLOWED_DECISIONS:
+        raise ValueError("Unsupported decision_type")
+    if not str(rationale or "").strip() or not str(actor or "").strip():
+        raise ValueError("rationale and actor are required")
+    with db() as conn:
+        target = conn.execute("""
+            SELECT roi.id FROM research_object_identity roi
+            JOIN research_project p ON p.id = roi.project_id
+            WHERE roi.id = %s AND roi.project_id = %s
+              AND roi.lifecycle_state = 'ACTIVE' AND p.status = 'ACTIVE'
+        """, (object_id, project_id)).fetchone()
+        if not target:
+            raise ValueError("Active research object not found in project")
+        coverage = conn.execute("""
+            SELECT id FROM coverage_context WHERE project_id = %s
+            ORDER BY observed_at DESC LIMIT 1
+        """, (project_id,)).fetchone()
+        previous = conn.execute("""
+            SELECT id FROM human_decision
+            WHERE project_id = %s AND primary_research_object_id = %s
+            ORDER BY decided_at DESC, created_at DESC LIMIT 1
+        """, (project_id, object_id)).fetchone()
+        row = conn.execute("""
+            INSERT INTO human_decision (
+                project_id, primary_research_object_id, coverage_context_id,
+                decision_type, rationale, actor, decided_at, supersedes_decision_id
+            ) VALUES (%s, %s, %s, %s, %s, %s, now(), %s)
+            RETURNING id AS decision_id, project_id, primary_research_object_id,
+                      decision_type, rationale, actor, decided_at,
+                      supersedes_decision_id, coverage_context_id
+        """, (
+            project_id, object_id,
+            coverage["id"] if coverage else None,
+            decision_type, rationale.strip(), actor.strip(),
+            previous["id"] if previous else None,
+        )).fetchone()
+    return row

@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.8.0";
+const PROTOTYPE_VERSION = "0.9.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -170,21 +170,22 @@ function renderJourney() {
 function renderOpportunities() {
   return commonHeader("Research Opportunities", "Canonical GapCandidate records for the selected Project.", "real") + `
   <div class="card real-surface"><h3>Gap Candidates <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading canonical gaps…</div></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>Evidence Relationship</h3><div id="real-gap-relationship">No relationship loaded yet.</div></div><div class="card"><h3>Scientific boundary</h3><div class="callout warning">A CANDIDATE gap and MACHINE_SUGGESTED relationship are hypotheses for HUMAN review, not accepted scientific conclusions.</div></div></div>`;
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>Evidence Relationship</h3><div id="real-gap-relationship">No relationship loaded yet.</div></div><div class="card real-surface"><h3>HUMAN Decision</h3><div id="real-gap-decision">Select a persisted GapCandidate.</div></div></div>`;
 }
 
 async function loadProjectGaps() {
   const list = document.getElementById("real-gap-list");
   const detail = document.getElementById("real-gap-detail");
   const relation = document.getElementById("real-gap-relationship");
+  const decision = document.getElementById("real-gap-decision");
   if (!list || !projectSelect.value) return;
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/gaps`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Gaps HTTP ${response.status}`);
     const rows = await response.json();
-    if (!rows.length) { list.innerHTML = "<p>No persisted GapCandidate records for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No EvidenceRelationship persisted.</p>"; return; }
+    if (!rows.length) { list.innerHTML = "<p>No persisted GapCandidate records for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No EvidenceRelationship persisted.</p>"; decision.innerHTML = "<p>No target object available.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-gap-index="${i}"><div class="change-main"><strong>${escapeHtml(r.canonical_label)}</strong><small>${escapeHtml(r.gap_type)} · ${escapeHtml(r.current_evolution_state)}</small></div><span class="state ${stateClass(r.current_evolution_state)}">${escapeHtml(r.current_evolution_state)}</span></div>`).join("");
-    const show = r => { detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>Scope:</strong> ${escapeHtml(r.scope_jsonb?.evidence_scope || "unspecified")}</p>`; relation.innerHTML = r.relationship_id ? `<p><strong>${escapeHtml(r.semantic_type)}</strong></p><p>${escapeHtml(r.relationship_rationale)}</p><p><strong>Review:</strong> ${escapeHtml(r.relationship_review_state)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p>` : `<p>No EvidenceRelationship persisted.</p>`; };
+    const show = async r => { detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>Scope:</strong> ${escapeHtml(r.scope_jsonb?.evidence_scope || "unspecified")}</p>`; relation.innerHTML = r.relationship_id ? `<p><strong>${escapeHtml(r.semantic_type)}</strong></p><p>${escapeHtml(r.relationship_rationale)}</p><p><strong>Review:</strong> ${escapeHtml(r.relationship_review_state)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p>` : `<p>No EvidenceRelationship persisted.</p>`; await renderGapDecision(r); };
     document.querySelectorAll("[data-gap-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.gapIndex)]));
     show(rows[0]);
   } catch (error) { console.error(error); list.innerHTML = `<p>Gap API unavailable: ${escapeHtml(error.message)}</p>`; }
@@ -346,3 +347,32 @@ fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) t
   const version = document.getElementById("prototype-version");
   if (version) version.textContent = `Prototype v${PROTOTYPE_VERSION} · API error`;
 });
+
+
+async function renderGapDecision(row) {
+  const box = document.getElementById("real-gap-decision");
+  if (!box) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/decisions`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Decisions HTTP ${response.status}`);
+    const all = await response.json();
+    const latest = all.find(d => d.primary_research_object_id === row.gap_id);
+    box.innerHTML = latest ? `<p><strong>Latest:</strong> ${escapeHtml(latest.decision_type)}</p><p>${escapeHtml(latest.rationale)}</p><small>${escapeHtml(latest.actor)} · ${escapeHtml(latest.decided_at)}</small>` : `<p>No HumanDecision persisted for this candidate.</p>`;
+    box.innerHTML += `<div class="decision-bar" style="margin-top:10px"><button data-decision="REVIEW">Review</button><button data-decision="MODIFY">Modify</button><button data-decision="ACCEPT_DIRECTION">Accept direction</button><button data-decision="REJECT_CANDIDATE">Reject candidate</button><button data-decision="NEED_MORE_EVIDENCE">Need more evidence</button></div><div class="callout warning" style="margin-top:10px">Only an explicit HUMAN action writes a decision. New decisions supersede history; they do not rewrite it.</div>`;
+    box.querySelectorAll("[data-decision]").forEach(btn => btn.onclick = () => submitHumanDecision(row, btn.dataset.decision));
+  } catch (error) { box.innerHTML = `<p>Decision API unavailable: ${escapeHtml(error.message)}</p>`; }
+}
+
+async function submitHumanDecision(row, decisionType) {
+  const actor = window.prompt("HUMAN actor / reviewer name:");
+  if (!actor?.trim()) return;
+  const rationale = window.prompt(`Rationale for ${decisionType}:`);
+  if (!rationale?.trim()) return;
+  const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/decisions`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ object_id: row.gap_id, decision_type: decisionType, rationale, actor })
+  });
+  const payload = await response.json();
+  if (!response.ok) { window.alert(payload.error || `Decision HTTP ${response.status}`); return; }
+  await renderGapDecision(row);
+}
