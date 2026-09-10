@@ -86,6 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
+const PROTOTYPE_VERSION = "0.4.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -234,7 +235,7 @@ document.querySelectorAll(".nav-list.small [data-view]").forEach(b => b.addEvent
 projectSelect.addEventListener("change", () => { renderLatestPapers(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (active && active !== "today") showView(active); });
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
-fetch(`${API_BASE}/api/context`).then(r => r.json()).then(rows => {
+fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(`Context HTTP ${r.status}`); return r.json(); }).then(rows => {
   const profiles = [...new Map(rows.map(r => [r.profile_id, r])).values()];
   profileSelect.innerHTML = profiles.map(r => `<option value="${r.profile_id}">${r.profile_name}</option>`).join("");
   const bindProjects = () => {
@@ -244,4 +245,12 @@ fetch(`${API_BASE}/api/context`).then(r => r.json()).then(rows => {
   };
   profileSelect.onchange = () => { bindProjects(); };
   bindProjects();
-}).catch(console.error);
+  renderDashboard();
+  const version = document.getElementById("prototype-version");
+  if (version) version.textContent = `Prototype v${PROTOTYPE_VERSION} · live`;
+}).catch(error => {
+  console.error(error);
+  projectSelect.innerHTML = `<option>Context unavailable</option>`;
+  const version = document.getElementById("prototype-version");
+  if (version) version.textContent = `Prototype v${PROTOTYPE_VERSION} · API error`;
+});
