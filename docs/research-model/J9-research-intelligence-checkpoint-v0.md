@@ -1,6 +1,6 @@
 # J9 Research Intelligence — Exit Checkpoint v0
 
-Status: implementation checkpoint; final deployment/commit verification pending.
+Status: FINAL PASS — J9 exit criteria verified end-to-end.
 
 ## Scope
 
@@ -21,19 +21,13 @@ J9 does not automatically create `HumanDecision`, does not automatically mutate 
 
 ## Validation evidence
 
-- Production-backed opportunity assessment dry-run passed on the persisted Project A gap.
-- Persistence apply created/reused `RESEARCH_OPPORTUNITY_INTELLIGENCE_V1` with exactly four advisory dimensions.
-- Idempotency rerun reused the same Assessment rather than duplicating it.
+- Production-backed opportunity assessment dry-run and persistence/idempotency validation passed.
 - Boundary verification confirmed the target gap remains `CANDIDATE`; the existing HUMAN decision is not linked to the J9 assessment.
-- SQL verifier `db/verify/011_research_opportunity_intelligence_verify.sql` passed (`BEGIN`, `DO`, `ROLLBACK`) after adding canonical SourceRecord trace validation.
-- Local API validation returned the persisted opportunity, assessment, coverage limitation, and evidence trace through SourceRecord.
-- `node --check prototype/app.js` passed after wiring `loadProjectOpportunities()`.
-- `git diff --check` passed after the J9 UI/API edits.
-
-## Remaining exit work
-
-Before declaring J9 complete: rerun final static/runtime checks where tool policy permits, review the complete diff/status, commit and push the J9 slice, verify deployment/workflow and live Research Opportunities behavior, then update this checkpoint to final PASS.
+- SQL verifier `db/verify/011_research_opportunity_intelligence_verify.sql` passed (`BEGIN`, `DO`, `ROLLBACK`) with canonical SourceRecord trace validation.
+- Final Python compile, `node --check prototype/app.js`, and `git diff --check` passed.
+- J9 implementation commit `eb58ebd` was pushed to `main`; GitHub Pages deployment run `34959010939` completed successfully.
+- Public HTTPS Research Opportunities API returned persisted opportunity intelligence with canonical SourceRecord provenance, visible coverage limitations, four advisory dimensions, and separate HUMAN decision context.
 
 ## Exit criterion
 
-J9 exits only when evidence-backed research opportunities are inspectable end-to-end while prioritization remains explicitly advisory, coverage limitations remain visible, provenance remains traceable to canonical source records, and HUMAN scientific authority is preserved.
+PASS. Evidence-backed research opportunities are inspectable end-to-end; prioritization remains explicitly advisory, coverage limitations remain visible, provenance remains traceable to canonical SourceRecord records, and HUMAN scientific authority remains preserved.
