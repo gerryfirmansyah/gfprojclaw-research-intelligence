@@ -265,7 +265,8 @@ def list_project_opportunities(project_id, limit=50):
                     'relationship_id', er.id, 'semantic_type', er.semantic_type,
                     'claim_id', c.id, 'claim_text', c.claim_text,
                     'evidence_fragment_id', ef.id, 'work_id', w.id, 'work_title', w.title,
-                    'source_record_id', sr.id, 'source_identifier', sr.source_record_identifier
+                    'source_record_id', sr.id, 'source_identifier', sr.source_record_identifier,
+                    'work_identifiers', COALESCE((SELECT jsonb_agg(jsonb_build_object('type', wi.identifier_type, 'value', wi.identifier_value, 'is_primary', wi.is_primary) ORDER BY wi.is_primary DESC, wi.identifier_type) FROM work_identifier wi WHERE wi.work_id = w.id), '[]'::jsonb)
                 ) ORDER BY er.created_at) AS evidence_trace
                 FROM evidence_relationship er
                 JOIN claim c ON c.id = er.claim_id
@@ -313,5 +314,58 @@ def list_project_opportunities(project_id, limit=50):
               END,
               gc.created_at DESC
             LIMIT %s
+        """, (project_id, limit)).fetchall()
+    return rows
+
+
+def list_project_advice_critic(project_id, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT gc.id AS gap_id, roi.canonical_label, gc.gap_type,
+                   gc.statement, gc.current_evolution_state,
+                   COALESCE(ev.support_count, 0) AS support_count,
+                   COALESCE(ev.challenge_count, 0) AS challenge_count,
+                   COALESCE(ev.linked_claim_count, 0) AS linked_claim_count,
+                   cc.id AS coverage_context_id, cc.counter_search_state,
+                   cc.limitations AS coverage_limitations,
+                   a.id AS assessment_id, a.explanation_summary,
+                   COALESCE(ad.dimensions, '[]'::jsonb) AS dimensions,
+                   hd.decision_type AS latest_human_decision
+            FROM gap_candidate gc
+            JOIN research_object_identity roi ON roi.id=gc.id AND roi.project_id=gc.project_id
+            LEFT JOIN LATERAL (
+                SELECT count(*) FILTER (WHERE semantic_type='SUPPORTS') support_count,
+                       count(*) FILTER (WHERE semantic_type IN ('CHALLENGES','CONTRADICTS')) challenge_count,
+                       count(DISTINCT claim_id) linked_claim_count
+                FROM evidence_relationship WHERE target_research_object_id=gc.id
+            ) ev ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT * FROM coverage_context x WHERE x.project_id=gc.project_id
+                ORDER BY x.observed_at DESC LIMIT 1
+            ) cc ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT x.* FROM assessment x
+                WHERE x.project_id=gc.project_id
+                  AND x.target_research_object_id=gc.id
+                  AND x.assessment_type='ADVICE_CRITIC_V1'
+                ORDER BY x.assessed_at DESC, x.created_at DESC LIMIT 1
+            ) a ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object(
+                    'dimension_type', d.dimension_type,
+                    'value_text', d.value_text,
+                    'explanation', d.explanation
+                ) ORDER BY d.dimension_type) dimensions
+                FROM assessment_dimension d WHERE d.assessment_id=a.id
+            ) ad ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT x.decision_type FROM human_decision x
+                WHERE x.project_id=gc.project_id
+                  AND x.primary_research_object_id=gc.id
+                ORDER BY x.decided_at DESC, x.created_at DESC LIMIT 1
+            ) hd ON TRUE
+            WHERE gc.project_id=%s AND roi.lifecycle_state='ACTIVE'
+              AND a.id IS NOT NULL
+            ORDER BY a.assessed_at DESC LIMIT %s
         """, (project_id, limit)).fetchall()
     return rows

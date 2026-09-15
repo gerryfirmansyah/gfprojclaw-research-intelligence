@@ -171,7 +171,7 @@ function renderOpportunities() {
   return commonHeader("Research Opportunities", "Evidence-backed advisory prioritization for HUMAN scientific review.", "real") + `
   <div class="callout warning">Prioritization is advisory context only. It does not establish novelty, significance, feasibility, acceptance, or a scientific verdict.</div>
   <div class="card real-surface"><h3>Research Opportunities <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading persisted opportunity intelligence…</div></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Advice & Critic</h3><div id="real-gap-critic">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
 }
 
 async function loadProjectOpportunities() {
@@ -189,14 +189,33 @@ async function loadProjectOpportunities() {
     const show = r => {
       detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>State:</strong> ${escapeHtml(r.current_evolution_state)}</p>`;
       const trace = Array.isArray(r.evidence_trace) ? r.evidence_trace : [];
-      relation.innerHTML = `<p><strong>Persisted evidence links:</strong> ${escapeHtml(r.support_count)} supporting · ${escapeHtml(r.challenge_count)} challenging · ${escapeHtml(r.linked_claim_count)} linked claim(s)</p><p><strong>Counter-search:</strong> ${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</p><p><strong>Coverage limitation:</strong> ${escapeHtml(r.coverage_limitations || "Not recorded")}</p>${trace.length ? trace.map(t => `<div class="trace"><strong>${escapeHtml(t.semantic_type)}</strong> · ${escapeHtml(t.work_title)}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`).join("") : `<p>No canonical evidence trace persisted.</p>`}`;
+      relation.innerHTML = `<p><strong>Persisted evidence links:</strong> ${escapeHtml(r.support_count)} supporting · ${escapeHtml(r.challenge_count)} challenging · ${escapeHtml(r.linked_claim_count)} linked claim(s)</p><p><strong>Counter-search:</strong> ${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</p><p><strong>Coverage limitation:</strong> ${escapeHtml(r.coverage_limitations || "Not recorded")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer">DOI</a>` : i.type === "OPENALEX" ? `<a href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer">OpenAlex</a>` : "").filter(Boolean).join(" · "); return `<div class="trace"><strong>${escapeHtml(t.semantic_type)}</strong> · ${escapeHtml(t.work_title)}${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`; }).join("") : `<p>No canonical evidence trace persisted.</p>`}`;
       const dimensions = Array.isArray(r.dimensions) ? r.dimensions : [];
       document.getElementById("real-gap-assessment").innerHTML = dimensions.length ? dimensions.map(d => `<p><strong>${escapeHtml(d.dimension_type)}:</strong> ${escapeHtml(d.value_text ?? d.value_numeric ?? "UNKNOWN")}</p><small>${escapeHtml(d.explanation || "")}</small>`).join("") : `<p>No persisted J9 assessment dimensions.</p>`;
+      renderGapCritic(r);
       decision.innerHTML = `<p><strong>Latest explicit HUMAN decision:</strong> ${escapeHtml(r.latest_human_decision || "None recorded")}</p><p>${escapeHtml(r.explanation_summary || "Machine prioritization is advisory only.")}</p>`;
     };
     document.querySelectorAll("[data-gap-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.gapIndex)]));
     show(rows[0]);
   } catch (error) { console.error(error); list.innerHTML = `<p>Research Opportunities API unavailable: ${escapeHtml(error.message)}</p>`; }
+}
+
+async function renderGapCritic(gap) {
+  const box = document.getElementById("real-gap-critic");
+  if (!box || !projectSelect.value) return;
+  box.innerHTML = `<p>Loading persisted Advice & Critic…</p>`;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/advice-critic`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Advice & Critic HTTP ${response.status}`);
+    const rows = await response.json();
+    const critic = rows.find(r => r.gap_id === gap.gap_id);
+    if (!critic) { box.innerHTML = `<p>No persisted J10 Advice & Critic assessment for this candidate.</p>`; return; }
+    const dimensions = Array.isArray(critic.dimensions) ? critic.dimensions : [];
+    box.innerHTML = `<p><strong>Observed balance:</strong> ${escapeHtml(critic.support_count)} supporting · ${escapeHtml(critic.challenge_count)} challenging/contradicting</p><p><strong>Counter-search:</strong> ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")}</p>${dimensions.map(d => `<p><strong>${escapeHtml(d.dimension_type)}:</strong> ${escapeHtml(d.value_text ?? "UNKNOWN")}</p><small>${escapeHtml(d.explanation || "")}</small>`).join("")}<div class="callout warning">Advice & Critic is machine advice for falsification and review. HUMAN scientific judgment remains authoritative.</div>`;
+  } catch (error) {
+    console.error(error);
+    box.innerHTML = `<p>Advice & Critic unavailable: ${escapeHtml(error.message)}</p>`;
+  }
 }
 
 function escapeHtml(value) {
