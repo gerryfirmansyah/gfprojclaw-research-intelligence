@@ -211,7 +211,11 @@ async function renderGapCritic(gap) {
     const critic = rows.find(r => r.gap_id === gap.gap_id);
     if (!critic) { box.innerHTML = `<p>No persisted J10 Advice & Critic assessment for this candidate.</p>`; return; }
     const dimensions = Array.isArray(critic.dimensions) ? critic.dimensions : [];
-    box.innerHTML = `<p><strong>Observed balance:</strong> ${escapeHtml(critic.support_count)} supporting · ${escapeHtml(critic.challenge_count)} challenging/contradicting</p><p><strong>Counter-search:</strong> ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")}</p>${dimensions.map(d => `<p><strong>${escapeHtml(d.dimension_type)}:</strong> ${escapeHtml(d.value_text ?? "UNKNOWN")}</p><small>${escapeHtml(d.explanation || "")}</small>`).join("")}<div class="callout warning">Advice & Critic is machine advice for falsification and review. HUMAN scientific judgment remains authoritative.</div>`;
+    const byType = type => dimensions.find(d => d.dimension_type === type);
+    const risk = byType("COUNTER_EVIDENCE_RISK");
+    const coverage = byType("EVIDENCE_COVERAGE_CONTEXT");
+    const priority = byType("REVIEW_PRIORITY");
+    box.innerHTML = `<p><strong>Critic — what challenges this opportunity?</strong></p><p>${escapeHtml(risk?.explanation || "No persisted counter-evidence assessment is available.")}</p><p><strong>What remains unknown?</strong></p><p>Counter-search: ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")} · ${escapeHtml(coverage?.explanation || critic.coverage_limitations || "Coverage limitations are not recorded.")}</p><p><strong>Recommended next HUMAN action</strong></p><p>${escapeHtml(priority?.value_text || "HUMAN_REVIEW_REQUIRED")}</p><small>${escapeHtml(priority?.explanation || "Machine advice only; HUMAN scientific judgment remains authoritative.")}</small><div class="callout warning">Advice & Critic supports falsification and review; it does not establish novelty, truth, acceptance, or a scientific verdict.</div>`;
   } catch (error) {
     console.error(error);
     box.innerHTML = `<p>Advice & Critic unavailable: ${escapeHtml(error.message)}</p>`;
