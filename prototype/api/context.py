@@ -235,3 +235,83 @@ def list_project_changes(project_id, object_id=None, limit=50):
             LIMIT %s
         """, (project_id, object_id, object_id, limit)).fetchall()
     return rows
+
+
+def list_project_opportunities(project_id, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT gc.id AS gap_id, roi.canonical_label, gc.gap_type,
+                   gc.statement, gc.current_evolution_state,
+                   COALESCE(ev.support_count, 0) AS support_count,
+                   COALESCE(ev.challenge_count, 0) AS challenge_count,
+                   COALESCE(ev.linked_claim_count, 0) AS linked_claim_count,
+                   COALESCE(et.evidence_trace, '[]'::jsonb) AS evidence_trace,
+                   cc.id AS coverage_context_id, cc.observed_at AS coverage_observed_at,
+                   cc.counter_search_state, cc.limitations AS coverage_limitations,
+                   a.id AS assessment_id, a.assessment_type, a.explanation_summary,
+                   COALESCE(ad.dimensions, '[]'::jsonb) AS dimensions,
+                   hd.decision_type AS latest_human_decision,
+                   hd.decided_at AS latest_human_decision_at
+            FROM gap_candidate gc
+            JOIN research_object_identity roi ON roi.id = gc.id AND roi.project_id = gc.project_id
+            LEFT JOIN LATERAL (
+                SELECT count(*) FILTER (WHERE er.semantic_type='SUPPORTS') AS support_count,
+                       count(*) FILTER (WHERE er.semantic_type='CHALLENGES') AS challenge_count,
+                       count(DISTINCT er.claim_id) AS linked_claim_count
+                FROM evidence_relationship er WHERE er.target_research_object_id = gc.id
+            ) ev ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object(
+                    'relationship_id', er.id, 'semantic_type', er.semantic_type,
+                    'claim_id', c.id, 'claim_text', c.claim_text,
+                    'evidence_fragment_id', ef.id, 'work_id', w.id, 'work_title', w.title,
+                    'source_record_id', sr.id, 'source_identifier', sr.source_record_identifier
+                ) ORDER BY er.created_at) AS evidence_trace
+                FROM evidence_relationship er
+                JOIN claim c ON c.id = er.claim_id
+                JOIN evidence_fragment ef ON ef.id = c.evidence_fragment_id
+                JOIN work w ON w.id = ef.work_id
+                LEFT JOIN work_source_record wsr ON wsr.work_id = w.id
+                LEFT JOIN source_record sr ON sr.id = wsr.source_record_id
+                WHERE er.target_research_object_id = gc.id
+            ) et ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT * FROM coverage_context x WHERE x.project_id = gc.project_id
+                ORDER BY x.observed_at DESC LIMIT 1
+            ) cc ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT x.* FROM assessment x
+                WHERE x.project_id = gc.project_id
+                  AND x.target_research_object_id = gc.id
+                  AND x.assessment_type = 'RESEARCH_OPPORTUNITY_INTELLIGENCE_V1'
+                ORDER BY x.assessed_at DESC, x.created_at DESC LIMIT 1
+            ) a ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object(
+                    'dimension_type', d.dimension_type,
+                    'value_numeric', d.value_numeric,
+                    'value_text', d.value_text,
+                    'explanation', d.explanation
+                ) ORDER BY d.dimension_type) AS dimensions
+                FROM assessment_dimension d WHERE d.assessment_id = a.id
+            ) ad ON TRUE
+            LEFT JOIN LATERAL (
+                SELECT x.decision_type, x.decided_at FROM human_decision x
+                WHERE x.project_id = gc.project_id
+                  AND x.primary_research_object_id = gc.id
+                ORDER BY x.decided_at DESC, x.created_at DESC LIMIT 1
+            ) hd ON TRUE
+            WHERE gc.project_id = %s AND roi.lifecycle_state = 'ACTIVE'
+            ORDER BY
+              CASE
+                WHEN EXISTS (
+                  SELECT 1 FROM assessment_dimension d
+                  WHERE d.assessment_id = a.id
+                    AND d.dimension_type = 'REVIEW_PRIORITY'
+                    AND d.value_text = 'HIGH_HUMAN_REVIEW_RECOMMENDED'
+                ) THEN 0 ELSE 1
+              END,
+              gc.created_at DESC
+            LIMIT %s
+        """, (project_id, limit)).fetchall()
+    return rows

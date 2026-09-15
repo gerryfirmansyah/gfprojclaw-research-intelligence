@@ -168,27 +168,35 @@ function renderJourney() {
 }
 
 function renderOpportunities() {
-  return commonHeader("Research Opportunities", "Canonical GapCandidate records for the selected Project.", "real") + `
-  <div class="card real-surface"><h3>Gap Candidates <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading canonical gaps…</div></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>Evidence Relationship</h3><div id="real-gap-relationship">No relationship loaded yet.</div></div><div class="card real-surface"><h3>Machine Assessment</h3><div id="real-gap-assessment">Select a persisted GapCandidate.</div></div><div class="card real-surface"><h3>HUMAN Decision</h3><div id="real-gap-decision">Select a persisted GapCandidate.</div></div></div>`;
+  return commonHeader("Research Opportunities", "Evidence-backed advisory prioritization for HUMAN scientific review.", "real") + `
+  <div class="callout warning">Prioritization is advisory context only. It does not establish novelty, significance, feasibility, acceptance, or a scientific verdict.</div>
+  <div class="card real-surface"><h3>Research Opportunities <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading persisted opportunity intelligence…</div></div>
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Candidate Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
 }
 
-async function loadProjectGaps() {
+async function loadProjectOpportunities() {
   const list = document.getElementById("real-gap-list");
   const detail = document.getElementById("real-gap-detail");
   const relation = document.getElementById("real-gap-relationship");
   const decision = document.getElementById("real-gap-decision");
   if (!list || !projectSelect.value) return;
   try {
-    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/gaps`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Gaps HTTP ${response.status}`);
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Opportunities HTTP ${response.status}`);
     const rows = await response.json();
-    if (!rows.length) { list.innerHTML = "<p>No persisted GapCandidate records for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No EvidenceRelationship persisted.</p>"; decision.innerHTML = "<p>No target object available.</p>"; return; }
+    if (!rows.length) { list.innerHTML = "<p>No persisted research opportunities for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No canonical evidence trace persisted.</p>"; decision.innerHTML = "<p>No research opportunity available for HUMAN review.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-gap-index="${i}"><div class="change-main"><strong>${escapeHtml(r.canonical_label)}</strong><small>${escapeHtml(r.gap_type)} · ${escapeHtml(r.current_evolution_state)}</small></div><span class="state ${stateClass(r.current_evolution_state)}">${escapeHtml(r.current_evolution_state)}</span></div>`).join("");
-    const show = async r => { detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>Scope:</strong> ${escapeHtml(r.scope_jsonb?.evidence_scope || "unspecified")}</p>`; relation.innerHTML = r.relationship_id ? `<p><strong>${escapeHtml(r.semantic_type)}</strong></p><p>${escapeHtml(r.relationship_rationale)}</p><p><strong>Review:</strong> ${escapeHtml(r.relationship_review_state)}</p><p><strong>Claim:</strong> ${escapeHtml(r.claim_text)}</p>` : `<p>No EvidenceRelationship persisted.</p>`; await renderGapAssessment(r); await renderGapDecision(r); };
+    const show = r => {
+      detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>State:</strong> ${escapeHtml(r.current_evolution_state)}</p>`;
+      const trace = Array.isArray(r.evidence_trace) ? r.evidence_trace : [];
+      relation.innerHTML = `<p><strong>Persisted evidence links:</strong> ${escapeHtml(r.support_count)} supporting · ${escapeHtml(r.challenge_count)} challenging · ${escapeHtml(r.linked_claim_count)} linked claim(s)</p><p><strong>Counter-search:</strong> ${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</p><p><strong>Coverage limitation:</strong> ${escapeHtml(r.coverage_limitations || "Not recorded")}</p>${trace.length ? trace.map(t => `<div class="trace"><strong>${escapeHtml(t.semantic_type)}</strong> · ${escapeHtml(t.work_title)}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`).join("") : `<p>No canonical evidence trace persisted.</p>`}`;
+      const dimensions = Array.isArray(r.dimensions) ? r.dimensions : [];
+      document.getElementById("real-gap-assessment").innerHTML = dimensions.length ? dimensions.map(d => `<p><strong>${escapeHtml(d.dimension_type)}:</strong> ${escapeHtml(d.value_text ?? d.value_numeric ?? "UNKNOWN")}</p><small>${escapeHtml(d.explanation || "")}</small>`).join("") : `<p>No persisted J9 assessment dimensions.</p>`;
+      decision.innerHTML = `<p><strong>Latest explicit HUMAN decision:</strong> ${escapeHtml(r.latest_human_decision || "None recorded")}</p><p>${escapeHtml(r.explanation_summary || "Machine prioritization is advisory only.")}</p>`;
+    };
     document.querySelectorAll("[data-gap-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.gapIndex)]));
     show(rows[0]);
-  } catch (error) { console.error(error); list.innerHTML = `<p>Gap API unavailable: ${escapeHtml(error.message)}</p>`; }
+  } catch (error) { console.error(error); list.innerHTML = `<p>Research Opportunities API unavailable: ${escapeHtml(error.message)}</p>`; }
 }
 
 function escapeHtml(value) {
@@ -327,7 +335,7 @@ function showView(name) {
   view.classList.add("active-view");
   if (name === "evidence") loadProjectEvidence();
   if (name === "review") loadHumanReview();
-  if (name === "opportunities") loadProjectGaps();
+  if (name === "opportunities") loadProjectOpportunities();
   if (name === "coverage") loadProjectCoverage();
   if (name === "evolution") loadProjectChanges();
 }
