@@ -343,10 +343,21 @@ function renderProfiles() {
 }
 
 function renderTelegram() {
-  return commonHeader("Telegram Research Radar", "A compressed, non-canonical attention channel that points back to the cockpit.") + `
-  <div class="detail-grid"><div class="card"><h3>Daily Research Radar</h3><p><strong>${selectedProjectLabel()}</strong></p><ul><li>14 new relevant works</li><li>5 new evidence-backed claims</li><li>GAP-014 became CONTESTED</li><li>1 competing theory deserves review</li><li>R5 and R12 need HUMAN attention</li></ul><div class="callout warning">Coverage: 2 sources healthy · 1 degraded.</div></div>
-  <div class="card"><h3>High-value alert</h3><p><strong>EXISTING SOLUTION DISCOVERED</strong></p><p>SOL-008 may address part of GAP-014. The contribution may need a narrower boundary condition.</p><p>Evidence: 1 new full-text paper · 2 linked claims.</p><button class="text-button">Open Gap–Solution Workspace</button></div>
-  <div class="card"><h3>Radar Rules</h3><ul><li>No raw crawler logs</li><li>No automatic scientific decisions</li><li>No canonical state in Telegram</li><li>Delivery failure stays local</li><li>Deep-link back to Dashboard</li></ul></div></div>`;
+  return commonHeader("Telegram Research Radar", "Read-only projection of canonical ChangeEvent. Telegram never becomes scientific state.") + `
+  <div id="radar-live" class="card"><p>Loading canonical Radar projection…</p></div>
+  <div class="card"><h3>Radar Rules</h3><ul><li>No raw crawler logs</li><li>No automatic scientific decisions</li><li>No canonical state in Telegram</li><li>Delivery failure stays local</li><li>Inspect full context in Dashboard</li></ul></div>`;
+}
+
+async function loadProjectRadar() {
+  const box = document.getElementById("radar-live");
+  if (!box) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/radar`, { cache: "no-store" });
+    const rows = response.ok ? await response.json() : [];
+    box.innerHTML = rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)}</strong><small>${escapeHtml(r.profile_name)} / ${escapeHtml(r.project_name)}</small><p><strong>WHAT CHANGED</strong><br>${escapeHtml(r.canonical_label)}</p><p><strong>WHY IT MATTERS</strong><br>${escapeHtml(r.reasoning_delta)}</p><p><strong>COVERAGE</strong><br>Counter-search: ${escapeHtml(r.counter_search_state || "UNKNOWN")} · ${escapeHtml(r.coverage_limitations || "No limitation recorded")}</p><p><strong>HUMAN CONTEXT</strong><br>Latest decision: ${escapeHtml(r.latest_human_decision || "NONE")}. This Radar item does not change it.</p></div></div>`).join("") : `<p>No canonical ChangeEvent is currently available for Radar projection.</p>`;
+  } catch (error) {
+    box.innerHTML = `<p>Radar projection unavailable. Canonical research processing is unaffected.</p>`;
+  }
 }
 
 const renderers = { journey:renderJourney, opportunities:renderOpportunities, evidence:renderEvidence, evolution:renderEvolution, review:renderReview, coverage:renderCoverage, profiles:renderProfiles, telegram:renderTelegram };
@@ -362,6 +373,7 @@ function showView(name) {
   if (name === "opportunities") loadProjectOpportunities();
   if (name === "coverage") loadProjectCoverage();
   if (name === "evolution") loadProjectChanges();
+  if (name === "telegram") loadProjectRadar();
 }
 
 function bindOpenButtons() {

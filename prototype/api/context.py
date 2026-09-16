@@ -377,3 +377,31 @@ def list_project_advice_critic(project_id, limit=50):
             ORDER BY a.assessed_at DESC LIMIT %s
         """, (project_id, limit)).fetchall()
     return rows
+
+
+def list_project_radar(project_id, limit=20):
+    """Read-only Telegram Radar projection from canonical ChangeEvent state."""
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT ce.id AS change_event_id, ce.change_type, ce.observed_at,
+                   ce.primary_research_object_id, roi.canonical_label,
+                   ce.reasoning_delta, ce.previous_state_jsonb, ce.current_state_jsonb,
+                   ce.coverage_context_id, cc.counter_search_state,
+                   cc.limitations AS coverage_limitations,
+                   p.name AS project_name, rp.name AS profile_name,
+                   hd.decision_type AS latest_human_decision
+            FROM change_event ce
+            JOIN research_object_identity roi ON roi.id = ce.primary_research_object_id
+            JOIN research_project p ON p.id = ce.project_id
+            JOIN research_profile rp ON rp.id = p.profile_id
+            LEFT JOIN coverage_context cc ON cc.id = ce.coverage_context_id
+            LEFT JOIN LATERAL (
+                SELECT x.decision_type FROM human_decision x
+                WHERE x.project_id = ce.project_id
+                  AND x.primary_research_object_id = ce.primary_research_object_id
+                ORDER BY x.decided_at DESC, x.created_at DESC LIMIT 1
+            ) hd ON TRUE
+            WHERE ce.project_id = %s
+            ORDER BY ce.observed_at DESC, ce.created_at DESC LIMIT %s
+        """, (project_id, limit)).fetchall()
+    return rows
