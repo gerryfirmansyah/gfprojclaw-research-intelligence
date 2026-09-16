@@ -272,7 +272,8 @@ def list_project_opportunities(project_id, limit=50):
                 SELECT jsonb_agg(jsonb_build_object(
                     'relationship_id', er.id, 'semantic_type', er.semantic_type,
                     'claim_id', c.id, 'claim_text', c.claim_text,
-                    'evidence_fragment_id', ef.id, 'work_id', w.id, 'work_title', w.title,
+                    'evidence_fragment_id', ef.id, 'access_level', ef.access_level,
+                    'work_id', w.id, 'work_title', w.title,
                     'source_record_id', sr.id, 'source_identifier', sr.source_record_identifier,
                     'work_identifiers', COALESCE((SELECT jsonb_agg(jsonb_build_object('type', wi.identifier_type, 'value', wi.identifier_value, 'is_primary', wi.is_primary) ORDER BY wi.is_primary DESC, wi.identifier_type) FROM work_identifier wi WHERE wi.work_id = w.id), '[]'::jsonb)
                 ) ORDER BY er.created_at) AS evidence_trace

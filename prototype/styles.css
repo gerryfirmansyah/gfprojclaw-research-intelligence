@@ -63,6 +63,9 @@ select, input[type="search"] { border:1px solid var(--border); background:var(--
 .source-link-openalex { border-color:#7c5cff; }
 html[data-theme="dark"] .source-link-doi { background:#102a52; color:#9bc2ff; }
 html[data-theme="dark"] .source-link-openalex { background:#251c4d; color:#c0adff; }
+.access-badge { display:inline-block; margin:3px 4px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:700; vertical-align:middle; }
+.access-badge.full { background:var(--green-soft); color:var(--green); border:1px solid var(--green); }
+.access-badge.limited { background:var(--yellow-soft); color:var(--yellow); border:1px solid var(--yellow); }
 
 .view { display:none; padding:26px; }.active-view { display:block; }
 .page-heading { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; margin-bottom:18px; }.page-heading h1 { margin:0; font-size:29px; }.page-heading p { margin:5px 0 0; color:var(--muted); }
