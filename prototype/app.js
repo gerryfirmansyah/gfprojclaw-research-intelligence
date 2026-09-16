@@ -86,8 +86,27 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.12.2";
+const PROTOTYPE_VERSION = "0.12.3";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
+const themeToggle = document.getElementById("theme-toggle");
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const dark = theme === "dark";
+  if (themeToggle) {
+    themeToggle.textContent = dark ? "☀️ Light" : "🌙 Dark";
+    themeToggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    themeToggle.setAttribute("aria-pressed", String(dark));
+  }
+}
+
+const savedTheme = localStorage.getItem("gfprojclaw-theme");
+applyTheme(savedTheme === "dark" ? "dark" : "light");
+themeToggle?.addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("gfprojclaw-theme", next);
+  applyTheme(next);
+});
 
 function selectedDummyData() {
   const idx = Math.max(0, profileSelect.selectedIndex);
