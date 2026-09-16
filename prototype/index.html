@@ -68,15 +68,15 @@
             <h1>Today</h1>
             <p>What changed, why it matters, and where HUMAN attention is useful.</p>
           </div>
-          <div class="coverage-pill">2 sources healthy · 1 degraded</div>
+          <div class="coverage-pill" id="today-coverage-pill">Loading persisted coverage context…</div>
         </div>
 
         <div class="metric-grid">
-          <article class="metric-card"><span>New Papers</span><strong>42</strong><small>+12 since yesterday</small></article>
-          <article class="metric-card warning"><span>Needs Attention</span><strong>7</strong><small>3 high priority</small></article>
-          <article class="metric-card"><span>Knowledge Changes</span><strong>5</strong><small>2 strengthened</small></article>
-          <article class="metric-card warning"><span>Coverage Alerts</span><strong>2</strong><small>1 affects novelty search</small></article>
-          <article class="metric-card"><span>Telegram Updates</span><strong>6</strong><small>Last 2 hours ago</small></article>
+          <article class="metric-card" id="metric-papers"><span>Persisted Papers</span><strong>…</strong><small>Loading canonical project data</small></article>
+          <article class="metric-card" id="metric-decisions"><span>HUMAN Decisions</span><strong>…</strong><small>Loading persisted decisions</small></article>
+          <article class="metric-card" id="metric-changes"><span>Knowledge Changes</span><strong>…</strong><small>Loading canonical ChangeEvents</small></article>
+          <article class="metric-card" id="metric-coverage"><span>Coverage Context</span><strong>…</strong><small>Loading persisted coverage state</small></article>
+          <article class="metric-card" id="metric-radar"><span>Radar Items</span><strong>…</strong><small>Loading canonical projection</small></article>
         </div>
 
         <div class="dashboard-grid">
@@ -86,7 +86,7 @@
           </article>
 
           <article class="panel">
-            <div class="panel-header"><h2>R0–R16 Research Stages</h2><button class="text-button" data-open="journey">View all</button></div>
+            <div class="panel-header"><h2>Research Stage Guide</h2><button class="text-button" data-open="journey">View all</button></div>
             <div id="journey-mini" class="journey-mini"></div>
           </article>
 
@@ -128,6 +128,6 @@
     </main>
   </div>
 
-  <script src="app.js?v=0.12.1"></script>
+  <script src="app.js?v=0.12.2"></script>
 </body>
 </html>

@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.11.0";
+const PROTOTYPE_VERSION = "0.12.2";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 
 function selectedDummyData() {
@@ -111,27 +111,96 @@ function renderProjects() {
 }
 
 function renderDashboard() {
-  const d = selectedDummyData();
-  document.getElementById("change-list").innerHTML = d.changes.map(([id, text, state, cls]) => `
-    <div class="change-row"><div class="change-main"><strong>${id} — ${text}</strong><small>Evidence-aware dummy ChangeEvent</small></div><span class="state ${cls}">${state}</span></div>`).join("");
+  document.getElementById("change-list").innerHTML = `<div class="change-row"><div class="change-main"><strong>Loading canonical ChangeEvents…</strong><small>Persisted project state</small></div></div>`;
+  loadTodayChanges();
 
-  document.getElementById("journey-mini").innerHTML = journeyStages.slice(0, 7).map(([r, name, status, cls]) => `
-    <div class="journey-row"><span class="r-code">${r}</span><div><strong>${name}</strong><small>Evidence-linked stage status</small></div><span class="state ${cls}">${status}</span></div>`).join("") + `<button class="text-button" data-open="journey">Show R7–R16</button>`;
+  document.getElementById("journey-mini").innerHTML = journeyStages.slice(0, 7).map(([r, name]) => `
+    <div class="journey-row"><span class="r-code">${r}</span><div><strong>${name}</strong><small>Workflow guide only · no canonical stage status persisted</small></div><span class="state gray">GUIDE</span></div>`).join("") + `<button class="text-button" data-open="journey">Show R7–R16 guide</button>`;
 
-  document.getElementById("opportunity-table").innerHTML = `
-    <table class="table"><thead><tr><th>ID</th><th>Candidate</th><th>Gap evidence</th><th>Coverage</th><th>Evolution</th></tr></thead><tbody>
-    ${d.opportunities.map(([id, title, score, evidence, status]) => `<tr><td><strong>${id}</strong></td><td>${title}</td><td><span class="score">${score}</span></td><td>${evidence}</td><td><span class="state ${stateClass(status)}">${status}</span></td></tr>`).join("")}
-    </tbody></table>`;
+  document.getElementById("opportunity-table").innerHTML = `<p>Loading canonical research opportunities…</p>`;
+  loadTodayOpportunities();
 
   renderLatestPapers();
-  document.querySelectorAll(".metric-card").forEach(el => el.classList.add("dummy-surface"));
-  ["change-list","journey-mini","opportunity-table","evolution-mini","telegram-mini"].forEach(id => document.getElementById(id)?.closest(".panel")?.classList.add("dummy-surface"));
-  document.getElementById("paper-list")?.closest(".panel")?.classList.add("real-surface");
+  document.querySelectorAll(".metric-card").forEach(el => { el.classList.remove("dummy-surface"); el.classList.add("real-surface"); });
+  ["journey-mini"].forEach(id => { const panel = document.getElementById(id)?.closest(".panel"); panel?.classList.remove("dummy-surface"); panel?.classList.add("guide-surface"); });
+  ["change-list","opportunity-table","paper-list","evolution-mini","telegram-mini"].forEach(id => document.getElementById(id)?.closest(".panel")?.classList.add("real-surface"));
   document.getElementById("health-mini")?.closest(".panel")?.classList.add("real-surface");
   loadProjectCoverageSummary();
-  document.getElementById("evolution-mini").innerHTML = evolution.map(([id,change,when]) => `<div class="evolution-row"><div><strong>${id}</strong><small>${change}</small></div><small>${when}</small></div>`).join("");
-  document.getElementById("telegram-mini").innerHTML = telegram.map(([time,text]) => `<div class="telegram-row"><time>${time}</time><strong>${text}</strong></div>`).join("");
+  loadTodayMetrics();
+  loadTodayEvolution();
+  loadTodayRadar();
   bindOpenButtons();
+}
+
+async function loadTodayMetrics() {
+  const projectId = projectSelect.value;
+  if (!projectId) return;
+  const endpoints = ["papers", "decisions", "changes", "coverage", "radar"];
+  try {
+    const [papers, decisions, changes, coverage, radar] = await Promise.all(endpoints.map(async name => {
+      const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectId)}/${name}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`${name} HTTP ${response.status}`);
+      return response.json();
+    }));
+    const setMetric = (id, value, detail) => { const el = document.getElementById(id); if (el) { el.querySelector("strong").textContent = value; el.querySelector("small").textContent = detail; el.classList.remove("dummy-surface"); el.classList.add("real-surface"); } };
+    setMetric("metric-papers", papers.length, "Persisted works in selected project");
+    setMetric("metric-decisions", decisions.length, "Explicit persisted HUMAN decisions");
+    setMetric("metric-changes", changes.length, "Persisted canonical ChangeEvents");
+    setMetric("metric-coverage", coverage.coverage_context_id ? 1 : 0, coverage.counter_search_state ? `Counter-search: ${coverage.counter_search_state}` : "No CoverageContext persisted");
+    setMetric("metric-radar", radar.length, "Read-only projections from ChangeEvent");
+    const pill = document.getElementById("today-coverage-pill");
+    if (pill) pill.textContent = coverage.coverage_context_id ? `Coverage persisted · counter-search ${coverage.counter_search_state || "UNKNOWN"}` : "No persisted CoverageContext";
+  } catch (error) {
+    document.querySelectorAll(".metric-card").forEach(el => { el.querySelector("strong").textContent = "—"; el.querySelector("small").textContent = `Canonical metric unavailable: ${error.message}`; });
+  }
+}
+
+async function loadTodayRadar() {
+  const box = document.getElementById("telegram-mini");
+  if (!box || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/radar`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const rows = await response.json();
+    box.innerHTML = rows.length ? rows.slice(0, 4).map(r => `<div class="telegram-row"><time>${escapeHtml(r.observed_at || "")}</time><strong>${escapeHtml(r.change_type)} — ${escapeHtml(r.canonical_label)}</strong></div>`).join("") : `<p>No canonical Radar item yet.</p>`;
+  } catch (error) { box.innerHTML = `<p>Radar projection unavailable: ${escapeHtml(error.message)}</p>`; }
+}
+
+async function loadTodayEvolution() {
+  const box = document.getElementById("evolution-mini");
+  if (!box || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/changes`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const rows = await response.json();
+    box.innerHTML = rows.length ? rows.slice(0, 4).map(r => `<div class="evolution-row"><div><strong>${escapeHtml(r.canonical_label || r.primary_research_object_id)}</strong><small>${escapeHtml(r.change_type)} · ${escapeHtml(r.reasoning_delta || "No reasoning delta recorded")}</small></div><small>${escapeHtml(r.observed_at || "")}</small></div>`).join("") : `<p>No persisted evolution event yet.</p>`;
+  } catch (error) { box.innerHTML = `<p>Canonical evolution unavailable: ${escapeHtml(error.message)}</p>`; }
+}
+
+async function loadTodayOpportunities() {
+  const box = document.getElementById("opportunity-table");
+  if (!box || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const rows = await response.json();
+    box.innerHTML = rows.length ? `<table class="table"><thead><tr><th>Candidate</th><th>Evidence</th><th>Counter-search</th><th>State</th></tr></thead><tbody>${rows.slice(0, 5).map(r => `<tr><td><strong>${escapeHtml(r.canonical_label || r.gap_id)}</strong><br><small>${escapeHtml(r.statement || "No statement recorded")}</small></td><td>${escapeHtml(r.support_count)} support · ${escapeHtml(r.challenge_count)} challenge</td><td>${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</td><td><span class="state ${stateClass(r.current_evolution_state || "CANDIDATE")}">${escapeHtml(r.current_evolution_state || "CANDIDATE")}</span></td></tr>`).join("")}</tbody></table>` : `<p>No canonical research opportunity persisted for this project yet.</p>`;
+  } catch (error) {
+    box.innerHTML = `<p>Canonical opportunities unavailable: ${escapeHtml(error.message)}</p>`;
+  }
+}
+
+async function loadTodayChanges() {
+  const box = document.getElementById("change-list");
+  if (!box || !projectSelect.value) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/changes`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const rows = await response.json();
+    box.innerHTML = rows.length ? rows.slice(0, 5).map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)} — ${escapeHtml(r.canonical_label || r.primary_research_object_id)}</strong><small>${escapeHtml(r.reasoning_delta || "No reasoning delta recorded")} · ${escapeHtml(r.observed_at || "time unknown")}</small></div><span class="state blue">CANONICAL</span></div>`).join("") : `<p>No persisted ChangeEvent for this project yet.</p>`;
+  } catch (error) {
+    box.innerHTML = `<p>Canonical ChangeEvents unavailable: ${escapeHtml(error.message)}</p>`;
+  }
 }
 
 async function renderLatestPapers() {
@@ -386,7 +455,7 @@ document.getElementById("main-nav").addEventListener("click", e => {
 });
 document.querySelectorAll(".nav-list.small [data-view]").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
-projectSelect.addEventListener("change", () => { renderLatestPapers(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (active && active !== "today") showView(active); });
+projectSelect.addEventListener("change", () => { const active = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || active === "today") renderDashboard(); else showView(active); });
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
 fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(`Context HTTP ${r.status}`); return r.json(); }).then(rows => {
