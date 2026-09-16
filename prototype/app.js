@@ -186,14 +186,14 @@ async function loadProjectOpportunities() {
     const rows = await response.json();
     if (!rows.length) { list.innerHTML = "<p>No persisted research opportunities for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No canonical evidence trace persisted.</p>"; decision.innerHTML = "<p>No research opportunity available for HUMAN review.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-gap-index="${i}"><div class="change-main"><strong>${escapeHtml(r.canonical_label)}</strong><small>${escapeHtml(r.gap_type)} · ${escapeHtml(r.current_evolution_state)}</small></div><span class="state ${stateClass(r.current_evolution_state)}">${escapeHtml(r.current_evolution_state)}</span></div>`).join("");
-    const show = r => {
+    const show = async r => {
       detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Type:</strong> ${escapeHtml(r.gap_type)}</p><p><strong>State:</strong> ${escapeHtml(r.current_evolution_state)}</p>`;
       const trace = Array.isArray(r.evidence_trace) ? r.evidence_trace : [];
       relation.innerHTML = `<p><strong>Persisted evidence links:</strong> ${escapeHtml(r.support_count)} supporting · ${escapeHtml(r.challenge_count)} challenging · ${escapeHtml(r.linked_claim_count)} linked claim(s)</p><p><strong>Counter-search:</strong> ${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</p><p><strong>Coverage limitation:</strong> ${escapeHtml(r.coverage_limitations || "Not recorded")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer">DOI</a>` : i.type === "OPENALEX" ? `<a href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer">OpenAlex</a>` : "").filter(Boolean).join(" · "); return `<div class="trace"><strong>${escapeHtml(t.semantic_type)}</strong> · ${escapeHtml(t.work_title)}${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`; }).join("") : `<p>No canonical evidence trace persisted.</p>`}`;
       const dimensions = Array.isArray(r.dimensions) ? r.dimensions : [];
       document.getElementById("real-gap-assessment").innerHTML = dimensions.length ? dimensions.map(d => `<p><strong>${escapeHtml(d.dimension_type)}:</strong> ${escapeHtml(d.value_text ?? d.value_numeric ?? "UNKNOWN")}</p><small>${escapeHtml(d.explanation || "")}</small>`).join("") : `<p>No persisted J9 assessment dimensions.</p>`;
-      renderGapCritic(r);
-      decision.innerHTML = `<p><strong>Latest explicit HUMAN decision:</strong> ${escapeHtml(r.latest_human_decision || "None recorded")}</p><p>${escapeHtml(r.explanation_summary || "Machine prioritization is advisory only.")}</p>`;
+      await renderGapCritic(r);
+      renderGapDecision(r);
     };
     document.querySelectorAll("[data-gap-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.gapIndex)]));
     show(rows[0]);
@@ -210,6 +210,7 @@ async function renderGapCritic(gap) {
     const rows = await response.json();
     const critic = rows.find(r => r.gap_id === gap.gap_id);
     if (!critic) { box.innerHTML = `<p>No persisted J10 Advice & Critic assessment for this candidate.</p>`; return; }
+    gap.assessment_id = critic.assessment_id || null;
     const dimensions = Array.isArray(critic.dimensions) ? critic.dimensions : [];
     const byType = type => dimensions.find(d => d.dimension_type === type);
     const risk = byType("COUNTER_EVIDENCE_RISK");
@@ -283,7 +284,7 @@ function renderReview() {
   return commonHeader("Human Review", "Canonical claims needing HUMAN scientific review for the selected Project.", "real") + `
   <div class="detail-grid"><div class="card real-surface"><h3>Review Queue <span class="data-badge real">REAL DATA</span></h3><div id="real-review-list">Loading canonical review queue…</div></div>
   <div class="card real-surface"><h3>Review Context</h3><div id="real-review-detail">Select a persisted claim.</div></div>
-  <div class="card"><h3>Decision boundary</h3><p>This view is read-only for now. No HumanDecision is created until an explicit persisted review action exists.</p><div class="callout warning">NEEDS_REVIEW is an attention state, not scientific acceptance or rejection.</div></div></div>`;
+  <div class="card"><h3>Decision boundary</h3><p>This queue supports inspection of canonical claims. A HumanDecision is written only through an explicit HUMAN action in a workflow that provides decision controls.</p><div class="callout warning">NEEDS_REVIEW is an attention state, not scientific acceptance or rejection.</div></div></div>`;
 }
 
 async function loadHumanReview() {
@@ -404,21 +405,24 @@ async function renderGapDecision(row) {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/decisions`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Decisions HTTP ${response.status}`);
     const all = await response.json();
-    const latest = all.find(d => d.primary_research_object_id === row.gap_id);
-    box.innerHTML = latest ? `<p><strong>Latest:</strong> ${escapeHtml(latest.decision_type)}</p><p>${escapeHtml(latest.rationale)}</p><small>${escapeHtml(latest.actor)} · ${escapeHtml(latest.decided_at)}</small>` : `<p>No HumanDecision persisted for this candidate.</p>`;
-    box.innerHTML += `<div class="decision-bar" style="margin-top:10px"><button data-decision="REVIEW">Review</button><button data-decision="MODIFY">Modify</button><button data-decision="ACCEPT_DIRECTION">Accept direction</button><button data-decision="REJECT_CANDIDATE">Reject candidate</button><button data-decision="NEED_MORE_EVIDENCE">Need more evidence</button></div><div class="callout warning" style="margin-top:10px">Only an explicit HUMAN action writes a decision. New decisions supersede history; they do not rewrite it.</div>`;
+    const history = all.filter(d => d.primary_research_object_id === row.gap_id);
+    const latest = history[0];
+    box.innerHTML = latest ? `<p><strong>Latest HUMAN decision:</strong> ${escapeHtml(latest.decision_type)}</p><p>${escapeHtml(latest.rationale)}</p><small>${escapeHtml(latest.actor)} · ${escapeHtml(latest.decided_at)}</small><h4>Change history</h4>${history.map((d, i) => `<div class="trace"><strong>${i === 0 ? "CURRENT · " : "PRIOR · "}${escapeHtml(d.decision_type)}</strong><br>${escapeHtml(d.rationale)}<br><small>${escapeHtml(d.actor)} · ${escapeHtml(d.decided_at)} · Assessment: ${escapeHtml(d.assessment_id || "none")} · Supersedes: ${escapeHtml(d.supersedes_decision_id || "none")}</small></div>`).join("")}` : `<p>No HumanDecision persisted for this candidate.</p>`;
+    box.innerHTML += `<div class="human-review-form" style="margin-top:12px"><label>HUMAN reviewer<br><input id="human-review-actor" type="text" placeholder="Researcher name"></label><br><label>Researcher rationale / note<br><textarea id="human-review-rationale" rows="4" placeholder="Why are you taking this action based on the evidence and critic above?"></textarea></label></div><div class="decision-bar" style="margin-top:10px"><button data-decision="REVIEW">Review</button><button data-decision="MODIFY">Modify</button><button data-decision="ACCEPT_DIRECTION">Accept direction</button><button data-decision="REJECT_CANDIDATE">Reject candidate</button><button data-decision="NEED_MORE_EVIDENCE">Need more evidence</button></div><div class="callout warning" style="margin-top:10px">Accept direction means proceed with the current research direction based on current evidence; it does not establish that the gap is true or novel. Only an explicit HUMAN action writes a decision. New decisions supersede history; they do not rewrite it.</div>`;
     box.querySelectorAll("[data-decision]").forEach(btn => btn.onclick = () => submitHumanDecision(row, btn.dataset.decision));
   } catch (error) { box.innerHTML = `<p>Decision API unavailable: ${escapeHtml(error.message)}</p>`; }
 }
 
 async function submitHumanDecision(row, decisionType) {
-  const actor = window.prompt("HUMAN actor / reviewer name:");
-  if (!actor?.trim()) return;
-  const rationale = window.prompt(`Rationale for ${decisionType}:`);
-  if (!rationale?.trim()) return;
+  const actor = document.getElementById("human-review-actor")?.value?.trim();
+  const rationale = document.getElementById("human-review-rationale")?.value?.trim();
+  if (!actor || !rationale) {
+    window.alert("HUMAN reviewer and rationale are required before recording a decision.");
+    return;
+  }
   const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/decisions`, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ object_id: row.gap_id, decision_type: decisionType, rationale, actor })
+    body: JSON.stringify({ object_id: row.gap_id, assessment_id: row.assessment_id || null, decision_type: decisionType, rationale, actor })
   });
   const payload = await response.json();
   if (!response.ok) { window.alert(payload.error || `Decision HTTP ${response.status}`); return; }

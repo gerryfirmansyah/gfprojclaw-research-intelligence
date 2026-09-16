@@ -147,7 +147,7 @@ def list_project_decisions(project_id, object_id=None, limit=50):
     return rows
 
 
-def create_human_decision(project_id, object_id, decision_type, rationale, actor):
+def create_human_decision(project_id, object_id, decision_type, rationale, actor, assessment_id=None):
     if decision_type not in ALLOWED_DECISIONS:
         raise ValueError("Unsupported decision_type")
     if not str(rationale or "").strip() or not str(actor or "").strip():
@@ -161,6 +161,14 @@ def create_human_decision(project_id, object_id, decision_type, rationale, actor
         """, (object_id, project_id)).fetchone()
         if not target:
             raise ValueError("Active research object not found in project")
+        if assessment_id:
+            assessment = conn.execute("""
+                SELECT id FROM assessment
+                WHERE id = %s AND project_id = %s
+                  AND target_research_object_id = %s
+            """, (assessment_id, project_id, object_id)).fetchone()
+            if not assessment:
+                raise ValueError("Assessment not found for this research object in project")
         coverage = conn.execute("""
             SELECT id FROM coverage_context WHERE project_id = %s
             ORDER BY observed_at DESC LIMIT 1
@@ -172,14 +180,14 @@ def create_human_decision(project_id, object_id, decision_type, rationale, actor
         """, (project_id, object_id)).fetchone()
         row = conn.execute("""
             INSERT INTO human_decision (
-                project_id, primary_research_object_id, coverage_context_id,
+                project_id, primary_research_object_id, assessment_id, coverage_context_id,
                 decision_type, rationale, actor, decided_at, supersedes_decision_id
-            ) VALUES (%s, %s, %s, %s, %s, %s, now(), %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, now(), %s)
             RETURNING id AS decision_id, project_id, primary_research_object_id,
                       decision_type, rationale, actor, decided_at,
-                      supersedes_decision_id, coverage_context_id
+                      supersedes_decision_id, coverage_context_id, assessment_id
         """, (
-            project_id, object_id,
+            project_id, object_id, assessment_id,
             coverage["id"] if coverage else None,
             decision_type, rationale.strip(), actor.strip(),
             previous["id"] if previous else None,

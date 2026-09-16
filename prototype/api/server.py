@@ -91,7 +91,7 @@ class Handler(SimpleHTTPRequestHandler):
             try:
                 length = int(self.headers.get("Content-Length", "0"))
                 payload = json.loads(self.rfile.read(length) or b"{}")
-                row = create_human_decision(parts[2], payload.get("object_id"), payload.get("decision_type"), payload.get("rationale"), payload.get("actor"))
+                row = create_human_decision(parts[2], payload.get("object_id"), payload.get("decision_type"), payload.get("rationale"), payload.get("actor"), payload.get("assessment_id"))
                 self.send_json(row, status=201)
             except Exception as exc:
                 self.send_json({"error": str(exc)}, status=400)
