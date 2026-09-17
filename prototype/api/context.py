@@ -104,6 +104,31 @@ def get_project_coverage(project_id):
     return row
 
 
+def list_project_research_objects(project_id, limit=50):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT roi.id AS research_object_id, roi.object_type, roi.canonical_label,
+                   roi.lifecycle_state, roi.origin, roi.created_at,
+                   COALESCE(gc.statement, idr.statement) AS statement,
+                   COALESCE(gc.scope_jsonb, idr.scope_jsonb, '{}'::jsonb) AS scope_jsonb,
+                   gc.gap_type,
+                   CASE WHEN roi.object_type = 'GAP_CANDIDATE' THEN gc.current_evolution_state
+                        WHEN roi.object_type = 'INVESTIGATION_DIRECTION' THEN idr.current_state END AS object_state,
+                   hd.decision_type AS latest_human_decision,
+                   hd.decided_at AS latest_human_decision_at
+            FROM research_object_identity roi
+            LEFT JOIN gap_candidate gc ON gc.id = roi.id AND gc.project_id = roi.project_id
+            LEFT JOIN investigation_direction idr ON idr.id = roi.id AND idr.project_id = roi.project_id
+            LEFT JOIN LATERAL (
+                SELECT x.decision_type, x.decided_at FROM human_decision x
+                WHERE x.project_id = roi.project_id AND x.primary_research_object_id = roi.id
+                ORDER BY x.decided_at DESC, x.created_at DESC LIMIT 1
+            ) hd ON TRUE
+            WHERE roi.project_id = %s AND roi.lifecycle_state = 'ACTIVE'
+            ORDER BY roi.created_at DESC LIMIT %s
+        """, (project_id, limit)).fetchall()
+    return rows
+
 def list_project_gaps(project_id, limit=50):
     with db() as conn:
         rows = conn.execute("""
