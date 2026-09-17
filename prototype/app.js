@@ -373,6 +373,12 @@ function renderReview() {
   <div class="card"><h3>Decision boundary</h3><p>This queue supports inspection of canonical claims. A HumanDecision is written only through an explicit HUMAN action in a workflow that provides decision controls.</p><div class="callout warning">NEEDS_REVIEW is an attention state, not scientific acceptance or rejection.</div></div></div>`;
 }
 
+async function loadHumanReviewBadge() {
+  const badge = document.getElementById("human-review-badge"); if (!badge) return;
+  try { const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/evidence`, {cache:"no-store"}); if (!response.ok) throw new Error(`HTTP ${response.status}`); const rows = await response.json(); badge.textContent = rows.filter(r => r.review_state === "NEEDS_REVIEW" || r.review_state === "CONTESTED").length; }
+  catch (error) { badge.textContent = "?"; }
+}
+
 async function loadHumanReview() {
   const list = document.getElementById("real-review-list");
   const detail = document.getElementById("real-review-detail");
@@ -482,7 +488,7 @@ document.getElementById("main-nav").addEventListener("click", e => {
 });
 document.querySelectorAll(".nav-list.small [data-view]").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
-projectSelect.addEventListener("change", () => { const active = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || active === "today") renderDashboard(); else showView(active); });
+projectSelect.addEventListener("change", () => { loadHumanReviewBadge(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || active === "today") renderDashboard(); else showView(active); });
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
 fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(`Context HTTP ${r.status}`); return r.json(); }).then(rows => {
@@ -496,6 +502,7 @@ fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) t
   profileSelect.onchange = () => { bindProjects(); };
   bindProjects();
   renderDashboard();
+loadHumanReviewBadge();
   const version = document.getElementById("prototype-version");
   if (version) version.textContent = `Prototype v${PROTOTYPE_VERSION} · live`;
 }).catch(error => {
