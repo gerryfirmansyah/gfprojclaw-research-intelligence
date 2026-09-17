@@ -440,7 +440,7 @@ def list_project_pilot_health(project_id, limit=20):
             SELECT r.id AS pilot_run_id, r.trigger_type, r.started_at, r.finished_at,
                    r.status, r.machine_actions_jsonb, r.idempotency_key,
                    COALESCE(count(s.id),0) AS stage_attempts,
-                   COALESCE(count(s.id) FILTER (WHERE s.status='FAILED'),0) AS failed_stage_attempts
+                   COALESCE(count(s.id) FILTER (WHERE s.status='FAILED'),0) AS failed_stage_attempts, ARRAY_REMOVE(ARRAY_AGG(s.source_key || ':' || s.attempt::text || ':' || s.status ORDER BY s.source_key,s.attempt),NULL) AS stage_history
             FROM continuous_pilot_run r
             LEFT JOIN continuous_pilot_stage_run s ON s.pilot_run_id=r.id
             WHERE r.project_id=%s
