@@ -19,6 +19,12 @@ def main():
         changes=scalar(cur, 'SELECT count(*) FROM change_event WHERE observed_at >= %s AND observed_at < %s'+filt, p)
         decisions=scalar(cur, 'SELECT count(*) FROM human_decision WHERE decided_at >= %s AND decided_at < %s'+filt, p)
         pending=scalar(cur, "SELECT count(*) FROM project_work_relevance WHERE relevance_state IN ('CANDIDATE','NEEDS_REVIEW')"+(' AND project_id=%s' if project else ''), (project,) if project else ())
-    out={'window_start':start.isoformat(),'window_end':end.isoformat(),'project_id':project,'new_works':works,'change_events':changes,'human_decisions':decisions,'pending_human_review':pending,'scientific_decisions_made_automatically':0}
+        evidence=scalar(cur, 'SELECT count(*) FROM evidence_fragment ef JOIN project_work_relevance pwr ON pwr.work_id=ef.work_id WHERE ef.created_at >= %s AND ef.created_at < %s'+(' AND pwr.project_id=%s' if project else ''), p)
+        runs=scalar(cur, 'SELECT count(*) FROM continuous_pilot_run WHERE started_at >= %s AND started_at < %s'+filt, p)
+        failed=scalar(cur, "SELECT count(*) FROM continuous_pilot_run WHERE started_at >= %s AND started_at < %s AND status='FAILED'"+filt, p)
+        auto=scalar(cur, "SELECT count(*) FROM continuous_pilot_run WHERE started_at >= %s AND started_at < %s AND machine_actions_jsonb @> '[{\"scientific_decision\":true}]'::jsonb"+filt, p)
+        cur.execute('SELECT ef.id::text FROM evidence_fragment ef JOIN project_work_relevance pwr ON pwr.work_id=ef.work_id WHERE ef.created_at >= %s AND ef.created_at < %s'+(' AND pwr.project_id=%s' if project else '')+' ORDER BY ef.created_at', p); evidence_ids=[r['id'] for r in cur.fetchall()]
+        cur.execute("SELECT id::text FROM continuous_pilot_run WHERE started_at >= %s AND started_at < %s AND status='FAILED'"+filt+' ORDER BY started_at', p); failed_ids=[r['id'] for r in cur.fetchall()]
+    out={'window_start':start.isoformat(),'window_end':end.isoformat(),'project_id':project,'new_works':works,'change_events':changes,'human_decisions':decisions,'pending_human_review_backlog':pending,'new_evidence_fragments':evidence,'pilot_runs':runs,'failed_pilot_runs':failed,'scientific_decisions_made_automatically':auto,'drilldown':{'new_evidence_fragment_ids':evidence_ids,'failed_pilot_run_ids':failed_ids},'query_basis':{'window':'[window_start, window_end)','pending_human_review_backlog':'current backlog; not window-scoped','automatic_scientific_decisions':'pilot machine_actions_jsonb scientific_decision=true'}}
     print(json.dumps(out,indent=2))
 if __name__=='__main__': main()
