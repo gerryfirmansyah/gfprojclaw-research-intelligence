@@ -499,7 +499,7 @@ fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) t
     projectSelect.innerHTML = projects.map(r => `<option value="${r.project_id}">${r.project_name}</option>`).join("");
     renderLatestPapers();
   };
-  profileSelect.onchange = () => { bindProjects(); };
+  profileSelect.onchange = () => { bindProjects(); loadHumanReviewBadge(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || active === "today") renderDashboard(); else showView(active); };
   bindProjects();
   renderDashboard();
 loadHumanReviewBadge();
