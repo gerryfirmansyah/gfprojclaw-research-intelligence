@@ -36,9 +36,12 @@ def main():
         with conn.cursor() as cur:
             cur.execute("INSERT INTO continuous_pilot_run (id,trigger_type,project_id,started_at,status,machine_actions_jsonb,idempotency_key) VALUES (%s,'MANUAL',%s,now(),'RUNNING','[]'::jsonb,%s) ON CONFLICT (idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING RETURNING id", (rid,a.project_id,a.idempotency_key))
             row=cur.fetchone()
-            if row is None: raise SystemExit('idempotent pilot run already exists')
+            if row is None:
+                cur.execute("SELECT id,status FROM continuous_pilot_run WHERE idempotency_key=%s", (a.idempotency_key,)); existing=cur.fetchone()
+                if existing is None or existing['status'] != 'RUNNING': raise SystemExit('idempotent pilot run already terminal')
+                rid=str(existing['id']); result['run_id']=rid; result['resumed']=True
             for x in outcomes:
-                cur.execute("INSERT INTO continuous_pilot_stage_run (id,pilot_run_id,stage_key,source_key,attempt,status,started_at,finished_at,error_class,error_summary,metrics_jsonb) VALUES (%s,%s,'SOURCE_DISCOVERY',%s,%s,%s,now(),now(),%s,%s,'{}'::jsonb)", (str(uuid.uuid4()),rid,x['source'],x['attempt'],x['status'],x['error'],x['error']))
+                cur.execute("INSERT INTO continuous_pilot_stage_run (id,pilot_run_id,stage_key,source_key,attempt,status,started_at,finished_at,error_class,error_summary,metrics_jsonb) VALUES (%s,%s,'SOURCE_DISCOVERY',%s,%s,%s,now(),now(),%s,%s,'{}'::jsonb) ON CONFLICT (pilot_run_id,stage_key,source_key,attempt) DO NOTHING", (str(uuid.uuid4()),rid,x['source'],x['attempt'],x['status'],x['error'],x['error']))
             cur.execute("UPDATE continuous_pilot_run SET status=%s,finished_at=now(),machine_actions_jsonb=%s::jsonb WHERE id=%s", (status,json.dumps([{'action':'SIMULATED_SOURCE_DISCOVERY','scientific_decision':False}]),rid))
     print(json.dumps(result,indent=2))
 if __name__=='__main__': main()
