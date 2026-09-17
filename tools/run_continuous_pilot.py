@@ -6,12 +6,12 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'prototype'/'api'))
 def assert_worker_boundary(conn):
     with conn.cursor() as cur:
         cur.execute("SELECT current_user, has_table_privilege(current_user,'continuous_pilot_run','INSERT'), has_table_privilege(current_user,'continuous_pilot_stage_run','UPDATE'), has_table_privilege(current_user,'human_decision','INSERT'), has_table_privilege(current_user,'human_decision','UPDATE')")
-        role, can_insert_run, can_update_stage, can_insert_human, can_update_human = cur.fetchone()
+        row=cur.fetchone(); role,can_insert_run,can_update_stage,can_insert_human,can_update_human = list(row.values())
     if role != 'gfproj_pilot_worker' or not can_insert_run or not can_update_stage or can_insert_human or can_update_human:
         raise SystemExit('worker database authority boundary check failed')
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--project-id'); ap.add_argument('--simulate-failure'); ap.add_argument('--dry-run',action='store_true'); ap.add_argument('--max-attempts',type=int,default=2); a=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument('--project-id'); ap.add_argument('--simulate-failure'); ap.add_argument('--dry-run',action='store_true'); ap.add_argument('--max-attempts',type=int,default=2); ap.add_argument('--idempotency-key'); a=ap.parse_args()
     stages=['OpenAlex','Crossref']; rid=str(uuid.uuid4()); outcomes=[]
     for source in stages:
         failed=source==a.simulate_failure
@@ -29,5 +29,12 @@ def main():
     from db import db
     with db() as conn:
         assert_worker_boundary(conn)
-    raise SystemExit('write mode boundary verified; persisted writes remain intentionally disabled pending execution identity provisioning')
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO continuous_pilot_run (id,trigger_type,project_id,started_at,status,machine_actions_jsonb,idempotency_key) VALUES (%s,'MANUAL',%s,now(),'RUNNING','[]'::jsonb,%s) ON CONFLICT (idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING RETURNING id", (rid,a.project_id,a.idempotency_key))
+            row=cur.fetchone()
+            if row is None: raise SystemExit('idempotent pilot run already exists')
+            for x in outcomes:
+                cur.execute("INSERT INTO continuous_pilot_stage_run (id,pilot_run_id,stage_key,source_key,attempt,status,started_at,finished_at,error_class,error_summary,metrics_jsonb) VALUES (%s,%s,'SOURCE_DISCOVERY',%s,%s,%s,now(),now(),%s,%s,'{}'::jsonb)", (str(uuid.uuid4()),rid,x['source'],x['attempt'],x['status'],x['error'],x['error']))
+            cur.execute("UPDATE continuous_pilot_run SET status=%s,finished_at=now(),machine_actions_jsonb=%s::jsonb WHERE id=%s", (status,json.dumps([{'action':'SIMULATED_SOURCE_DISCOVERY','scientific_decision':False}]),rid))
+    print(json.dumps(result,indent=2))
 if __name__=='__main__': main()
