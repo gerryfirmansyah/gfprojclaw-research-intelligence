@@ -1,0 +1,11 @@
+BEGIN;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='gfproj_pilot_executor') THEN
+    CREATE ROLE gfproj_pilot_executor LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS;
+  END IF;
+END $$;
+ALTER ROLE gfproj_pilot_executor LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS;
+GRANT gfproj_pilot_worker TO gfproj_pilot_executor;
+REVOKE ALL ON human_decision FROM gfproj_pilot_executor;
+COMMIT;

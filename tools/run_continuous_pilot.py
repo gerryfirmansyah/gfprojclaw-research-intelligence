@@ -5,8 +5,8 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'prototype'/'api'))
 def assert_worker_boundary(conn):
     with conn.cursor() as cur:
-        cur.execute("SELECT current_user, has_table_privilege(current_user,'continuous_pilot_run','INSERT'), has_table_privilege(current_user,'continuous_pilot_stage_run','UPDATE'), has_table_privilege(current_user,'human_decision','INSERT'), has_table_privilege(current_user,'human_decision','UPDATE')")
-        row=cur.fetchone(); role,can_insert_run,can_update_stage,can_insert_human,can_update_human = list(row.values())
+        cur.execute("SELECT current_user AS role, has_table_privilege(current_user,'continuous_pilot_run','INSERT') AS can_insert_run, has_table_privilege(current_user,'continuous_pilot_stage_run','UPDATE') AS can_update_stage, has_table_privilege(current_user,'human_decision','INSERT') AS can_insert_human, has_table_privilege(current_user,'human_decision','UPDATE') AS can_update_human")
+        row=cur.fetchone(); role=row['role']; can_insert_run=row['can_insert_run']; can_update_stage=row['can_update_stage']; can_insert_human=row['can_insert_human']; can_update_human=row['can_update_human']
     if role != 'gfproj_pilot_worker' or not can_insert_run or not can_update_stage or can_insert_human or can_update_human:
         raise SystemExit('worker database authority boundary check failed')
 
@@ -28,6 +28,10 @@ def main():
     if a.dry_run: print(json.dumps(result,indent=2)); return
     from db import db
     with db() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT session_user AS session_role")
+            if cur.fetchone()['session_role'] != 'gfproj_pilot_executor': raise SystemExit('pilot executor session identity check failed')
+            cur.execute("SET ROLE gfproj_pilot_worker")
         assert_worker_boundary(conn)
         with conn.cursor() as cur:
             cur.execute("INSERT INTO continuous_pilot_run (id,trigger_type,project_id,started_at,status,machine_actions_jsonb,idempotency_key) VALUES (%s,'MANUAL',%s,now(),'RUNNING','[]'::jsonb,%s) ON CONFLICT (idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING RETURNING id", (rid,a.project_id,a.idempotency_key))
