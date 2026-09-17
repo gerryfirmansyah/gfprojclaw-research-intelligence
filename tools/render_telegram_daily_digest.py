@@ -30,9 +30,19 @@ def main():
         auto=scalar(cur, "SELECT count(*) FROM continuous_pilot_run WHERE started_at >= %s AND started_at < %s AND machine_actions_jsonb @> '[{\"scientific_decision\":true}]'::jsonb"+filt, p)
         cur.execute('SELECT ef.id::text FROM evidence_fragment ef JOIN project_work_relevance pwr ON pwr.work_id=ef.work_id WHERE ef.created_at >= %s AND ef.created_at < %s'+(' AND pwr.project_id=%s' if project else '')+' ORDER BY ef.created_at', p); evidence_ids=[r['id'] for r in cur.fetchall()]
         cur.execute("SELECT id::text FROM continuous_pilot_run WHERE started_at >= %s AND started_at < %s AND status='FAILED'"+filt+' ORDER BY started_at', p); failed_ids=[r['id'] for r in cur.fetchall()]
+        cur.execute('SELECT hd.decided_at, hd.decision_type FROM human_decision hd WHERE hd.decided_at >= %s AND hd.decided_at < %s'+(' AND hd.project_id=%s' if project else '')+' ORDER BY hd.decided_at', p); decision_events=cur.fetchall()
+        cur.execute('SELECT ce.observed_at, ce.change_type FROM change_event ce WHERE ce.observed_at >= %s AND ce.observed_at < %s'+(' AND ce.project_id=%s' if project else '')+' ORDER BY ce.observed_at', p); change_events=cur.fetchall()
+        cur.execute('SELECT ps.started_at, ps.finished_at, ps.source_key, ps.attempt, ps.status FROM continuous_pilot_stage_run ps JOIN continuous_pilot_run pr ON pr.id=ps.pilot_run_id WHERE ps.started_at >= %s AND ps.started_at < %s'+(' AND pr.project_id=%s' if project else '')+' ORDER BY ps.started_at, ps.attempt', p); stage_events=cur.fetchall()
     out={'window_start':start.isoformat(),'window_end':end.isoformat(),'project_id':project,'new_works':works,'change_events':changes,'human_decisions':decisions,'pending_human_review_backlog':pending,'new_evidence_fragments':evidence,'pilot_runs':runs,'failed_pilot_runs':failed,'scientific_decisions_made_automatically':auto,'drilldown':{'new_evidence_fragment_ids':evidence_ids,'failed_pilot_run_ids':failed_ids},'query_basis':{'window':'[window_start, window_end)','pending_human_review_backlog':'current backlog; not window-scoped','automatic_scientific_decisions':'pilot machine_actions_jsonb scientific_decision=true'}}
     wib=ZoneInfo('Asia/Jakarta')
     fmt=lambda dt: dt.astimezone(wib).strftime('%d %b %Y · %H:%M WIB')
+    timeline=[]
+    for r in change_events: timeline.append((r['observed_at'], f"Research change: {r['change_type']}"))
+    for r in decision_events: timeline.append((r['decided_at'], f"HUMAN decision: {r['decision_type']}"))
+    for r in stage_events: timeline.append((r['finished_at'] or r['started_at'], f"Pilot {r['source_key'] or 'local'} attempt {r['attempt']}: {r['status']}"))
+    timeline.sort(key=lambda x:x[0])
     lines=["GFPROJCLAW — Daily Research Radar", f"Generated: {fmt(end)}", "", "CHANGE WINDOW", f"{fmt(start)} → {fmt(end)}", f"Profile: {profile_name}", f"Project: {project_name}", "", "RESEARCH ACTIVITY", f"• {works} new works discovered", f"• {evidence} new evidence fragments", f"• {changes} canonical change events", f"• {decisions} HUMAN decisions recorded", "", "HUMAN REVIEW", f"• {pending} items in current review backlog", "", "OPERATIONAL PILOT HEALTH", f"• {runs} runs; {failed} failed runs in window", "• Operational status is not a scientific judgment", "", "SCIENTIFIC AUTHORITY GUARDRAIL", f"• Automatic scientific decisions: {auto}", "• HUMAN remains the scientific decision authority", "", "Open Research Cockpit for evidence and HUMAN judgment."]
+    if timeline:
+        lines += ["", "TIMELINE"] + [f"• {fmt(ts)} — {label}" for ts,label in timeline]
     print("\n".join(lines))
 if __name__=='__main__': main()
