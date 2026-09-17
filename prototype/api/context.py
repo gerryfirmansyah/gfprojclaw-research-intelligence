@@ -431,3 +431,19 @@ def list_project_radar(project_id, limit=20):
             ORDER BY ce.observed_at DESC, ce.created_at DESC LIMIT %s
         """, (project_id, limit)).fetchall()
     return rows
+
+
+def list_project_pilot_health(project_id, limit=20):
+    """Read-only J14 operational health; never a scientific decision surface."""
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT r.id AS pilot_run_id, r.trigger_type, r.started_at, r.finished_at,
+                   r.status, r.machine_actions_jsonb, r.idempotency_key,
+                   COALESCE(count(s.id),0) AS stage_attempts,
+                   COALESCE(count(s.id) FILTER (WHERE s.status='FAILED'),0) AS failed_stage_attempts
+            FROM continuous_pilot_run r
+            LEFT JOIN continuous_pilot_stage_run s ON s.pilot_run_id=r.id
+            WHERE r.project_id=%s
+            GROUP BY r.id ORDER BY r.started_at DESC LIMIT %s
+        """, (project_id, limit)).fetchall()
+    return rows

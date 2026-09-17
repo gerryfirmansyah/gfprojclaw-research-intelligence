@@ -429,9 +429,19 @@ function renderProfiles() {
 }
 
 function renderTelegram() {
-  return commonHeader("Telegram Research Radar", "Read-only projection of canonical ChangeEvent. Telegram never becomes scientific state.") + `
+  return commonHeader("Telegram Research Radar", "Read-only projection of canonical ChangeEvent. Telegram never becomes scientific state.", "real") + `
+  <div id="pilot-health-live" class="card"><p>Loading Continuous Pilot health…</p></div>
   <div id="radar-live" class="card"><p>Loading canonical Radar projection…</p></div>
   <div class="card"><h3>Radar Rules</h3><ul><li>No raw crawler logs</li><li>No automatic scientific decisions</li><li>No canonical state in Telegram</li><li>Delivery failure stays local</li><li>Inspect full context in Dashboard</li></ul></div>`;
+}
+
+async function loadPilotHealth() {
+  const box = document.getElementById("pilot-health-live"); if (!box) return;
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/pilot-health`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`); const rows = await response.json();
+    box.innerHTML = `<h3>Continuous Pilot Health</h3><p class="muted">Operational health only — never a scientific judgment.</p>` + (rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.status)} · ${escapeHtml(r.trigger_type)}</strong><small>Run ${escapeHtml(r.pilot_run_id)}</small><p>Started: ${escapeHtml(r.started_at)}<br>Finished: ${escapeHtml(r.finished_at || "RUNNING")}<br>Stage attempts: ${escapeHtml(r.stage_attempts)} · Failed attempts: ${escapeHtml(r.failed_stage_attempts)}</p><p>Machine actions: ${escapeHtml(JSON.stringify(r.machine_actions_jsonb || []))}</p></div></div>`).join("") : `<p>No Continuous Pilot run recorded yet.</p>`);
+  } catch (error) { box.innerHTML = `<h3>Continuous Pilot Health</h3><p>Operational health unavailable; canonical scientific state is unaffected.</p>`; }
 }
 
 async function loadProjectRadar() {
@@ -459,7 +469,7 @@ function showView(name) {
   if (name === "opportunities") loadProjectOpportunities();
   if (name === "coverage") loadProjectCoverage();
   if (name === "evolution") loadProjectChanges();
-  if (name === "telegram") loadProjectRadar();
+  if (name === "telegram") { loadPilotHealth(); loadProjectRadar(); }
 }
 
 function bindOpenButtons() {
