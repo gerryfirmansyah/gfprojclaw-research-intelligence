@@ -28,6 +28,7 @@ jobs:
       - name: Apply prerequisite schema and roles
         run: |
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/001_canonical_vertical_slice.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -c "CREATE ROLE gfproj_app NOLOGIN;"
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/003_investigation_direction.sql
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/005_pilot_worker_role.sql
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/008_pilot_executor_role.sql
