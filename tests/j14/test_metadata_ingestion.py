@@ -11,12 +11,12 @@ def rec(oid="https://openalex.org/WJ14TEST1",doi="https://doi.org/10.5555/j14.te
 def count(sql):
  with psycopg.connect(VERIFY_DSN) as c:return c.execute(sql).fetchone()[0]
 def test_idempotent_and_scientific_boundary(tmp_path):
- x=env([rec()]);run(tmp_path,x);run(tmp_path,x)
+ x=env([rec()]); baseline_h=count("SELECT count(*) FROM human_decision"); baseline_c=count("SELECT count(*) FROM claim"); baseline_e=count("SELECT count(*) FROM evidence_fragment");run(tmp_path,x);run(tmp_path,x)
  assert count("SELECT count(*) FROM work_identifier WHERE identifier_value IN ('WJ14TEST1','10.5555/j14.test.1')")==2
  assert count("SELECT count(*) FROM project_work_relevance WHERE project_id='"+PROJECT+"' AND origin='openalex_pilot_ingest'")==1
- assert count("SELECT count(*) FROM human_decision")==0
- assert count("SELECT count(*) FROM claim")==0
- assert count("SELECT count(*) FROM evidence_fragment")==0
+ assert count("SELECT count(*) FROM human_decision")==baseline_h
+ assert count("SELECT count(*) FROM claim")==baseline_c
+ assert count("SELECT count(*) FROM evidence_fragment")==baseline_e
 def test_stale_version_fails_closed(tmp_path):
  r=run(tmp_path,env([rec("https://openalex.org/WJ14TEST2","10.5555/j14.test.2")],"00000000-0000-0000-0000-000000000099"),ok=False);assert "stale project version" in r.stderr
 def test_identifier_collision_fails_locally(tmp_path):
