@@ -1,0 +1,4 @@
+# OFFLINE TEMPLATE ONLY — ordering matters.
+# Place this dedicated rule BEFORE the existing generic: local all all peer
+# TYPE   DATABASE   USER                    ADDRESS   METHOD
+local    all        gfproj_pilot_executor             peer map=gfproj_pilot_map

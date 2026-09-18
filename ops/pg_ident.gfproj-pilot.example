@@ -1,0 +1,3 @@
+# OFFLINE TEMPLATE ONLY — do not append until OS identity gfproj-pilot exists.
+# MAPNAME              SYSTEM-USERNAME  PG-USERNAME
+gfproj_pilot_map       gfproj-pilot     gfproj_pilot_executor
