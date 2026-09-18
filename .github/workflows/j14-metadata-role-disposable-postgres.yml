@@ -13,6 +13,8 @@ name: J14 Metadata Role Disposable PostgreSQL Test
       - 'db/verify/019_pilot_metadata_ingestor_role_verify.sql'
       - 'db/migrations/010_bibliographic_source_registry.sql'
       - 'db/verify/020_bibliographic_source_registry_verify.sql'
+      - 'tools/ingest_discovery_metadata.py'
+      - 'tests/j14/test_metadata_ingestion.py'
       - '.github/workflows/j14-metadata-role-disposable-postgres.yml'
 jobs:
   postgres-16:
@@ -44,3 +46,11 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/010_bibliographic_source_registry.sql
       - name: Verify canonical bibliographic source registry
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/verify/020_bibliographic_source_registry_verify.sql
+      - name: Load synthetic project fixture
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/fixtures/001_vertical_slice_reference.sql
+      - name: Install Python test dependencies
+        run: python -m pip install psycopg[binary] pytest
+      - name: Run metadata ingestion fixture tests
+        env:
+          GFPROJ_PILOT_DSN: postgresql://gfproj_pilot_executor@localhost/gfprojclaw_j14_test
+        run: pytest -q tests/j14/test_metadata_ingestion.py
