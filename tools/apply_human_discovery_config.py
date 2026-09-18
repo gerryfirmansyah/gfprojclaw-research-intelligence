@@ -20,7 +20,7 @@ with db() as conn:
  with conn.cursor() as cur:
   out=[]
   for pid,approved in CONFIGS.items():
-   cur.execute('SELECT p.current_version_id,v.version_no,v.research_intent,v.provisional_rq_text,v.project_configuration_jsonb FROM research_project p JOIN research_project_version v ON v.id=p.current_version_id WHERE p.id=%s AND p.status=\'ACTIVE\' FOR UPDATE',(pid,)); row=cur.fetchone()
+   cur.execute('SELECT p.current_version_id,v.version_no,v.research_intent,v.provisional_rq_text,v.project_configuration_jsonb FROM research_project p JOIN research_project_version v ON v.id=p.current_version_id WHERE p.id=%s AND p.status=\'ACTIVE\' FOR UPDATE OF p',(pid,)); row=cur.fetchone()
    if not row: raise SystemExit(f'active project not found: {pid}')
    cfg=copy.deepcopy(row['project_configuration_jsonb']); existing=cfg.get('discovery_overrides') or {}
    if existing: raise SystemExit(f'fail closed: discovery_overrides already populated for {pid}')

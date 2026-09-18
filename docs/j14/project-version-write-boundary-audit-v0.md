@@ -17,3 +17,6 @@ Repository intent and observed production authority are inconsistent or the prod
 4. Verify v1 -> v2 lineage and exact approved discovery configuration for both projects.
 
 This is an operational authorization issue, not a scientific decision. The HUMAN query acceptance remains valid; it has simply not yet been applied to canonical ProjectVersion state.
+
+## Resolution
+The apparent privilege mismatch was traced to the application SQL, not production grant drift. An unqualified `FOR UPDATE` on the Project/ProjectVersion join attempted to lock the append-oriented `research_project_version` row. The operation was corrected to `FOR UPDATE OF p`, locking only mutable `research_project`. Effective runtime grants were then observed as intended, and HUMAN-approved Profile A/B configurations were persisted as ProjectVersion v2 with v1 lineage preserved. No privilege escalation or ad-hoc GRANT was used.
