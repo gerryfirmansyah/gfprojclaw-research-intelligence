@@ -18,8 +18,8 @@ def normalize_doi(v):
  return v
 def openalex_id(v): return v.rsplit("/",1)[-1].strip() if v else None
 def assert_boundary(c):
- r=c.execute("SELECT session_user,current_user,has_table_privilege(current_user,'source_record','INSERT'),has_table_privilege(current_user,'human_decision','INSERT'),has_table_privilege(current_user,'literature_source','INSERT')").fetchone()
- if r[0]!="gfproj_pilot_executor" or r[1]!="gfproj_pilot_metadata_ingestor" or not r[2] or r[3] or r[4]: raise SystemExit("metadata database authority boundary check failed")
+ r=c.execute("SELECT session_user,current_user,has_table_privilege(current_user,'source_record','INSERT') AS can_source_insert,has_table_privilege(current_user,'human_decision','INSERT') AS can_human_insert,has_table_privilege(current_user,'literature_source','INSERT') AS can_registry_insert").fetchone()
+ if r["session_user"]!="gfproj_pilot_executor" or r["current_user"]!="gfproj_pilot_metadata_ingestor" or not r["can_source_insert"] or r["can_human_insert"] or r["can_registry_insert"]: raise SystemExit("metadata database authority boundary check failed")
 def validate_context(c,x):
  r=c.execute("SELECT p.current_version_id::text FROM research_project p JOIN literature_source s ON s.source_key=%s AND s.active WHERE p.id=%s AND p.status='ACTIVE'",(x["source_key"],x["project_id"])).fetchone()
  if not r or r[0]!=x["project_version_id"]: raise SystemExit("fail closed: stale project version or inactive provider/project")
@@ -65,7 +65,7 @@ def main():
  dsn=os.environ.get("GFPROJ_PILOT_DSN")
  if not dsn: raise SystemExit("GFPROJ_PILOT_DSN required for apply")
  with psycopg.connect(dsn,row_factory=dict_row) as c:
-  if c.execute("SELECT session_user").fetchone()[0]!="gfproj_pilot_executor":raise SystemExit("pilot executor session identity check failed")
+  if c.execute("SELECT session_user").fetchone()["session_user"]!="gfproj_pilot_executor":raise SystemExit("pilot executor session identity check failed")
   c.execute("SET ROLE gfproj_pilot_metadata_ingestor");assert_boundary(c);validate_context(c,x);rows=ingest(c,x,a.retrieved_at)
  print(json.dumps({"mode":"APPLY","source_key":x["source_key"],"persisted":rows,"scientific_decisions_made_automatically":0},indent=2))
 if __name__=="__main__":main()
