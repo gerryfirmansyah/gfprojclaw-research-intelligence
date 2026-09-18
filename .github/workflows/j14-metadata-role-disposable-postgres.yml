@@ -6,6 +6,7 @@ name: J14 Metadata Role Disposable PostgreSQL Test
     paths:
       - 'db/migrations/001_canonical_vertical_slice.sql'
       - 'db/migrations/003_investigation_direction.sql'
+      - 'db/migrations/004_continuous_pilot.sql'
       - 'db/migrations/005_pilot_worker_role.sql'
       - 'db/migrations/008_pilot_executor_role.sql'
       - 'db/migrations/009_pilot_metadata_ingestor_role.sql'
@@ -30,6 +31,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/001_canonical_vertical_slice.sql
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -c "CREATE ROLE gfproj_app NOLOGIN;"
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/003_investigation_direction.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/004_continuous_pilot.sql
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/005_pilot_worker_role.sql
           psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/008_pilot_executor_role.sql
       - name: Apply metadata capability
