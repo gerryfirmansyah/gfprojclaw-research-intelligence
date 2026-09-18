@@ -21,8 +21,8 @@ def assert_boundary(c):
  r=c.execute("SELECT session_user,current_user,has_table_privilege(current_user,'source_record','INSERT') AS can_source_insert,has_table_privilege(current_user,'human_decision','INSERT') AS can_human_insert,has_table_privilege(current_user,'literature_source','INSERT') AS can_registry_insert").fetchone()
  if r["session_user"]!="gfproj_pilot_executor" or r["current_user"]!="gfproj_pilot_metadata_ingestor" or not r["can_source_insert"] or r["can_human_insert"] or r["can_registry_insert"]: raise SystemExit("metadata database authority boundary check failed")
 def validate_context(c,x):
- r=c.execute("SELECT p.current_version_id::text FROM research_project p JOIN literature_source s ON s.source_key=%s AND s.active WHERE p.id=%s AND p.status='ACTIVE'",(x["source_key"],x["project_id"])).fetchone()
- if not r or r[0]!=x["project_version_id"]: raise SystemExit("fail closed: stale project version or inactive provider/project")
+ r=c.execute("SELECT p.current_version_id::text AS current_version_id FROM research_project p JOIN literature_source s ON s.source_key=%s AND s.active WHERE p.id=%s AND p.status='ACTIVE'",(x["source_key"],x["project_id"])).fetchone()
+ if not r or r["current_version_id"]!=x["project_version_id"]: raise SystemExit("fail closed: stale project version or inactive provider/project")
 def title(r): return (r.get("title") or "").strip()
 def dates(r):
  if r.get("publication_date"): return r.get("publication_date"),r.get("publication_year")
@@ -38,20 +38,20 @@ def source_identifier(src,r):
 def find_work(c,ids):
  found=set()
  for t,v,_ in ids:
-  z=c.execute("SELECT work_id::text FROM work_identifier WHERE identifier_type=%s AND identifier_value=%s",(t,v)).fetchone()
-  if z:found.add(z[0])
+  z=c.execute("SELECT work_id::text AS work_id FROM work_identifier WHERE identifier_type=%s AND identifier_value=%s",(t,v)).fetchone()
+  if z:found.add(z["work_id"])
  if len(found)>1:raise SystemExit("identifier collision")
  return next(iter(found),None)
 def ingest(c,x,retrieved):
- sid=c.execute("SELECT id::text FROM literature_source WHERE source_key=%s AND active",(x["source_key"],)).fetchone()[0]; out=[]
+ sid=c.execute("SELECT id::text AS id FROM literature_source WHERE source_key=%s AND active",(x["source_key"],)).fetchone()["id"]; out=[]
  for r in x["records"]:
   ids=identifiers(x["source_key"],r); ident=source_identifier(x["source_key"],r)
   if not ident or not title(r) or not ids: raise SystemExit("fail closed: malformed provider record")
-  sr=c.execute("SELECT id::text FROM source_record WHERE literature_source_id=%s AND source_record_identifier=%s AND retrieved_at=%s",(sid,ident,retrieved)).fetchone()
-  if sr: srid=sr[0]
-  else: srid=c.execute("INSERT INTO source_record(literature_source_id,source_record_identifier,retrieved_at,raw_metadata_jsonb,content_access_state,normalization_state,provenance_hash) VALUES(%s,%s,%s,%s::jsonb,%s,'UNRESOLVED',%s) RETURNING id::text",(sid,ident,retrieved,json.dumps(r),"ABSTRACT_ONLY" if r.get("has_abstract") else "METADATA_ONLY",r.get("payload_hash"))).fetchone()[0]
+  sr=c.execute("SELECT id::text AS id FROM source_record WHERE literature_source_id=%s AND source_record_identifier=%s AND retrieved_at=%s",(sid,ident,retrieved)).fetchone()
+  if sr: srid=sr["id"]
+  else: srid=c.execute("INSERT INTO source_record(literature_source_id,source_record_identifier,retrieved_at,raw_metadata_jsonb,content_access_state,normalization_state,provenance_hash) VALUES(%s,%s,%s,%s::jsonb,%s,'UNRESOLVED',%s) RETURNING id::text AS id",(sid,ident,retrieved,json.dumps(r),"ABSTRACT_ONLY" if r.get("has_abstract") else "METADATA_ONLY",r.get("payload_hash"))).fetchone()["id"]
   wid=find_work(c,ids); pubdate,pubyear=dates(r)
-  if not wid: wid=c.execute("INSERT INTO work(title,publication_date,publication_year,venue,work_type,current_access_level) VALUES(%s,%s,%s,%s,%s,%s) RETURNING id::text",(title(r),pubdate,pubyear,r.get("container_title") or ((r.get("primary_location") or {}).get("source") or {}).get("display_name"),r.get("type"),"ABSTRACT_ONLY" if r.get("has_abstract") else "METADATA_ONLY")).fetchone()[0]
+  if not wid: wid=c.execute("INSERT INTO work(title,publication_date,publication_year,venue,work_type,current_access_level) VALUES(%s,%s,%s,%s,%s,%s) RETURNING id::text AS id",(title(r),pubdate,pubyear,r.get("container_title") or ((r.get("primary_location") or {}).get("source") or {}).get("display_name"),r.get("type"),"ABSTRACT_ONLY" if r.get("has_abstract") else "METADATA_ONLY")).fetchone()["id"]
   for t,v,primary in ids:c.execute("INSERT INTO work_identifier(work_id,identifier_type,identifier_value,is_primary) VALUES(%s,%s,%s,%s) ON CONFLICT(identifier_type,identifier_value) DO NOTHING",(wid,t,v,primary))
   c.execute("INSERT INTO work_source_record(work_id,source_record_id,match_method,match_state,matched_at) VALUES(%s,%s,%s,'MATCHED',%s) ON CONFLICT(source_record_id) DO NOTHING",(wid,srid,x["source_key"]+"_identifier_resolution",retrieved))
   c.execute("UPDATE source_record SET normalization_state='MATCHED' WHERE id=%s",(srid,))
