@@ -1,5 +1,5 @@
 name: J14 Metadata Role Disposable PostgreSQL Test
-on:
+'on':
   workflow_dispatch:
   push:
     branches: [main]
