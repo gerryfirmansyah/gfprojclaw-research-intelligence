@@ -1,0 +1,37 @@
+name: J14 Metadata Role Disposable PostgreSQL Test
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'db/migrations/001_canonical_vertical_slice.sql'
+      - 'db/migrations/003_investigation_direction.sql'
+      - 'db/migrations/005_pilot_worker_role.sql'
+      - 'db/migrations/008_pilot_executor_role.sql'
+      - 'db/migrations/009_pilot_metadata_ingestor_role.sql'
+      - 'db/verify/019_pilot_metadata_ingestor_role_verify.sql'
+      - '.github/workflows/j14-metadata-role-disposable-postgres.yml'
+jobs:
+  postgres-16:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: {POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres}
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env: {PGHOST: localhost, PGPORT: 5432, PGUSER: postgres, PGPASSWORD: postgres}
+    steps:
+      - uses: actions/checkout@v4
+      - run: createdb gfprojclaw_j14_test
+      - name: Apply prerequisite schema and roles
+        run: |
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/001_canonical_vertical_slice.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/003_investigation_direction.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/005_pilot_worker_role.sql
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/008_pilot_executor_role.sql
+      - name: Apply metadata capability
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/009_pilot_metadata_ingestor_role.sql
+      - name: Verify least-privilege boundary
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/verify/019_pilot_metadata_ingestor_role_verify.sql
