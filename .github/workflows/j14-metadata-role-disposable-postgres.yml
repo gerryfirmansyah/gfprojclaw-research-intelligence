@@ -11,6 +11,8 @@ name: J14 Metadata Role Disposable PostgreSQL Test
       - 'db/migrations/008_pilot_executor_role.sql'
       - 'db/migrations/009_pilot_metadata_ingestor_role.sql'
       - 'db/verify/019_pilot_metadata_ingestor_role_verify.sql'
+      - 'db/migrations/010_bibliographic_source_registry.sql'
+      - 'db/verify/020_bibliographic_source_registry_verify.sql'
       - '.github/workflows/j14-metadata-role-disposable-postgres.yml'
 jobs:
   postgres-16:
@@ -38,3 +40,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/009_pilot_metadata_ingestor_role.sql
       - name: Verify least-privilege boundary
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/verify/019_pilot_metadata_ingestor_role_verify.sql
+      - name: Apply canonical bibliographic source registry
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/migrations/010_bibliographic_source_registry.sql
+      - name: Verify canonical bibliographic source registry
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j14_test -f db/verify/020_bibliographic_source_registry_verify.sql
