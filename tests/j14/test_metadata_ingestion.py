@@ -1,7 +1,7 @@
 import json,os,subprocess,sys
 from pathlib import Path
 import psycopg
-ROOT=Path(__file__).resolve().parents[2]; TOOL=ROOT/"tools"/"ingest_discovery_metadata.py"; DSN=os.environ["GFPROJ_PILOT_DSN"]
+ROOT=Path(__file__).resolve().parents[2]; TOOL=ROOT/"tools"/"ingest_discovery_metadata.py"; DSN=os.environ["GFPROJ_PILOT_DSN"]; VERIFY_DSN=os.environ["GFPROJ_VERIFY_DSN"]
 PROJECT="a2000000-0000-0000-0000-000000000001"; VERSION="a3000000-0000-0000-0000-000000000001"
 def run(tmp_path,envelope,retrieved="2026-09-18T08:00:00Z",ok=True):
  p=tmp_path/"e.json";p.write_text(json.dumps(envelope));r=subprocess.run([sys.executable,str(TOOL),"--envelope",str(p),"--retrieved-at",retrieved,"--apply"],env=os.environ.copy(),text=True,capture_output=True)
@@ -9,7 +9,7 @@ def run(tmp_path,envelope,retrieved="2026-09-18T08:00:00Z",ok=True):
 def env(records,version=VERSION):return {"source_key":"openalex","project_id":PROJECT,"project_version_id":version,"records":records}
 def rec(oid="https://openalex.org/WJ14TEST1",doi="https://doi.org/10.5555/j14.test.1",title="J14 synthetic metadata fixture"):return {"openalex_id":oid,"doi":doi,"title":title,"publication_date":"2026-01-02","publication_year":2026,"type":"article","has_abstract":False,"payload_hash":"fixture-hash"}
 def count(sql):
- with psycopg.connect(DSN) as c:return c.execute(sql).fetchone()[0]
+ with psycopg.connect(VERIFY_DSN) as c:return c.execute(sql).fetchone()[0]
 def test_idempotent_and_scientific_boundary(tmp_path):
  x=env([rec()]);run(tmp_path,x);run(tmp_path,x)
  assert count("SELECT count(*) FROM work_identifier WHERE identifier_value IN ('WJ14TEST1','10.5555/j14.test.1')")==2

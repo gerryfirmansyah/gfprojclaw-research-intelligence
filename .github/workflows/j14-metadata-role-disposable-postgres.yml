@@ -53,4 +53,5 @@ jobs:
       - name: Run metadata ingestion fixture tests
         env:
           GFPROJ_PILOT_DSN: postgresql://gfproj_pilot_executor@localhost/gfprojclaw_j14_test
+          GFPROJ_VERIFY_DSN: postgresql://postgres@localhost/gfprojclaw_j14_test
         run: pytest -q tests/j14/test_metadata_ingestion.py
