@@ -1,0 +1,17 @@
+[Unit]
+Description=GFPROJCLAW Canonical Continuous Pilot
+After=network.target postgresql.service
+ConditionUser=gfproj-pilot
+
+[Service]
+Type=oneshot
+User=gfproj-pilot
+Group=gfproj-pilot
+WorkingDirectory=/opt/gfprojclaw-research-intelligence
+ExecStart=/opt/gfprojclaw/.venv/bin/python /opt/gfprojclaw-research-intelligence/tools/run_continuous_pilot.py --project-id PROJECT_ID --idempotency-key SCHEDULED_IDEMPOTENCY_KEY
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+# TEMPLATE ONLY: do not install/enable until gfproj-pilot peer/map auth is verified end-to-end.
