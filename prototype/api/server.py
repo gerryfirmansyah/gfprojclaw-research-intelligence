@@ -3,7 +3,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-from context import create_human_decision, get_project_coverage, list_context, list_project_advice_critic, list_project_assessments, list_project_changes, list_project_decisions, list_project_evidence, list_project_gaps, list_project_opportunities, list_project_papers, list_project_radar, list_project_research_objects, list_project_pilot_health
+from context import create_human_decision, get_project_quality, get_project_coverage, list_context, list_project_advice_critic, list_project_assessments, list_project_changes, list_project_decisions, list_project_evidence, list_project_gaps, list_project_opportunities, list_project_papers, list_project_radar, list_project_research_objects, list_project_pilot_health
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -89,6 +89,15 @@ class Handler(SimpleHTTPRequestHandler):
         if len(parts) == 4 and parts[0] == "api" and parts[1] == "projects" and parts[3] == "pilot-health":
             try:
                 self.send_json(list_project_pilot_health(parts[2]))
+            except Exception as exc:
+                self.send_json({"error": str(exc)}, status=400)
+            return
+        if len(parts) == 4 and parts[0] == "api" and parts[1] == "projects" and parts[3] == "quality":
+            try:
+                query = __import__("urllib.parse", fromlist=["parse_qs"]).parse_qs(urlparse(self.path).query)
+                object_id = (query.get("object_id") or [None])[0]
+                row = get_project_quality(parts[2], object_id)
+                self.send_json(row or {}, status=200 if row else 404)
             except Exception as exc:
                 self.send_json({"error": str(exc)}, status=400)
             return

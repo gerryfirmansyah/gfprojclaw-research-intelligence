@@ -447,3 +447,81 @@ def list_project_pilot_health(project_id, limit=20):
             GROUP BY r.id ORDER BY r.started_at DESC LIMIT %s
         """, (project_id, limit)).fetchall()
     return rows
+
+def get_project_quality(project_id, object_id=None):
+    with db() as conn:
+        obj = conn.execute("""
+            SELECT roi.id AS research_object_id, roi.object_type, roi.canonical_label,
+                   roi.lifecycle_state,
+                   CASE WHEN roi.object_type='GAP_CANDIDATE' THEN gc.current_evolution_state
+                        WHEN roi.object_type='INVESTIGATION_DIRECTION' THEN idr.current_state END AS object_state,
+                   hd.decision_type AS latest_human_decision, hd.decided_at AS latest_human_decision_at
+            FROM research_object_identity roi
+            LEFT JOIN gap_candidate gc ON gc.id=roi.id AND gc.project_id=roi.project_id
+            LEFT JOIN investigation_direction idr ON idr.id=roi.id AND idr.project_id=roi.project_id
+            LEFT JOIN LATERAL (
+                SELECT decision_type,decided_at FROM human_decision
+                WHERE project_id=roi.project_id AND primary_research_object_id=roi.id
+                ORDER BY decided_at DESC,created_at DESC LIMIT 1
+            ) hd ON TRUE
+            WHERE roi.project_id=%s AND roi.lifecycle_state='ACTIVE'
+              AND (%s::uuid IS NULL OR roi.id=%s::uuid)
+            ORDER BY roi.created_at DESC LIMIT 1
+        """,(project_id,object_id,object_id)).fetchone()
+        if not obj:
+            return None
+        evidence = conn.execute("""
+            SELECT er.semantic_type,er.review_state AS relationship_review_state,
+                   c.id AS claim_id,c.review_state AS claim_review_state,c.extraction_origin,c.scope_jsonb,
+                   ef.id AS evidence_fragment_id,ef.access_level,ef.source_record_id,
+                   w.id AS work_id,w.title,w.publication_year,w.publication_date,
+                   ls.source_key,sr.source_record_identifier,sr.retrieved_at
+            FROM evidence_relationship er
+            JOIN claim c ON c.id=er.claim_id
+            JOIN evidence_fragment ef ON ef.id=c.evidence_fragment_id
+            JOIN work w ON w.id=ef.work_id
+            LEFT JOIN source_record sr ON sr.id=ef.source_record_id
+            LEFT JOIN literature_source ls ON ls.id=sr.literature_source_id
+            WHERE er.target_research_object_id=%s
+            ORDER BY er.created_at DESC
+        """,(obj['research_object_id'],)).fetchall()
+        cov = conn.execute("""
+            SELECT cc.observed_at,cc.counter_search_state,cc.limitations,
+                   cc.access_summary_jsonb,cc.extraction_summary_jsonb,
+                   COALESCE(src.sources,'[]'::jsonb) AS sources
+            FROM coverage_context cc
+            LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object(
+                    'source_key',ls.source_key,'health_state',css.health_state,
+                    'access_limitations',css.access_limitations,'degradation_reason',css.degradation_reason
+                ) ORDER BY ls.source_key) AS sources
+                FROM coverage_source_state css JOIN literature_source ls ON ls.id=css.literature_source_id
+                WHERE css.coverage_context_id=cc.id
+            ) src ON TRUE
+            WHERE cc.project_id=%s ORDER BY cc.observed_at DESC LIMIT 1
+        """,(project_id,)).fetchone()
+    ev=[dict(x) for x in evidence]
+    access=sorted({x['access_level'] for x in ev if x.get('access_level')})
+    rel_states=sorted({x['relationship_review_state'] for x in ev if x.get('relationship_review_state')})
+    claim_states=sorted({x['claim_review_state'] for x in ev if x.get('claim_review_state')})
+    traceable=sum(1 for x in ev if x.get('claim_id') and x.get('evidence_fragment_id') and x.get('work_id'))
+    methodological=any(bool((x.get('scope_jsonb') or {}).get(k)) for x in ev for k in ('method','methodology','design'))
+    semantics={}
+    for x in ev: semantics[x['semantic_type']]=semantics.get(x['semantic_type'],0)+1
+    observations=[
+      {'dimension':'ACCESS_COMPLETENESS','state':'AVAILABLE' if access else 'NOT_AVAILABLE','value':access or None,'basis':'linked canonical evidence access levels'},
+      {'dimension':'PROVENANCE_COMPLETENESS','state':'AVAILABLE' if ev else 'NOT_AVAILABLE','value':{'traceable_relationships':traceable,'linked_relationships':len(ev)} if ev else None,'basis':'Claim -> EvidenceFragment -> Work traceability'},
+      {'dimension':'EXTRACTION_REVIEW_STATE','state':'AVAILABLE' if ev else 'NOT_AVAILABLE','value':{'claim_states':claim_states,'relationship_states':rel_states} if ev else None,'basis':'canonical review states'},
+      {'dimension':'METHODOLOGICAL_CONTEXT_AVAILABILITY','state':'AVAILABLE' if methodological else 'NOT_AVAILABLE','value':None,'basis':'explicit method/methodology/design keys in canonical claim scope'},
+      {'dimension':'CORROBORATION_CONTEXT','state':'AVAILABLE' if ev else 'NOT_AVAILABLE','value':{'SUPPORTS':semantics.get('SUPPORTS',0),'EXTENDS':semantics.get('EXTENDS',0),'REPLICATES':semantics.get('REPLICATES',0)} if ev else None,'basis':'canonical evidence relationships only'},
+      {'dimension':'CONTRADICTION_CONTEXT','state':'AVAILABLE' if ev else ('NOT_RUN' if cov and cov['counter_search_state']=='NOT_RUN' else 'NOT_AVAILABLE'),'value':{'CHALLENGES':semantics.get('CHALLENGES',0),'CONTRADICTS':semantics.get('CONTRADICTS',0),'counter_search_state':cov['counter_search_state'] if cov else 'NOT_AVAILABLE'},'basis':'canonical relationships and coverage counter-search state'},
+      {'dimension':'RECENCY_CONTEXT','state':'AVAILABLE' if ev else 'NOT_AVAILABLE','value':[{'work_id':str(x['work_id']),'publication_year':x['publication_year'],'publication_date':x['publication_date'],'retrieved_at':x['retrieved_at']} for x in ev] if ev else None,'basis':'publication/retrieval dates; no quality penalty inferred'},
+      {'dimension':'SOURCE_COVERAGE_LIMITATIONS','state':'AVAILABLE' if cov else 'NOT_AVAILABLE','value':{'limitations':cov['limitations'],'sources':cov['sources']} if cov else None,'basis':'latest canonical CoverageContext'}
+    ]
+    suggestions=[]
+    if 'ABSTRACT_ONLY' in access: suggestions.append({'action':'INSPECT_FULL_TEXT','because':['ACCESS_COMPLETENESS=ABSTRACT_ONLY']})
+    if any(x in ('NEEDS_REVIEW','MACHINE_SUGGESTED') for x in claim_states+rel_states): suggestions.append({'action':'HUMAN_REVIEW_EXTRACTION_RELATIONSHIP','because':['canonical review state requires/indicates review']})
+    if cov and cov['counter_search_state']=='NOT_RUN': suggestions.append({'action':'CONSIDER_COUNTER_SEARCH','because':['counter_search_state=NOT_RUN']})
+    if ev and not methodological: suggestions.append({'action':'INSPECT_METHODOLOGICAL_CONTEXT','because':['linked evidence exists but METHODOLOGICAL_CONTEXT_AVAILABILITY=NOT_AVAILABLE']})
+    if not ev: suggestions.append({'action':'ESTABLISH_EXPLICIT_EVIDENCE_LINKAGE','because':['no canonical EvidenceRelationship is asserted for this research object']})
+    return {'object':dict(obj),'observations':observations,'limitations':([cov['limitations']] if cov and cov['limitations'] else []) + ([] if ev else ['No canonical EvidenceRelationship is asserted for this research object; project literature is not projected as object evidence.']),'review_suggestions':suggestions,'evidence_references':ev,'scientific_decision':False}

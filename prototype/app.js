@@ -259,7 +259,7 @@ function renderOpportunities() {
   return commonHeader("Research Opportunities", "Evidence-backed advisory prioritization for HUMAN scientific review.", "real") + `
   <div class="callout warning">Prioritization is advisory context only. It does not establish novelty, significance, feasibility, acceptance, or a scientific verdict.</div>
   <div class="card real-surface"><h3>Research Opportunities <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading persisted opportunity intelligence…</div></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Research Object Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Advice & Critic</h3><div id="real-gap-critic">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Research Object Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Advice & Critic</h3><div id="real-gap-critic">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Research Quality <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-quality">Select a persisted research object.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
 }
 
 async function loadProjectOpportunities() {
@@ -279,6 +279,7 @@ async function loadProjectOpportunities() {
       document.getElementById("real-gap-assessment").innerHTML = isGap ? `<p>Loading persisted assessment…</p>` : `<p>No assessment is required to display this HUMAN-selected investigation direction.</p>`;
       document.getElementById("real-gap-critic").innerHTML = isGap ? `<p>Loading persisted Advice & Critic…</p>` : `<p>Advice & Critic has not been generalized for Investigation Direction. Continue evidence screening without treating this absence as a global lock.</p>`;
       if (isGap) { const legacy = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, {cache:"no-store"}); const oldRows = legacy.ok ? await legacy.json() : []; const old = oldRows.find(x => x.gap_id === r.research_object_id); if (old) { Object.assign(r, old); const trace = Array.isArray(old.evidence_trace) ? old.evidence_trace : []; relation.innerHTML = `<p><strong>Persisted evidence links:</strong> ${escapeHtml(old.support_count)} supporting · ${escapeHtml(old.challenge_count)} challenging · ${escapeHtml(old.linked_claim_count)} linked claim(s)</p><p><strong>Counter-search:</strong> ${escapeHtml(old.counter_search_state || "NOT_RECORDED")}</p><p><strong>Coverage limitation:</strong> ${escapeHtml(old.coverage_limitations || "Not recorded")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a class="source-link source-link-doi" href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Open DOI source">DOI ↗</a>` : i.type === "OPENALEX" ? `<a class="source-link source-link-openalex" href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Open in OpenAlex">OpenAlex ↗</a>` : "").filter(Boolean).join(" · "); const access = t.access_level || "NOT_RECORDED"; const accessNote = access === "ABSTRACT_ONLY" ? " — limited evidence access" : access === "METADATA_ONLY" ? " — metadata only; no text evidence" : ""; return `<div class="trace"><strong>${escapeHtml(t.semantic_type)}</strong> · ${escapeHtml(t.work_title)} <span class="access-badge ${access === "FULL_TEXT" ? "full" : "limited"}">${escapeHtml(access)}${escapeHtml(accessNote)}</span>${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · EvidenceFragment: ${escapeHtml(t.evidence_fragment_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`; }).join("") : `<p>No canonical evidence trace persisted.</p>`}`; await renderGapCritic(r); await renderGapAssessment(r); } }
+      await renderResearchQuality(r);
       await renderGapDecision(r);
     };
     document.querySelectorAll("[data-object-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.objectIndex)]));
@@ -559,5 +560,28 @@ async function renderGapAssessment(gap) {
   } catch (error) {
     console.error(error);
     box.innerHTML = `<p>Assessment API unavailable: ${escapeHtml(error.message)}</p>`;
+  }
+}
+
+async function renderResearchQuality(row) {
+  const box = document.getElementById("real-gap-quality");
+  if (!box || !projectSelect.value || !row?.research_object_id) return;
+  box.innerHTML = "<p>Loading canonical quality observations…</p>";
+  try {
+    const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/quality?object_id=${encodeURIComponent(row.research_object_id)}`, {cache:"no-store"});
+    if (!response.ok) throw new Error(`Quality HTTP ${response.status}`);
+    const q = await response.json();
+    const observations = Array.isArray(q.observations) ? q.observations : [];
+    const limitations = Array.isArray(q.limitations) ? q.limitations : [];
+    const suggestions = Array.isArray(q.review_suggestions) ? q.review_suggestions : [];
+    const fmt = value => value == null ? "—" : (typeof value === "string" ? value : JSON.stringify(value));
+    box.innerHTML = `
+      <div class="callout warning">Quality observations are decomposed advisory context, not a universal score or scientific verdict.</div>
+      ${observations.map(o => `<div class="trace"><strong>${escapeHtml(o.dimension)}</strong> · <span class="state ${stateClass(o.state)}">${escapeHtml(o.state)}</span><br><small>${escapeHtml(fmt(o.value))}</small><br><small>Basis: ${escapeHtml(o.basis || "Not recorded")}</small></div>`).join("")}
+      <p><strong>Limitations</strong></p>${limitations.length ? `<ul>${limitations.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>` : "<p>No additional limitation recorded by this projection.</p>"}
+      <p><strong>Suggested HUMAN review actions</strong></p>${suggestions.length ? suggestions.map(x => `<div class="trace"><strong>${escapeHtml(x.action)}</strong><br><small>Because: ${escapeHtml((x.because || []).join("; "))}</small></div>`).join("") : "<p>No quality-triggered review suggestion.</p>"}
+      <div class="callout warning">scientific_decision=${escapeHtml(String(q.scientific_decision))}. HUMAN scientific authority remains explicit.</div>`;
+  } catch (error) {
+    box.innerHTML = `<p>Research Quality unavailable: ${escapeHtml(error.message)}</p>`;
   }
 }
