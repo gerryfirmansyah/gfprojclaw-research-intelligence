@@ -291,20 +291,19 @@ async function loadProjectOpportunities() {
 async function renderGapCritic(gap) {
   const box = document.getElementById("real-gap-critic");
   if (!box || !projectSelect.value) return;
-  box.innerHTML = `<p>Loading persisted Advice & Critic…</p>`;
+  box.innerHTML = "<p>Loading persisted Advice & Critic…</p>";
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/advice-critic`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Advice & Critic HTTP ${response.status}`);
     const rows = await response.json();
     const critic = rows.find(r => r.gap_id === gap.gap_id);
-    if (!critic) { box.innerHTML = `<p>No persisted J10 Advice & Critic assessment for this candidate.</p>`; return; }
+    if (!critic) { box.innerHTML = "<p>No persisted J10 Advice & Critic assessment for this candidate.</p>"; return; }
     gap.assessment_id = critic.assessment_id || null;
     const dimensions = Array.isArray(critic.dimensions) ? critic.dimensions : [];
-    const byType = type => dimensions.find(d => d.dimension_type === type);
-    const risk = byType("COUNTER_EVIDENCE_RISK");
-    const coverage = byType("EVIDENCE_COVERAGE_CONTEXT");
-    const priority = byType("REVIEW_PRIORITY");
-    box.innerHTML = `<p><strong>Critic — what challenges this opportunity?</strong></p><p>${escapeHtml(risk?.explanation || "No persisted counter-evidence assessment is available.")}</p><p><strong>What remains unknown?</strong></p><p>Counter-search: ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")} · ${escapeHtml(coverage?.explanation || critic.coverage_limitations || "Coverage limitations are not recorded.")}</p><p><strong>Recommended next HUMAN action</strong></p><p>${escapeHtml(priority?.value_text || "HUMAN_REVIEW_REQUIRED")}</p><small>${escapeHtml(priority?.explanation || "Machine advice only; HUMAN scientific judgment remains authoritative.")}</small><div class="callout warning">Advice & Critic supports falsification and review; it does not establish novelty, truth, acceptance, or a scientific verdict.</div>`;
+    const evidence = Array.isArray(critic.evidence_basis) ? critic.evidence_basis : [];
+    const dimensionCards = dimensions.map(d => `<div class="trace"><strong>${escapeHtml(d.dimension_type)} — ${escapeHtml(d.value_text || "NOT_RECORDED")}</strong><p>${escapeHtml(d.explanation || "Explanation unavailable from current canonical assessment.")}</p></div>`).join("");
+    const evidenceCards = evidence.length ? evidence.map(e => `<div class="trace"><strong>${escapeHtml(e.semantic_type)} · ${escapeHtml(e.work_title || "Work unavailable")}</strong><p><strong>Claim under review:</strong> ${escapeHtml(e.claim_text || "Claim unavailable")}</p><p><strong>Why linked:</strong> ${escapeHtml(e.relationship_rationale || "Relationship rationale unavailable.")}</p><small>Evidence access: ${escapeHtml(e.access_level || "NOT_RECORDED")} · Claim: ${escapeHtml(e.claim_review_state || "NOT_RECORDED")} · Relationship: ${escapeHtml(e.relationship_review_state || "NOT_RECORDED")}</small></div>`).join("") : "<p>No explicit canonical evidence relationship is available as a basis for this Advice & Critic assessment.</p>";
+    box.innerHTML = `<p><strong>Advice & Critic assessment</strong></p><p>${escapeHtml(critic.explanation_summary || "Explanation summary unavailable from current canonical assessment.")}</p><p><strong>Reviewable machine reasoning</strong></p>${dimensionCards}<p><strong>Canonical evidence basis</strong></p>${evidenceCards}<p><strong>Coverage / unresolved limitation</strong></p><p>Counter-search: ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")}. ${escapeHtml(critic.coverage_limitations || "No additional coverage limitation is recorded.")}</p><div class="callout warning">Verify the explanation against Evidence Verification and the external source before accepting any stronger scientific claim. Advice & Critic does not establish novelty, truth, acceptance, or a scientific verdict.</div>`;
   } catch (error) {
     console.error(error);
     box.innerHTML = `<p>Advice & Critic unavailable: ${escapeHtml(error.message)}</p>`;

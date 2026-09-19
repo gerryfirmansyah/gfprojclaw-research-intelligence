@@ -364,14 +364,25 @@ def list_project_advice_critic(project_id, limit=50):
                    cc.limitations AS coverage_limitations,
                    a.id AS assessment_id, a.explanation_summary,
                    COALESCE(ad.dimensions, '[]'::jsonb) AS dimensions,
+                   COALESCE(ev.evidence_basis, '[]'::jsonb) AS evidence_basis,
                    hd.decision_type AS latest_human_decision
             FROM gap_candidate gc
             JOIN research_object_identity roi ON roi.id=gc.id AND roi.project_id=gc.project_id
             LEFT JOIN LATERAL (
                 SELECT count(*) FILTER (WHERE semantic_type='SUPPORTS') support_count,
                        count(*) FILTER (WHERE semantic_type IN ('CHALLENGES','CONTRADICTS')) challenge_count,
-                       count(DISTINCT claim_id) linked_claim_count
-                FROM evidence_relationship WHERE target_research_object_id=gc.id
+                       count(DISTINCT er.claim_id) linked_claim_count,
+                       jsonb_agg(jsonb_build_object(
+                         'semantic_type',er.semantic_type,'relationship_review_state',er.review_state,
+                         'relationship_rationale',er.rationale,'claim_text',c.claim_text,
+                         'claim_review_state',c.review_state,'access_level',ef.access_level,
+                         'work_title',w.title,'evidence_fragment_id',ef.id
+                       ) ORDER BY er.created_at DESC) FILTER (WHERE er.id IS NOT NULL) evidence_basis
+                FROM evidence_relationship er
+                LEFT JOIN claim c ON c.id=er.claim_id
+                LEFT JOIN evidence_fragment ef ON ef.id=c.evidence_fragment_id
+                LEFT JOIN work w ON w.id=ef.work_id
+                WHERE er.target_research_object_id=gc.id
             ) ev ON TRUE
             LEFT JOIN LATERAL (
                 SELECT * FROM coverage_context x WHERE x.project_id=gc.project_id
