@@ -259,7 +259,7 @@ function renderOpportunities() {
   return commonHeader("Research Opportunities", "Evidence-backed advisory prioritization for HUMAN scientific review.", "real") + `
   <div class="callout warning">Prioritization is advisory context only. It does not establish novelty, significance, feasibility, acceptance, or a scientific verdict.</div>
   <div class="card real-surface"><h3>Research Opportunities <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading persisted opportunity intelligence…</div></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Research Object Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Advice & Critic</h3><div id="real-gap-critic">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Research Quality <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-quality">Select a persisted research object.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Research Object Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Advice & Critic</h3><div id="real-gap-critic">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Research Quality <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-quality">Select a persisted research object.</div></div><div class="card real-surface"><h3>Evidence Verification <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-verification">Select a persisted research object.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
 }
 
 async function loadProjectOpportunities() {
@@ -280,6 +280,7 @@ async function loadProjectOpportunities() {
       document.getElementById("real-gap-critic").innerHTML = isGap ? `<p>Loading persisted Advice & Critic…</p>` : `<p>Advice & Critic has not been generalized for Investigation Direction. Continue evidence screening without treating this absence as a global lock.</p>`;
       if (isGap) { const legacy = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, {cache:"no-store"}); const oldRows = legacy.ok ? await legacy.json() : []; const old = oldRows.find(x => x.gap_id === r.research_object_id); if (old) { Object.assign(r, old); const trace = Array.isArray(old.evidence_trace) ? old.evidence_trace : []; relation.innerHTML = `<p><strong>Persisted evidence links:</strong> ${escapeHtml(old.support_count)} supporting · ${escapeHtml(old.challenge_count)} challenging · ${escapeHtml(old.linked_claim_count)} linked claim(s)</p><p><strong>Counter-search:</strong> ${escapeHtml(old.counter_search_state || "NOT_RECORDED")}</p><p><strong>Coverage limitation:</strong> ${escapeHtml(old.coverage_limitations || "Not recorded")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a class="source-link source-link-doi" href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Open DOI source">DOI ↗</a>` : i.type === "OPENALEX" ? `<a class="source-link source-link-openalex" href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Open in OpenAlex">OpenAlex ↗</a>` : "").filter(Boolean).join(" · "); const access = t.access_level || "NOT_RECORDED"; const accessNote = access === "ABSTRACT_ONLY" ? " — limited evidence access" : access === "METADATA_ONLY" ? " — metadata only; no text evidence" : ""; return `<div class="trace"><strong>${escapeHtml(t.semantic_type)}</strong> · ${escapeHtml(t.work_title)} <span class="access-badge ${access === "FULL_TEXT" ? "full" : "limited"}">${escapeHtml(access)}${escapeHtml(accessNote)}</span>${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · EvidenceFragment: ${escapeHtml(t.evidence_fragment_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`; }).join("") : `<p>No canonical evidence trace persisted.</p>`}`; await renderGapCritic(r); await renderGapAssessment(r); } }
       await renderResearchQuality(r);
+      await renderEvidenceVerification(r);
       await renderGapDecision(r);
     };
     document.querySelectorAll("[data-object-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.objectIndex)]));
@@ -583,5 +584,27 @@ async function renderResearchQuality(row) {
       <div class="callout warning">scientific_decision=${escapeHtml(String(q.scientific_decision))}. HUMAN scientific authority remains explicit.</div>`;
   } catch (error) {
     box.innerHTML = `<p>Research Quality unavailable: ${escapeHtml(error.message)}</p>`;
+  }
+}
+
+async function renderEvidenceVerification(row) {
+  const box=document.getElementById("real-gap-verification");
+  if(!box || !projectSelect.value || !row?.research_object_id) return;
+  box.innerHTML="<p>Loading inspectable canonical evidence…</p>";
+  try {
+    const response=await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/evidence-verification?object_id=${encodeURIComponent(row.research_object_id)}`,{cache:"no-store"});
+    if(!response.ok) throw new Error(`Evidence verification HTTP ${response.status}`);
+    const rows=await response.json();
+    box.innerHTML=`<div class="callout warning">Read what is actually stored before judging a Claim or relationship. PROJECT_LITERATURE_ONLY is candidate context, not evidence for this research object. ABSTRACT_ONLY is not full text.</div>`+
+      rows.map((x,i)=>{
+        const links=[x.doi_url ? `<a class="source-link source-link-doi" href="${escapeHtml(x.doi_url)}" target="_blank" rel="noopener noreferrer">DOI ↗</a>`:"",x.openalex_url ? `<a class="source-link source-link-openalex" href="${escapeHtml(x.openalex_url)}" target="_blank" rel="noopener noreferrer">OpenAlex ↗</a>`:""].filter(Boolean).join(" · ");
+        const text=x.evidence_text ? `<details ${i===0 ? "open":""}><summary>Read stored ${escapeHtml(x.fragment_type || "evidence fragment")} (${escapeHtml(x.access_level || "UNKNOWN")})</summary><p class="evidence-readable">${escapeHtml(x.evidence_text)}</p></details>` : `<p><em>No canonical EvidenceFragment text is stored for this work.</em></p>`;
+        const claim=x.claim_id ? `<p><strong>Extracted Claim:</strong> ${escapeHtml(x.claim_text)}<br><small>Claim review: ${escapeHtml(x.claim_review_state)} · extraction: ${escapeHtml(x.extraction_origin)}</small></p>` : "<p><strong>Extracted Claim:</strong> none stored.</p>";
+        const rel=x.relationship_id ? `<p><strong>Object relationship:</strong> ${escapeHtml(x.semantic_type)} · ${escapeHtml(x.relationship_review_state)}</p>` : "<p><strong>Object relationship:</strong> none asserted.</p>";
+        return `<div class="trace"><strong>${escapeHtml(x.title)}</strong><br><small>${escapeHtml(x.publication_year || "Year unavailable")} · ${escapeHtml(x.object_evidence_status)} · ${escapeHtml(x.access_level || x.current_access_level || "METADATA_ONLY")}</small>${links ? `<p>${links}</p>`:""}${text}${claim}${rel}</div>`;
+      }).join("")+
+      `<div class="callout warning">External DOI/OpenAlex links are for HUMAN source inspection. This screen does not claim access to publisher full text unless canonical access_level is FULL_TEXT.</div>`;
+  } catch(error) {
+    box.innerHTML=`<p>Evidence Verification unavailable: ${escapeHtml(error.message)}</p>`;
   }
 }

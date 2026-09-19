@@ -525,3 +525,40 @@ def get_project_quality(project_id, object_id=None):
     if ev and not methodological: suggestions.append({'action':'INSPECT_METHODOLOGICAL_CONTEXT','because':['linked evidence exists but METHODOLOGICAL_CONTEXT_AVAILABILITY=NOT_AVAILABLE']})
     if not ev: suggestions.append({'action':'ESTABLISH_EXPLICIT_EVIDENCE_LINKAGE','because':['no canonical EvidenceRelationship is asserted for this research object']})
     return {'object':dict(obj),'observations':observations,'limitations':([cov['limitations']] if cov and cov['limitations'] else []) + ([] if ev else ['No canonical EvidenceRelationship is asserted for this research object; project literature is not projected as object evidence.']),'review_suggestions':suggestions,'evidence_references':ev,'scientific_decision':False}
+
+def list_project_evidence_verification(project_id, object_id=None):
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT w.id AS work_id,w.title,w.publication_year,w.current_access_level,
+                   pwr.relevance_state,pwr.human_review_state,
+                   ef.id AS evidence_fragment_id,ef.fragment_type,ef.access_level,
+                   ef.text_or_reference AS evidence_text,ef.source_record_id,
+                   sr.source_record_identifier,ls.source_key,
+                   c.id AS claim_id,c.claim_text,c.review_state AS claim_review_state,c.extraction_origin,
+                   er.id AS relationship_id,er.semantic_type,er.review_state AS relationship_review_state,
+                   ids.identifiers
+            FROM project_work_relevance pwr
+            JOIN work w ON w.id=pwr.work_id
+            LEFT JOIN evidence_fragment ef ON ef.work_id=w.id AND ef.quarantine_state='ACTIVE'
+            LEFT JOIN source_record sr ON sr.id=ef.source_record_id
+            LEFT JOIN literature_source ls ON ls.id=sr.literature_source_id
+            LEFT JOIN claim c ON c.evidence_fragment_id=ef.id AND c.quarantine_state='ACTIVE'
+            LEFT JOIN evidence_relationship er ON er.claim_id=c.id
+                 AND (%s::uuid IS NULL OR er.target_research_object_id=%s::uuid)
+            LEFT JOIN LATERAL (
+                SELECT jsonb_object_agg(identifier_type,identifier_value) identifiers
+                FROM work_identifier wi WHERE wi.work_id=w.id
+            ) ids ON TRUE
+            WHERE pwr.project_id=%s
+            ORDER BY (er.id IS NOT NULL) DESC,(ef.id IS NOT NULL) DESC,w.publication_year DESC NULLS LAST,w.title
+        """,(object_id,object_id,project_id)).fetchall()
+    out=[]
+    for row in rows:
+        x=dict(row); ids=x.pop('identifiers') or {}
+        x['identifiers']=ids
+        x['doi_url']=f"https://doi.org/{ids['DOI']}" if ids.get('DOI') else None
+        x['openalex_url']=f"https://openalex.org/{ids['OPENALEX']}" if ids.get('OPENALEX') else None
+        x['object_evidence_status']='EXPLICIT_RELATIONSHIP' if x.get('relationship_id') else 'PROJECT_LITERATURE_ONLY'
+        x['full_text_available']=x.get('access_level')=='FULL_TEXT'
+        out.append(x)
+    return out

@@ -101,3 +101,14 @@ html[data-theme="dark"] .callout { background:#15243b; color:#c4cfdd; }
 html[data-theme="dark"] .callout.warning { background:#302713; }
 html[data-theme="dark"] .decision-bar button { background:var(--control); color:var(--text); }
 html[data-theme="dark"] .trace { background:#0b121b; border-color:var(--border); }
+
+.evidence-readable {
+  white-space: pre-wrap;
+  line-height: 1.65;
+  max-height: 360px;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+details summary { cursor: pointer; font-weight: 700; margin: 8px 0; }
