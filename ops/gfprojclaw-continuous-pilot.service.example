@@ -8,10 +8,11 @@ Type=oneshot
 User=gfproj-pilot
 Group=gfproj-pilot
 WorkingDirectory=/opt/gfprojclaw-research-intelligence
-ExecStart=/opt/gfprojclaw/.venv/bin/python /opt/gfprojclaw-research-intelligence/tools/run_continuous_pilot.py --project-id PROJECT_ID --idempotency-key SCHEDULED_IDEMPOTENCY_KEY
+Environment="GFPROJ_PILOT_DSN=dbname=gfprojclaw user=gfproj_pilot_executor"
+ExecStart=/opt/gfprojclaw/.venv/bin/python /opt/gfprojclaw-research-intelligence/tools/run_scheduled_pilot.py --project-id PROJECT_ID
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
 
-# TEMPLATE ONLY: do not install/enable until gfproj-pilot peer/map auth is verified end-to-end.
+# TEMPLATE ONLY: peer/map auth is verified; do not install/enable until real-source J14 HUMAN acceptance and scheduling/idempotency design are complete.

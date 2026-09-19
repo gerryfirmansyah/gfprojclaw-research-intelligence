@@ -2,7 +2,7 @@
 Description=GFPROJCLAW Canonical Continuous Pilot Schedule
 
 [Timer]
-OnCalendar=daily
+OnCalendar=*-*-* 00:15:00 Asia/Jakarta
 Persistent=true
 Unit=gfprojclaw-continuous-pilot.service
 
