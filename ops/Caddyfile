@@ -11,6 +11,20 @@ api.116.212.72.79.nip.io {
 		respond "" 204
 	}
 
+	@admin_ui path /admin /admin/ /admin/*
+	handle @admin_ui {
+		basicauth {
+			{$GFPROJ_ADMIN_USER} {$GFPROJ_ADMIN_PASSWORD_HASH}
+		}
+		header X-Content-Type-Options "nosniff"
+		root * /opt/gfprojclaw/admin-web
+		rewrite /admin /admin.html
+		rewrite /admin/ /admin.html
+		uri strip_prefix /admin
+		try_files {path} /admin.html
+		file_server
+	}
+
 	@admin_api path /api/admin/*
 	handle @admin_api {
 		basicauth {

@@ -1,4 +1,4 @@
-const API_BASE = "https://api.116.212.72.79.nip.io";
+const API_BASE = location.hostname === "api.116.212.72.79.nip.io" ? "" : "https://api.116.212.72.79.nip.io";
 const projectSelect = document.getElementById("admin-project-select");
 let contextRows=[];
 const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));

@@ -22,3 +22,8 @@ Do not activate a credentialed production gate until a real HUMAN Admin credenti
 `ops/Caddyfile` now contains an authenticated handler for `/api/admin/*` before the general `/api/*` route. `ops/j16/install_admin_auth.sh` provisions a bcrypt hash into `/etc/gfprojclaw/admin-auth.env` from an out-of-band plaintext environment variable; plaintext is not written to disk by the script. `ops/j16/caddy-admin-auth-override.conf` declares the protected EnvironmentFile for the Caddy service. `ops/j16/verify_admin_auth.sh` verifies public context remains HTTP 200 while unauthenticated Admin API is HTTP 401 after activation.
 
 Production is intentionally not switched to this repository Caddyfile until the HUMAN supplies/provisions the real Admin credential. This avoids a default credential and avoids locking the HUMAN out of the Admin surface.
+
+## Same-origin Admin UI activation — 2026-09-20
+The production Caddy origin now serves `/admin/` from `/opt/gfprojclaw/admin-web` behind the same Basic Auth boundary as `/api/admin/*`. The Admin JavaScript uses a same-origin API base when hosted on the production API origin, while the Research Copilot link explicitly returns to the public GitHub Pages Research workspace. Static deployment is performed by `ops/j16/install_admin_static.sh`; no credential is embedded in HTML or JavaScript.
+
+Machine verification after activation: Caddy active; unauthenticated `/admin/` returns HTTP 401; public `/api/context` remains HTTP 200; repository regressions `ADMIN_AUTH_ASSETS_PASS`, `ADMIN_SAME_ORIGIN_PASS`, `ADMIN_NAVIGATION_PASS`, `ADMIN_OPERATIONAL_HEALTH_PASS`, and `ADMIN_CONFIGURATION_BOUNDARY_PASS`. Authenticated browser rendering remains a HUMAN visual acceptance step.
