@@ -649,6 +649,29 @@ async function renderGapAssessment(gap) {
   }
 }
 
+const QUALITY_HUMAN_GUIDE = {
+  ACCESS_COMPLETENESS:{title:"Kelengkapan Akses Bukti",meaning:"Menunjukkan seberapa lengkap isi sumber yang tersedia untuk evidence yang terhubung.",why:"Abstrak dapat membantu screening, tetapi detail metode, batasan, dan hasil sering memerlukan teks penuh.",check:"Periksa level akses setiap sumber. Jika hanya ABSTRACT_ONLY, buka sumber/full text sebelum membuat penilaian yang bergantung pada detail."},
+  PROVENANCE_COMPLETENESS:{title:"Keterlacakan Bukti",meaning:"Menunjukkan apakah hubungan evidence dapat ditelusuri dari Claim ke potongan evidence lalu ke paper/sumber asal.",why:"Keterlacakan memungkinkan HUMAN memeriksa apakah pernyataan benar-benar bersumber dari evidence yang ditampilkan.",check:"Ikuti rantai Claim → EvidenceFragment → Work dan baca konteks sumbernya. Keterlacakan tidak berarti Claim otomatis benar."},
+  EXTRACTION_REVIEW_STATE:{title:"Status Tinjauan Claim & Hubungan Evidence",meaning:"Menunjukkan apakah hasil ekstraksi Claim dan hubungan evidence masih usulan mesin atau sudah memiliki status review canonical.",why:"Usulan mesin harus diperiksa HUMAN sebelum dipakai sebagai dasar penilaian ilmiah.",check:"Prioritaskan NEEDS_REVIEW dan MACHINE_SUGGESTED; bandingkan teks Claim dengan evidence asal sebelum menyetujui atau menentangnya."},
+  METHODOLOGICAL_CONTEXT_AVAILABILITY:{title:"Konteks Metodologi",meaning:"Menunjukkan apakah konteks metode/metodologi/desain eksplisit tersedia dalam scope canonical yang sedang diperiksa.",why:"Tanpa konteks metodologi, sistem tidak memiliki dasar canonical untuk membantu HUMAN menilai bagaimana temuan dihasilkan.",check:"Buka sumber dan periksa bagian metode/desain. NOT_AVAILABLE berarti konteks belum tersedia di state canonical, bukan metodologinya buruk."},
+  CORROBORATION_CONTEXT:{title:"Dukungan dari Evidence Lain",meaning:"Merangkum hubungan canonical yang mendukung, memperluas, atau mereplikasi Claim/objek riset.",why:"Beberapa hubungan evidence dapat memberi konteks lebih luas daripada satu sumber saja, tetapi jumlah bukan ukuran kebenaran.",check:"Periksa masing-masing hubungan SUPPORTS, EXTENDS, atau REPLICATES dan nilai relevansinya secara langsung."},
+  CONTRADICTION_CONTEXT:{title:"Kontradiksi & Counter-search",meaning:"Menunjukkan evidence canonical yang menantang/bertentangan serta apakah pencarian khusus evidence lawan sudah dilakukan.",why:"Tidak menemukan kontradiksi belum berarti tidak ada kontradiksi, terutama bila counter-search belum dijalankan.",check:"Jika counter-search NOT_RUN, pertimbangkan pencarian evidence yang dapat menantang Claim sebelum menilai gap, novelty, atau kekuatan kesimpulan."},
+  RECENCY_CONTEXT:{title:"Konteks Waktu Sumber",meaning:"Menampilkan kapan sumber dipublikasikan dan kapan evidence diperoleh sistem.",why:"Tanggal membantu HUMAN memahami konteks temporal literatur; sumber lama tidak otomatis berkualitas rendah.",check:"Periksa apakah rentang waktu sumber sesuai kebutuhan pertanyaan riset dan apakah literatur yang lebih baru perlu dicari."},
+  SOURCE_COVERAGE_LIMITATIONS:{title:"Cakupan Sumber & Keterbatasan",meaning:"Menjelaskan sumber discovery/coverage yang tercatat dan keterbatasan canonical yang diketahui.",why:"Coverage yang terbatas dapat membuat peta literatur belum lengkap tanpa berarti hasil yang ada salah.",check:"Baca keterbatasan dan status sumber sebelum menyimpulkan bahwa pencarian sudah mencakup literatur yang relevan."}
+};
+function qualityCurrentText(o){
+  const v=o?.value, d=o?.dimension;
+  if(v==null) return o?.state==="NOT_AVAILABLE" ? "Belum ada konteks canonical yang tersedia untuk dimensi ini." : `Status canonical: ${o?.state||"UNKNOWN"}.`;
+  if(d==="PROVENANCE_COMPLETENESS") return `${v.traceable_relationships??0} dari ${v.linked_relationships??0} hubungan evidence dapat ditelusuri lengkap.`;
+  if(d==="ACCESS_COMPLETENESS") return `Level akses evidence saat ini: ${(Array.isArray(v)?v:[v]).join(", ")}.`;
+  if(d==="EXTRACTION_REVIEW_STATE") return `Status Claim: ${(v.claim_states||[]).join(", ")||"NOT_AVAILABLE"}; status hubungan evidence: ${(v.relationship_states||[]).join(", ")||"NOT_AVAILABLE"}.`;
+  if(d==="CORROBORATION_CONTEXT") return `Hubungan tercatat — mendukung: ${v.SUPPORTS??0}, memperluas: ${v.EXTENDS??0}, mereplikasi: ${v.REPLICATES??0}.`;
+  if(d==="CONTRADICTION_CONTEXT") return `Menantang: ${v.CHALLENGES??0}; bertentangan: ${v.CONTRADICTS??0}; counter-search: ${v.counter_search_state||"NOT_AVAILABLE"}.`;
+  if(d==="RECENCY_CONTEXT" && Array.isArray(v)) return `${v.length} sumber/evidence memiliki konteks tanggal yang dapat diperiksa.`;
+  if(d==="SOURCE_COVERAGE_LIMITATIONS") return `Konteks coverage tersedia${v.limitations?`; keterbatasan tercatat: ${v.limitations}`:"."}`;
+  return `Status canonical: ${o?.state||"UNKNOWN"}.`;
+}
+function qualityTechnicalValue(value){return value==null?"—":(typeof value==="string"?value:JSON.stringify(value,null,2));}
 async function renderResearchQuality(row) {
   const box = document.getElementById("real-gap-quality");
   if (!box || !projectSelect.value || !row?.research_object_id) return;
@@ -656,20 +679,12 @@ async function renderResearchQuality(row) {
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/quality?object_id=${encodeURIComponent(row.research_object_id)}`, {cache:"no-store"});
     if (!response.ok) throw new Error(`Quality HTTP ${response.status}`);
-    const q = await response.json();
-    const observations = Array.isArray(q.observations) ? q.observations : [];
-    const limitations = Array.isArray(q.limitations) ? q.limitations : [];
-    const suggestions = Array.isArray(q.review_suggestions) ? q.review_suggestions : [];
-    const fmt = value => value == null ? "—" : (typeof value === "string" ? value : JSON.stringify(value));
-    box.innerHTML = `
-      <div class="callout warning">Observasi kualitas adalah konteks saran yang diuraikan, bukan skor universal atau keputusan ilmiah.</div>
-      ${observations.map(o => `<div class="trace"><strong>${escapeHtml(o.dimension)}</strong> · <span class="state ${stateClass(o.state)}">${escapeHtml(o.state)}</span><br><small>${escapeHtml(fmt(o.value))}</small><br><small>Basis: ${escapeHtml(o.basis || "Tidak direkam")}</small></div>`).join("")}
-      <p><strong>Keterbatasan</strong></p>${limitations.length ? `<ul>${limitations.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>` : "<p>Tidak ada keterbatasan tambahan yang direkam oleh proyeksi ini.</p>"}
-      <p><strong>Tindakan tinjauan HUMAN yang disarankan</strong></p>${suggestions.length ? suggestions.map(x => `<div class="trace"><strong>${escapeHtml(x.action)}</strong><br><small>Karena: ${escapeHtml((x.because || []).join("; "))}</small></div>`).join("") : "<p>Tidak ada saran tinjauan yang dipicu oleh kualitas.</p>"}
-      <div class="callout warning">scientific_decision=${escapeHtml(String(q.scientific_decision))}. Otoritas ilmiah HUMAN tetap eksplisit.</div>`;
-  } catch (error) {
-    box.innerHTML = `<p>Kualitas Riset tidak tersedia: ${escapeHtml(error.message)}</p>`;
-  }
+    const q = await response.json(), observations=Array.isArray(q.observations)?q.observations:[], limitations=Array.isArray(q.limitations)?q.limitations:[], suggestions=Array.isArray(q.review_suggestions)?q.review_suggestions:[];
+    box.innerHTML = `<div class="callout warning"><strong>Apa yang diperiksa di sini?</strong><br>Bagian ini membantu HUMAN menilai seberapa siap evidence dan konteks sebuah Claim untuk diperiksa. Ini <strong>bukan skor kualitas riset</strong> dan tidak menentukan apakah Claim benar. Fokus pada akses sumber, keterlacakan, status review, metodologi, dukungan/kontradiksi, waktu sumber, dan cakupan pencarian.</div>
+      ${observations.map(o=>{const g=QUALITY_HUMAN_GUIDE[o.dimension]||{title:o.dimension,meaning:"Observasi canonical untuk membantu pemeriksaan HUMAN.",why:"Konteks ini tidak menghasilkan keputusan ilmiah.",check:"Periksa evidence dan state canonical terkait."};return `<article class="quality-human-card"><div class="quality-human-head"><h4>${escapeHtml(g.title)}</h4><span class="state ${stateClass(o.state)}">${escapeHtml(o.state)}</span></div><p><strong>Apa artinya?</strong><br>${escapeHtml(g.meaning)}</p><p><strong>Kondisi saat ini</strong><br>${escapeHtml(qualityCurrentText(o))}</p><p><strong>Mengapa penting?</strong><br>${escapeHtml(g.why)}</p><p><strong>Yang perlu HUMAN periksa</strong><br>${escapeHtml(g.check)}</p><details class="quality-technical"><summary>Detail teknis / canonical</summary><p><code>${escapeHtml(o.dimension)}</code></p><pre>${escapeHtml(qualityTechnicalValue(o.value))}</pre><small>Basis canonical: ${escapeHtml(o.basis||"Tidak direkam")}</small></details></article>`}).join("")}
+      <div class="quality-summary"><h4>Keterbatasan yang perlu diingat</h4>${limitations.length?`<ul>${limitations.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>`:"<p>Tidak ada keterbatasan tambahan yang direkam oleh proyeksi ini.</p>"}<h4>Tindakan tinjauan HUMAN yang disarankan</h4>${suggestions.length?suggestions.map(x=>`<div class="trace"><strong>${escapeHtml(x.action)}</strong><br><small>Dipicu oleh state canonical: ${escapeHtml((x.because||[]).join("; "))}</small></div>`).join(""):"<p>Tidak ada saran tinjauan yang dipicu oleh kualitas.</p>"}</div>
+      <div class="callout warning">scientific_decision=${escapeHtml(String(q.scientific_decision))}. Observasi dan saran di atas membantu pemeriksaan; keputusan ilmiah tetap milik HUMAN.</div>`;
+  } catch (error) { box.innerHTML = `<p>Kualitas Riset tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
 async function renderEvidenceVerification(row) {

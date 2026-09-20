@@ -57,3 +57,6 @@ Investigation Direction `3b200000-0000-4000-8000-000000000013`. The projection m
 `GET /api/projects/{project_id}/quality?object_id={research_object_id}`
 
 Response should contain `object`, `observations[]`, `limitations[]`, `review_suggestions[]`, `scientific_decision=false`, and source/evidence references sufficient for Cockpit drill-down.
+
+## HUMAN-readable Research Copilot presentation — 2026-09-20
+The Research Copilot presents every quality dimension as an explanatory card: human-readable title, what it means, current canonical condition, why it matters, and what HUMAN should inspect. Raw dimension names, values/JSON, and canonical basis remain available under a collapsed technical detail. This presentation does not change the quality projection, canonical state, or scientific authority. In particular, relationship counts are counts rather than scores; traceability does not establish truth; NOT_AVAILABLE is not a negative methodological judgment; and NOT_RUN counter-search remains explicit.
