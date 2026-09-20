@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GFPROJCLAW Research Copilot</title>
-  <link rel="stylesheet" href="styles.css?v=0.16.4" />
+  <link rel="stylesheet" href="styles.css?v=0.16.5" />
 </head>
 <body>
   <div class="app-shell">
@@ -57,11 +57,11 @@
           </label>
         </div>
         <div class="topbar-actions">
-          <input id="global-search" type="search" placeholder="Search papers, concepts, gaps…" />
+          <input id="global-search" type="search" placeholder="Search papers, concepts, gaps…" data-i18n-placeholder="searchPlaceholder" />
           <a class="workspace-link" href="admin.html" data-i18n="admin">Admin Copilot</a>
           <label class="language-control"><span data-i18n="language">Language</span><select data-language-select><option value="en">EN</option><option value="id">ID</option></select></label>
           <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">🌙 Dark</button>
-          <span id="prototype-version" class="sync-status">Prototype v0.16.4 · localized member trace trial</span>
+          <span id="prototype-version" class="sync-status">Prototype v0.16.5 · explanatory i18n trial</span>
         </div>
       </header>
 
@@ -88,37 +88,37 @@
 
         <div class="dashboard-grid">
           <article class="panel span-2">
-            <div class="panel-header"><h2>Recent Important Changes</h2><button class="text-button" data-open="evolution">View all</button></div>
+            <div class="panel-header"><h2 data-i18n="recentChanges">Recent Important Changes</h2><button class="text-button" data-open="evolution" data-i18n="viewAll">View all</button></div>
             <div id="change-list" class="change-list"></div>
           </article>
 
           <article class="panel">
-            <div class="panel-header"><h2>Research Stage Guide</h2><button class="text-button" data-open="journey">View all</button></div>
+            <div class="panel-header"><h2 data-i18n="stageGuide">Research Stage Guide</h2><button class="text-button" data-open="journey" data-i18n="viewAll">View all</button></div>
             <div id="journey-mini" class="journey-mini"></div>
           </article>
 
           <article class="panel span-2">
-            <div class="panel-header"><h2>Top Research Opportunities</h2><button class="text-button" data-open="opportunities">View all</button></div>
+            <div class="panel-header"><h2 data-i18n="topOpportunities">Top Research Opportunities</h2><button class="text-button" data-open="opportunities" data-i18n="viewAll">View all</button></div>
             <div id="opportunity-table"></div>
           </article>
 
           <article class="panel">
-            <div class="panel-header"><h2>Latest Papers</h2><button class="text-button" data-open="evidence">View all</button></div>
+            <div class="panel-header"><h2 data-i18n="latestPapers">Latest Papers</h2><button class="text-button" data-open="evidence" data-i18n="viewAll">View all</button></div>
             <div id="paper-list" class="paper-list"></div>
           </article>
 
           <article class="panel">
-            <div class="panel-header"><h2>Research Coverage</h2><button class="text-button" data-open="coverage">View all</button></div>
+            <div class="panel-header"><h2 data-i18n="coverage">Research Coverage</h2><button class="text-button" data-open="coverage" data-i18n="viewAll">View all</button></div>
             <div id="health-mini"></div>
           </article>
 
           <article class="panel">
-            <div class="panel-header"><h2>Knowledge Evolution</h2><button class="text-button" data-open="evolution">View all</button></div>
+            <div class="panel-header"><h2 data-i18n="evolution">Knowledge Evolution</h2><button class="text-button" data-open="evolution" data-i18n="viewAll">View all</button></div>
             <div id="evolution-mini"></div>
           </article>
 
           <article class="panel">
-            <div class="panel-header"><h2>Telegram Research Radar</h2><button class="text-button" data-open="telegram">View all</button></div>
+            <div class="panel-header"><h2 data-i18n="radar">Telegram Research Radar</h2><button class="text-button" data-open="telegram" data-i18n="viewAll">View all</button></div>
             <div id="telegram-mini"></div>
           </article>
         </div>
@@ -135,7 +135,7 @@
     </main>
   </div>
 
-  <script src="i18n.js?v=0.16.4"></script>
-  <script src="app.js?v=0.16.4"></script>
+  <script src="i18n.js?v=0.16.5"></script>
+  <script src="app.js?v=0.16.5"></script>
 </body>
 </html>

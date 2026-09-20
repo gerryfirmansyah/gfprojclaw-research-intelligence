@@ -233,3 +233,11 @@ This is a UI projection only and creates no scientific records or decisions. Sta
 The Today exact-member remediation is now integrated with the EN/ID presentation layer. Metric labels, the `Inspect members` affordance, canonical-member panel controls, and member-panel explanatory summaries switch with the UI language. Canonical member payload values remain untouched: paper titles, identifiers, rationale, ChangeEvent content, coverage state, and other persisted scientific records are not translated.
 
 This keeps the language preference a presentation concern while making the new aggregate traceability feature understandable in both supported UI languages. Static localization/member-trace assertions, JavaScript syntax checks, and diff checks passed. HUMAN browser re-trial remains required; J15 is not HUMAN PASS.
+
+## 16. 2026-09-20 HUMAN i18n clarification: translate explanations and guidance
+
+HUMAN trial clarified that localization is intended to maximize researcher understanding, not merely translate navigation chrome. The Research Copilot now translates Today metric explanatory text, dashboard headings/actions/search helper, and Research Stage Guide explanatory text when Indonesian is selected. R0–R16 guide names receive Indonesian presentation labels while their R-codes remain stable.
+
+The scientific/source boundary remains: source-origin paper titles and source evidence are displayed in their original language. Localization is presentation metadata and guidance; it does not mutate canonical records. The Research Journey remains explicitly illustrative/non-canonical in both languages.
+
+This slice is not a claim of complete application-wide translation; further explanatory surfaces can be moved into the same dictionary incrementally. Static explanatory-i18n assertions, JavaScript syntax checks, and diff checks passed. HUMAN browser re-trial remains required; J15 is not HUMAN PASS.

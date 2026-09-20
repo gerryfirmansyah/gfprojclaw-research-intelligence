@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.16.4";
+const PROTOTYPE_VERSION = "0.16.5";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 const themeToggle = document.getElementById("theme-toggle");
 
@@ -133,8 +133,8 @@ function renderDashboard() {
   document.getElementById("change-list").innerHTML = `<div class="change-row"><div class="change-main"><strong>Loading canonical ChangeEvents…</strong><small>Persisted project state</small></div></div>`;
   loadTodayChanges();
 
-  document.getElementById("journey-mini").innerHTML = journeyStages.slice(0, 7).map(([r, name]) => `
-    <div class="journey-row"><span class="r-code">${r}</span><div><strong>${name}</strong><small>Workflow guide only · no canonical stage status persisted</small></div><span class="state gray">GUIDE</span></div>`).join("") + `<button class="text-button" data-open="journey">Show R7–R16 guide</button>`;
+  document.getElementById("journey-mini").innerHTML = journeyStages.slice(0, 7).map(([r, name], index) => `
+    <div class="journey-row"><span class="r-code">${r}</span><div><strong>${escapeHtml(window.GF_I18N?.stageName(index) || name)}</strong><small>${escapeHtml(window.GF_I18N?.t("workflowGuideOnly") || "Workflow guide only · no canonical stage status persisted")}</small></div><span class="state gray">GUIDE</span></div>`).join("") + `<button class="text-button" data-open="journey">${escapeHtml(window.GF_I18N?.t("showRemainingStages") || "Show R7–R16 guide")}</button>`;
 
   document.getElementById("opportunity-table").innerHTML = `<p>Loading canonical research opportunities…</p>`;
   loadTodayOpportunities();
@@ -201,11 +201,11 @@ async function loadTodayMetrics() {
       radar:{label:window.GF_I18N?.t("radarItems") || "Radar Items",items:radar,summary:id?"Proyeksi Radar read-only persis yang berasal dari ChangeEvent canonical.":"Exact read-only Radar projections derived from canonical ChangeEvents."}
     };
     const setMetric = (id, value, detail, kind) => { const el = document.getElementById(id); if (el) { el.querySelector("strong").textContent = value; el.querySelector("small").textContent = detail; el.dataset.metricMembers=kind; el.classList.remove("dummy-surface"); el.classList.add("real-surface"); } };
-    setMetric("metric-papers", papers.length, "Persisted works in selected project", "papers");
-    setMetric("metric-decisions", decisions.length, "Explicit persisted HUMAN decisions", "decisions");
-    setMetric("metric-changes", changes.length, "Persisted canonical ChangeEvents", "changes");
+    setMetric("metric-papers", papers.length, window.GF_I18N?.t("persistedWorksDetail") || "Persisted works in selected project", "papers");
+    setMetric("metric-decisions", decisions.length, window.GF_I18N?.t("humanDecisionsDetail") || "Explicit persisted HUMAN decisions", "decisions");
+    setMetric("metric-changes", changes.length, window.GF_I18N?.t("knowledgeChangesDetail") || "Persisted canonical ChangeEvents", "changes");
     setMetric("metric-coverage", coverage.coverage_context_id ? 1 : 0, coverage.counter_search_state ? `Counter-search: ${coverage.counter_search_state}` : "No CoverageContext persisted", "coverage");
-    setMetric("metric-radar", radar.length, "Read-only projections from ChangeEvent", "radar");
+    setMetric("metric-radar", radar.length, window.GF_I18N?.t("radarDetail") || "Read-only projections from ChangeEvent", "radar");
     const pill = document.getElementById("today-coverage-pill");
     if (pill) pill.textContent = coverage.coverage_context_id ? `Coverage persisted · counter-search ${coverage.counter_search_state || "UNKNOWN"}` : "No persisted CoverageContext";
   } catch (error) {
@@ -289,9 +289,10 @@ function commonHeader(title, subtitle, mode = "dummy") {
 }
 
 function renderJourney() {
-  return commonHeader("Research Journey R0–R16", "Illustrative workflow mock-up only; no canonical stage status is persisted.") + `
-    <div class="callout warning dummy-warning"><strong>ILLUSTRATIVE / NON-CANONICAL:</strong> every stage status, count, identifier, evidence trace, and suggested action below is demonstration data. Do not use it as scientific state.</div>
-    <div class="detail-grid dummy-zone"><div class="stack"><div class="card"><h3>All stages</h3>${journeyStages.map(([r,n,s,c]) => `<div class="journey-row"><span class="r-code">${r}</span><div><strong>${n}</strong><small>Status is reversible</small></div><span class="state ${c}">${s}</span></div>`).join("")}</div></div>
+  const id=window.GF_I18N?.current?.() === "id";
+  return commonHeader(id ? "Perjalanan Riset R0–R16" : "Research Journey R0–R16", id ? "Mock-up alur kerja ilustratif saja; belum ada status tahap canonical yang tersimpan." : "Illustrative workflow mock-up only; no canonical stage status is persisted.") + `
+    <div class="callout warning dummy-warning">${escapeHtml(window.GF_I18N?.t("illustrativeBoundary") || "ILLUSTRATIVE / NON-CANONICAL demonstration data")}</div>
+    <div class="detail-grid dummy-zone"><div class="stack"><div class="card"><h3>${escapeHtml(window.GF_I18N?.t("allStages") || "All stages")}</h3>${journeyStages.map(([r,n,s,c],index) => `<div class="journey-row"><span class="r-code">${r}</span><div><strong>${escapeHtml(window.GF_I18N?.stageName(index) || n)}</strong><small>${escapeHtml(window.GF_I18N?.t("stageStatusReversible") || "Status is reversible")}</small></div><span class="state ${c}">${s}</span></div>`).join("")}</div></div>
     <div class="stack"><div class="card"><h3>R6 — Theory Positioning</h3><div class="callout warning">NEEDS ATTENTION because a competing explanation now covers part of the same mechanism.</div><p><strong>What we found</strong></p><ul><li>23 mapped papers</li><li>5 candidate theoretical lenses</li><li>4 challenging evidence links</li><li>2 competing explanations</li></ul><p><strong>Learn</strong></p><p>Theory should be evaluated for explanatory fit and contribution, not popularity alone.</p></div><div class="card"><h3>Evidence trace</h3><div class="trace">R6 WHY → CLM-142 → CHALLENGES THEORY-006 → EVF-0092 → Paper → Source</div></div></div>
     <div class="stack"><div class="card"><h3>Suggested HUMAN actions</h3><div class="decision-bar"><button class="primary">Compare theories</button><button>Inspect mechanisms</button><button>Counter-evidence</button><button>Need more evidence</button></div></div><div class="card"><h3>Recent stage impacts</h3><p>CE-0048 affects R4, R5, R6, R11 and R12. These are attention signals, not forced transitions.</p></div></div></div>`;
 }
@@ -666,6 +667,8 @@ window.GF_I18N?.apply();
 applyMetricActionLabels();
 window.addEventListener("gfprojclaw-language-change", () => {
   applyMetricActionLabels();
+  renderToday();
+  const activeJourney=document.getElementById("view-journey"); if (activeJourney?.classList.contains("active-view")) activeJourney.innerHTML=renderJourney();
   const dark = document.documentElement.dataset.theme === "dark";
   if (themeToggle) themeToggle.textContent = `${dark ? "☀️" : "🌙"} ${window.GF_I18N.t(dark ? "light" : "dark")}`;
 });
