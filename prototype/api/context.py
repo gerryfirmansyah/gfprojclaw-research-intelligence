@@ -680,3 +680,19 @@ def update_research_project(project_id, name, research_intent, provisional_rq_te
         new=conn.execute("""INSERT INTO research_project_version(project_id,version_no,research_intent,provisional_rq_text,project_configuration_jsonb,supersedes_version_id,created_by) VALUES(%s,%s,%s,%s,%s::jsonb,%s,%s) RETURNING id,version_no""",(project_id,v,research_intent,provisional_rq_text,__import__('json').dumps(configuration),old,actor)).fetchone()
         conn.execute("UPDATE research_project SET name=%s,current_version_id=%s WHERE id=%s",(name.strip(),new['id'],project_id)); conn.commit()
     return {'project_id':project_id,'project_version':new['version_no'],'scientific_decision':False}
+
+
+def update_profile_project_configuration(profile_id, project_id, profile, project, actor, reason):
+    import json
+    if not all(str(x or '').strip() for x in (profile_id,project_id,actor,reason)): raise ValueError('profile_id, project_id, actor, and reason are required')
+    if not str(profile.get('name') or '').strip() or not str(project.get('name') or '').strip() or not str(project.get('research_intent') or '').strip(): raise ValueError('profile name, project name, and research intent are required')
+    pc=profile.get('configuration') if isinstance(profile.get('configuration'),dict) else {}; qc=project.get('configuration') if isinstance(project.get('configuration'),dict) else {}
+    audit_actor=f"{actor.strip()} | reason: {reason.strip()}"
+    with db() as conn:
+        pr=conn.execute("SELECT current_version_id FROM research_profile WHERE id=%s AND status='ACTIVE' FOR UPDATE",(profile_id,)).fetchone(); pj=conn.execute("SELECT current_version_id FROM research_project WHERE id=%s AND research_profile_id=%s AND status='ACTIVE' FOR UPDATE",(project_id,profile_id)).fetchone()
+        if not pr or not pj: raise ValueError('Active linked profile/project not found')
+        pv=conn.execute("SELECT COALESCE(max(version_no),0)+1 n FROM research_profile_version WHERE profile_id=%s",(profile_id,)).fetchone()['n']; qv=conn.execute("SELECT COALESCE(max(version_no),0)+1 n FROM research_project_version WHERE project_id=%s",(project_id,)).fetchone()['n']
+        pn=conn.execute("INSERT INTO research_profile_version(profile_id,version_no,summary,configuration_jsonb,supersedes_version_id,created_by) VALUES(%s,%s,%s,%s::jsonb,%s,%s) RETURNING id",(profile_id,pv,profile.get('summary'),json.dumps(pc),pr['current_version_id'],audit_actor)).fetchone()['id']
+        qn=conn.execute("INSERT INTO research_project_version(project_id,version_no,research_intent,provisional_rq_text,project_configuration_jsonb,supersedes_version_id,created_by) VALUES(%s,%s,%s,%s,%s::jsonb,%s,%s) RETURNING id",(project_id,qv,project.get('research_intent'),project.get('provisional_rq_text'),json.dumps(qc),pj['current_version_id'],audit_actor)).fetchone()['id']
+        conn.execute("UPDATE research_profile SET name=%s,current_version_id=%s WHERE id=%s",(profile['name'].strip(),pn,profile_id)); conn.execute("UPDATE research_project SET name=%s,current_version_id=%s WHERE id=%s",(project['name'].strip(),qn,project_id)); conn.commit()
+    return {'profile_id':profile_id,'profile_version':pv,'project_id':project_id,'project_version':qv,'scientific_decision':False,'atomic':True}
