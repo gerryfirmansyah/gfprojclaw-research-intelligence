@@ -125,13 +125,20 @@ function applyTheme(theme) {
   }
 }
 
+const WORKSPACE_THEMES = ["light","dark","research-blue","scholar-green","executive-indigo"];
 const savedTheme = localStorage.getItem("gfprojclaw-theme");
-applyTheme(savedTheme === "dark" ? "dark" : "light");
+applyTheme(WORKSPACE_THEMES.includes(savedTheme) ? savedTheme : "light");
 themeToggle?.addEventListener("click", () => {
   const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   localStorage.setItem("gfprojclaw-theme", next);
   applyTheme(next);
 });
+function applyProfileTheme(rows){
+  if(localStorage.getItem("gfprojclaw-theme")) return;
+  const ctx=rows.find(r=>r.profile_id===profileSelect.value);
+  const preferred=ctx?.profile_configuration_jsonb?.workspace_theme;
+  if(WORKSPACE_THEMES.includes(preferred)) applyTheme(preferred);
+}
 
 function selectedDummyData() {
   const idx = Math.max(0, profileSelect.selectedIndex);
@@ -577,6 +584,7 @@ fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) t
     const projects = rows.filter(r => r.profile_id === profileSelect.value);
     projectSelect.innerHTML = projects.map(r => `<option value="${r.project_id}">${r.project_name}</option>`).join("");
     renderLatestPapers();
+    applyProfileTheme(rows);
   };
   profileSelect.onchange = () => { bindProjects(); loadHumanReviewBadge(); const aktif = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || aktif === "today") renderDashboard(); else showView(active); };
   bindProjects();

@@ -32,6 +32,10 @@ html[data-theme="dark"] {
   color-scheme: dark;
 }
 
+html[data-theme="research-blue"] { --bg:#eef4fb;--panel:#fff;--text:#102844;--muted:#60758d;--border:#cbd9e8;--sidebar:#102f52;--sidebar-2:#17436f;--blue:#2368a2;--blue-soft:#dcecff;--topbar:rgba(247,251,255,.94);--control:#fff;--row-border:#d9e4ef;--table-head:#edf4fa;--card-text:#405b75; }
+html[data-theme="scholar-green"] { --bg:#f0f5f1;--panel:#fff;--text:#17362b;--muted:#63786f;--border:#ceddd4;--sidebar:#173d31;--sidebar-2:#245646;--blue:#28745b;--blue-soft:#dcefe7;--topbar:rgba(249,252,250,.94);--control:#fff;--row-border:#dbe7df;--table-head:#eef5f1;--card-text:#466357; }
+html[data-theme="executive-indigo"] { --bg:#f2f1f8;--panel:#fff;--text:#292747;--muted:#716e88;--border:#d7d3e6;--sidebar:#29264f;--sidebar-2:#3b376b;--blue:#5651a8;--blue-soft:#e7e5f7;--topbar:rgba(250,249,253,.94);--control:#fff;--row-border:#e2dfee;--table-head:#f2f0f8;--card-text:#56536e; }
+
 * { box-sizing: border-box; }
 body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
 button, select, input { font: inherit; }
