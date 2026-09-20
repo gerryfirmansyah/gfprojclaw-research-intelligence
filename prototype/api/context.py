@@ -255,13 +255,38 @@ def list_project_changes(project_id, object_id=None, limit=50):
                    ce.primary_research_object_id,
                    roi.canonical_label,
                    ce.coverage_context_id,
+                   ce.previous_assessment_id,
+                   ce.current_assessment_id,
+                   ce.current_supersedes_assessment_id,
                    ce.change_type, ce.observed_at,
                    ce.previous_state_jsonb,
                    ce.current_state_jsonb,
-                   ce.reasoning_delta
+                   ce.reasoning_delta,
+                   COALESCE(cem.evidence_members, '[]'::jsonb) AS evidence_members
             FROM change_event ce
             JOIN research_object_identity roi
               ON roi.id = ce.primary_research_object_id
+            LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object(
+                    'change_event_evidence_id', x.id,
+                    'role', x.role,
+                    'evidence_relationship_id', er.id,
+                    'semantic_type', er.semantic_type,
+                    'claim_id', c.id,
+                    'claim_text', c.claim_text,
+                    'evidence_fragment_id', ef.id,
+                    'access_level', ef.access_level,
+                    'work_id', w.id,
+                    'work_title', w.title
+                ) ORDER BY x.created_at, x.id) AS evidence_members
+                FROM change_event_evidence x
+                JOIN evidence_relationship er ON er.id = x.evidence_relationship_id
+                  AND er.target_research_object_id = x.target_research_object_id
+                JOIN claim c ON c.id = er.claim_id
+                JOIN evidence_fragment ef ON ef.id = c.evidence_fragment_id
+                JOIN work w ON w.id = ef.work_id
+                WHERE x.change_event_id = ce.id
+            ) cem ON TRUE
             WHERE ce.project_id = %s
               AND (%s::uuid IS NULL OR ce.primary_research_object_id = %s::uuid)
             ORDER BY ce.observed_at DESC, ce.created_at DESC
