@@ -1,7 +1,7 @@
 # J15 Current State Checkpoint v0
 
 Date: 2026-09-20
-Status: J15 IN PROGRESS — HUMAN TRIAL
+Status: J15 HUMAN PASS — accepted 2026-09-20
 Code baseline: 968cc9f — Clarify J15 advice critic assessment scope
 
 ## 1. Purpose
@@ -255,3 +255,9 @@ The canonical ChangeEvent projection regression was executed with the project vi
 HUMAN browser review found that Indonesian UI labels alone were insufficient because persisted machine-authored statements, Claims, assessment explanations, relationship rationales, and coverage limitations remained English. Research Copilot v0.17.1 adds a presentation-only Indonesian translation layer for the currently persisted Profile A scientific prose used by Opportunities / Advice & Critic / Evidence Explorer. The canonical API and database values are not rewritten. Where a translated machine-authored canonical value is shown, the original is available through `Lihat teks canonical asli`.
 
 Paper titles and source-derived evidence previews remain in their original source language and are explicitly labeled as such. Research Journey illustrative status text is localized directly because it is demonstration/presentation data, not canonical scientific state. Canonical tokens and identifiers remain unchanged. This slice does not claim general machine translation for arbitrary future prose; untranslated canonical text falls back to the original rather than fabricating a translation. HUMAN browser re-trial remains required and J15 is not HUMAN PASS.
+
+## 19. 2026-09-20 HUMAN acceptance — J15 HUMAN PASS
+
+HUMAN completed the browser acceptance review and explicitly declared acceptance after reviewing the Research Copilot surfaces, including Research Journey, Research Opportunities, Evidence Explorer, and Human Review. The final requested presentation adjustment removes bold emphasis from the Claim text in the Evidence Explorer result list and Human Review queue; this does not alter canonical scientific state.
+
+The HUMAN reported that the remaining reviewed aspects pass. This acceptance closes the required HUMAN browser re-trial gate for J15 v0. The existing scientific-authority invariants remain in force: HUMAN remains the scientific authority; machine assessments remain advisory; source/access limitations remain explicit; canonical source text is not silently rewritten; and no timer activation or automatic scientific decision is authorized by this acceptance. J15 is therefore recorded as **HUMAN PASS** as of 2026-09-20.
