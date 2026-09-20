@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GFPROJCLAW Research Copilot</title>
-  <link rel="stylesheet" href="styles.css?v=0.16.0" />
+  <link rel="stylesheet" href="styles.css?v=0.16.1" />
 </head>
 <body>
   <div class="app-shell">
@@ -60,7 +60,7 @@
           <input id="global-search" type="search" placeholder="Search papers, concepts, gaps…" />
           <a class="workspace-link" href="admin.html">Admin Copilot</a>
           <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">🌙 Dark</button>
-          <span id="prototype-version" class="sync-status">Prototype v0.16.0 · Research Copilot split trial</span>
+          <span id="prototype-version" class="sync-status">Prototype v0.16.1 · traceable UX trial</span>
         </div>
       </header>
 
@@ -74,11 +74,11 @@
         </div>
 
         <div class="metric-grid">
-          <article class="metric-card" id="metric-papers"><span>Persisted Papers</span><strong>…</strong><small>Loading canonical project data</small></article>
-          <article class="metric-card" id="metric-decisions"><span>HUMAN Decisions</span><strong>…</strong><small>Loading persisted decisions</small></article>
-          <article class="metric-card" id="metric-changes"><span>Knowledge Changes</span><strong>…</strong><small>Loading canonical ChangeEvents</small></article>
-          <article class="metric-card" id="metric-coverage"><span>Coverage Context</span><strong>…</strong><small>Loading persisted coverage state</small></article>
-          <article class="metric-card" id="metric-radar"><span>Radar Items</span><strong>…</strong><small>Loading canonical projection</small></article>
+          <article class="metric-card metric-action" id="metric-papers" tabindex="0" role="button" data-metric-open="evidence" aria-label="Open persisted papers"><span>Persisted Papers</span><strong>…</strong><small>Loading canonical project data</small></article>
+          <article class="metric-card metric-action" id="metric-decisions" tabindex="0" role="button" data-metric-open="review" aria-label="Open HUMAN review and decisions"><span>HUMAN Decisions</span><strong>…</strong><small>Loading persisted decisions</small></article>
+          <article class="metric-card metric-action" id="metric-changes" tabindex="0" role="button" data-metric-open="evolution" aria-label="Open knowledge changes"><span>Knowledge Changes</span><strong>…</strong><small>Loading canonical ChangeEvents</small></article>
+          <article class="metric-card metric-action" id="metric-coverage" tabindex="0" role="button" data-metric-open="coverage" aria-label="Open research coverage"><span>Coverage Context</span><strong>…</strong><small>Loading persisted coverage state</small></article>
+          <article class="metric-card metric-action" id="metric-radar" tabindex="0" role="button" data-metric-open="telegram" aria-label="Open radar items"><span>Radar Items</span><strong>…</strong><small>Loading canonical projection</small></article>
         </div>
 
         <div class="dashboard-grid">
@@ -130,6 +130,6 @@
     </main>
   </div>
 
-  <script src="app.js?v=0.16.0"></script>
+  <script src="app.js?v=0.16.1"></script>
 </body>
 </html>

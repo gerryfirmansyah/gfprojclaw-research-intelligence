@@ -126,3 +126,12 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .workspace-link { display:inline-flex; align-items:center; border:1px solid var(--border); background:var(--control); color:var(--blue); border-radius:9px; padding:9px 11px; font-size:12px; font-weight:var(--font-weight-label); text-decoration:none; }
 .workspace-link:hover { border-color:var(--blue); }
 .paper-title { background:var(--surface-paper-title); color:var(--text-paper-title); border-radius:8px; padding:8px 10px; font-weight:var(--font-weight-heading); line-height:1.4; }
+.trace-label { font-weight:var(--font-weight-label); color:var(--text); }
+.trace .paper-title { margin:6px 0; font-family:var(--font-ui); }
+.trace p { font-family:var(--font-ui); font-weight:var(--font-weight-body); }
+.metric-action { cursor:pointer; transition:transform .15s ease,border-color .15s ease; }
+.metric-action:hover, .metric-action:focus-visible { border-color:var(--blue); transform:translateY(-1px); outline:none; }
+.metric-action::after { content:"Inspect members →"; display:block; margin-top:7px; color:var(--blue); font-size:10px; font-weight:var(--font-weight-label); }
+.dummy-warning { margin-bottom:14px; border:2px dashed var(--yellow); font-weight:var(--font-weight-body); }
+.dummy-zone { opacity:.82; border:2px dashed var(--yellow); border-radius:12px; padding:10px; }
+.dummy-zone::before { content:"ILLUSTRATIVE DATA — NOT CANONICAL"; display:block; grid-column:1/-1; color:var(--yellow); font-size:11px; font-weight:var(--font-weight-heading); letter-spacing:.08em; }

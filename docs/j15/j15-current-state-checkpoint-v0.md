@@ -203,3 +203,11 @@ The prototype now implements the first approved workspace split. `prototype/inde
 The CSS now begins a semantic token layer for typography, paper-title presentation, and workspace controls. This is an implementation foundation for later administrator defaults and permitted user preferences; it does not yet implement persisted preference management or EN/ID translation.
 
 Static contract checks and JavaScript syntax checks passed. HUMAN browser re-trial remains required before J15 HUMAN PASS.
+
+## 12. 2026-09-20 Research UX hierarchy and aggregate traceability slice
+
+The Research Copilot prototype now applies a consistent Paper title component across Latest Papers and key evidence/review traces, separates short labels from explanatory prose, and reduces reliance on bold text inside scientific explanation blocks. Today metric cards are keyboard-accessible drill-down controls: Papers -> Evidence Explorer, HUMAN Decisions -> Human Review, Knowledge Changes -> Knowledge Evolution, Coverage Context -> Research Coverage, and Radar Items -> Telegram Research Radar. These links expose the relevant canonical member surfaces rather than leaving the aggregate as a dead statistic.
+
+Research Journey remains illustrative rather than canonical. Its page now carries an explicit high-visibility NON-CANONICAL warning and a dashed illustrative zone stating that stage statuses, counts, identifiers, traces, and suggested actions are demonstration data. This does not convert those values into canonical research state.
+
+Static traceability assertions, JavaScript syntax checks, and `git diff --check` passed. Browser/HUMAN verification remains required; J15 is not HUMAN PASS.
