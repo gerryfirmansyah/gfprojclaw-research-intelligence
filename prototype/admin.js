@@ -19,9 +19,15 @@ function previewConfig(){
  out.innerHTML=`<h3>Preview</h3>${changes.length?changes.map(x=>`<p><strong>${esc(x[0])}</strong><br>Current: ${esc(x[1]||'NOT_AVAILABLE')}<br>Proposed: ${esc(x[2]||'NOT_AVAILABLE')}</p>`).join(''):'<p>No structured-field changes detected.</p>'}<p><strong>Reason:</strong> ${esc(reason)}</p><button class="text-button" id="ac-save">Confirm & create new versions</button>`;document.getElementById('ac-save').onclick=saveConfig;
 }
 
+async function loadOperationalHealth(){
+ const box=document.getElementById("admin-ops-health"); if(!box)return;
+ try{const r=await fetch(`${API_BASE}/api/admin/operational-health`,{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);const h=await r.json(), sv=h.services||{}, badge=(label,u)=>`<div class="health-row"><div><strong>${esc(label)}</strong><small>${esc(u.LoadState||"unknown")} · ${esc(u.UnitFileState||"not-enabled")}</small></div><span class="state ${u.ActiveState==="active"?"green":u.LoadState==="not-found"?"gray":"yellow"}">${esc(u.ActiveState||"UNKNOWN")}</span></div>`;box.innerHTML=`<div class="detail-grid"><div class="card"><h3>Services & Schedulers</h3>${badge("Cockpit API",sv.api||{})}${badge("Telegram daily radar",sv.telegram_timer||{})}${badge("PostgreSQL backup",sv.backup_timer||{})}${badge("Continuous Pilot",sv.continuous_pilot_timer||{})}${badge("Legacy G6–G9 (historical)",sv.legacy_g6_g9||{})}</div><div class="card"><h3>Backup & Storage</h3><p><strong>Latest backup</strong><br>${esc(h.backup?.latest_name||"NOT_AVAILABLE")} · ${h.backup?.latest_bytes?Math.round(h.backup.latest_bytes/1024)+" KB":"NOT_AVAILABLE"}</p><p><strong>Backup count</strong><br>${esc(h.backup?.count??"NOT_AVAILABLE")}</p><p><strong>Disk</strong><br>${esc(h.storage?.used_percent??"NOT_AVAILABLE")}% used · ${h.storage?.free_bytes?Math.round(h.storage.free_bytes/1073741824)+" GB free":"NOT_AVAILABLE"}</p></div></div><div class="callout">Operational projection is read-only and reports scientific_decision=false. A disabled/not-found Continuous Pilot is not treated as a scientific failure.</div>`;}catch(e){box.innerHTML=`<div class="callout warning">Production health unavailable: ${esc(e.message)}</div>`;}
+}
+
 async function loadAdmin() {
   if (!projectSelect.value) return;
   renderConfig();
+  loadOperationalHealth();
   const p=encodeURIComponent(projectSelect.value);
   const pilot=document.getElementById("admin-pilot"), sources=document.getElementById("admin-sources");
   try {

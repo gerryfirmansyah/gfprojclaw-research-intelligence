@@ -1,4 +1,6 @@
 import json
+import os, shutil, subprocess
+from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
@@ -20,8 +22,21 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def operational_health(self):
+        def unit(name):
+            p=subprocess.run(["systemctl","show",name,"-p","LoadState","-p","ActiveState","-p","SubState","-p","UnitFileState","-p","Result","--no-pager"],capture_output=True,text=True,timeout=3)
+            return dict(line.split("=",1) for line in p.stdout.splitlines() if "=" in line)
+        disk=shutil.disk_usage("/")
+        backup_dir=Path("/opt/gfprojclaw/backups"); dumps=sorted(backup_dir.glob("gfprojclaw-*.dump"),key=lambda p:p.stat().st_mtime,reverse=True) if backup_dir.exists() else []
+        latest=dumps[0] if dumps else None
+        return {"generated_at":datetime.now(timezone.utc).isoformat(),"services":{"api":unit("gfprojclaw-cockpit-api.service"),"telegram_timer":unit("gfprojclaw-status-telegram.timer"),"backup_timer":unit("gfprojclaw-backup.timer"),"legacy_g6_g9":unit("gfprojclaw-g6-g9.service"),"continuous_pilot_timer":unit("gfprojclaw-continuous-pilot.timer")},"storage":{"total_bytes":disk.total,"used_bytes":disk.used,"free_bytes":disk.free,"used_percent":round(disk.used*100/disk.total,1)},"backup":{"count":len(dumps),"latest_name":latest.name if latest else None,"latest_bytes":latest.stat().st_size if latest else None,"latest_mtime":datetime.fromtimestamp(latest.stat().st_mtime,timezone.utc).isoformat() if latest else None},"scientific_decision":False}
+
     def do_GET(self):
         path = urlparse(self.path).path
+        if path == "/api/admin/operational-health":
+            try: self.send_json(self.operational_health())
+            except Exception as exc: self.send_json({"error":str(exc)},status=500)
+            return
         if path == "/api/context":
             self.send_json(list_context())
             return
