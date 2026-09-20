@@ -390,7 +390,7 @@ function escapeHtml(value) {
 
 function renderEvidence() {
   return commonHeader("Penjelajah Bukti", "Record EvidenceFragment dan Claim nyata untuk Proyek yang dipilih.", "real") + `
-  <div class="detail-grid"><div class="card"><h3>Hasil Bukti</h3><div id="real-evidence-list">Memuat bukti canonical…</div></div>
+  <div class="detail-grid evidence-layout"><div class="card evidence-list-card"><h3>Hasil Bukti</h3><div id="real-evidence-list">Memuat bukti canonical…</div></div>
   <div class="card"><h3>Detail Bukti</h3><div id="real-evidence-detail">Pilih Claim yang tersimpan.</div></div>
   <div class="card"><h3>Batas canonical</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>Hanya EvidenceRelationship yang tersimpan yang ditampilkan atau diimplikasikan; tidak ada relasi tambahan yang disimpulkan.</p></div></div>`;
 }
@@ -447,7 +447,7 @@ async function loadProjectChanges() {
 
 function renderReview() {
   return commonHeader("Tinjauan HUMAN", "Claim canonical yang memerlukan tinjauan ilmiah HUMAN untuk Proyek yang dipilih.", "real") + `
-  <div class="detail-grid"><div class="card real-surface"><h3>Antrean Tinjauan <span class="data-badge real">DATA NYATA</span></h3><div id="real-review-list">Memuat antrean tinjauan canonical…</div></div>
+  <div class="detail-grid review-layout"><div class="card real-surface review-list-card"><h3>Antrean Tinjauan <span class="data-badge real">DATA NYATA</span></h3><div id="real-review-list">Memuat antrean tinjauan canonical…</div></div>
   <div class="card real-surface"><h3>Konteks Tinjauan</h3><div id="real-review-detail">Pilih Claim yang tersimpan.</div></div>
   <div class="card"><h3>Batas Keputusan</h3><p>Antrean ini mendukung pemeriksaan Claim canonical. HumanDecision hanya ditulis melalui tindakan HUMAN eksplisit pada alur kerja yang menyediakan kontrol keputusan.</p><div class="callout warning">NEEDS_REVIEW adalah status yang memerlukan perhatian, bukan penerimaan atau penolakan ilmiah.</div></div></div>`;
 }

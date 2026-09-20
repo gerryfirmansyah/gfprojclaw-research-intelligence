@@ -156,3 +156,11 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 /* Long scientific text must own its row; status badges never overlap content. */
 .change-row{grid-template-columns:minmax(0,1fr) auto;align-items:start}.change-main{min-width:0;overflow-wrap:anywhere;word-break:normal;line-height:1.38}.change-main>div{font-size:13px;line-height:1.45}.change-main small{display:block;margin-top:6px;line-height:1.4;overflow-wrap:anywhere}.change-row>.state{align-self:start;margin-left:8px}.paper-title{overflow-wrap:anywhere;word-break:normal;line-height:1.4}
 @media (max-width:760px){.change-row{grid-template-columns:1fr}.change-row>.state{margin-left:0;justify-self:start}.detail-grid{grid-template-columns:1fr}.span-2{grid-column:span 1}}
+/* Evidence/review lists need more width than generic three-column detail cards. */
+.evidence-layout,.review-layout{grid-template-columns:minmax(420px,1.35fr) minmax(320px,1fr) minmax(260px,.8fr)}
+.evidence-list-card .paper-title,.review-list-card .paper-title{background:transparent;padding:0;border-radius:0;font-weight:var(--font-weight-label)}
+.evidence-list-card .change-row,.review-list-card .change-row{grid-template-columns:1fr;gap:8px;padding:14px 16px}
+.evidence-list-card .change-row>.state,.review-list-card .change-row>.state{margin-left:0;justify-self:start}
+.evidence-list-card .change-main small,.review-list-card .change-main small{font-weight:var(--font-weight-body)}
+@media (max-width:1180px){.evidence-layout,.review-layout{grid-template-columns:minmax(380px,1.2fr) minmax(320px,1fr)}.evidence-layout> :last-child,.review-layout> :last-child{grid-column:1/-1}}
+@media (max-width:820px){.evidence-layout,.review-layout{grid-template-columns:1fr}.evidence-layout> :last-child,.review-layout> :last-child{grid-column:auto}}
