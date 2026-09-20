@@ -50,3 +50,6 @@ Admin Copilot is the J16 operational acceptance surface. Its current J15 shell i
 - API, Caddy, Telegram timer, and backup timer are enabled/active. Continuous Pilot remains absent/inactive. Runtime DB config is 0700/0600 under `gfproj:gfproj`; Admin credential environment is 0600 root-only; backups are 0700 with 0600 dumps.
 - Authenticated Admin UI received HUMAN visual acceptance after showing the browser sign-in boundary and successfully rendering Production Health after authentication.
 - Replacement-environment replication is `DEFERRED — FINAL J16 GATE` by HUMAN decision. It remains mandatory before final J16 HUMAN PASS.
+
+## HUMAN verification-surface invariant
+Database state is machine-readable state; Research Copilot is the HUMAN scientific verification surface. No scientifically meaningful machine interpretation may be presented as supported knowledge unless HUMAN can inspect the canonical state/evidence that supports it through the interface. Meaningful aggregates must expose members. Machine terminology must not substitute for a HUMAN-readable explanation. If a support/verification path cannot be displayed, the interface must expose the limitation (`UNKNOWN`, `NOT_AVAILABLE`, `NOT_RECORDED`, or `NOT_RUN`) rather than silently asserting support. This invariant is regression-tested and is part of J16 acceptance.
