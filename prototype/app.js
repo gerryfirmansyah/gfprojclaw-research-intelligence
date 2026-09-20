@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.16.2";
+const PROTOTYPE_VERSION = "0.16.3";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 const themeToggle = document.getElementById("theme-toggle");
 
@@ -151,6 +151,37 @@ function renderDashboard() {
   bindOpenButtons();
 }
 
+let todayMetricMembers = {};
+
+function sourceLinks(identifiers = {}) {
+  const links = [];
+  if (identifiers.DOI) links.push(`<a class="source-link source-link-doi" href="https://doi.org/${escapeHtml(identifiers.DOI)}" target="_blank" rel="noopener noreferrer">DOI ↗</a>`);
+  if (identifiers.OPENALEX) links.push(`<a class="source-link source-link-openalex" href="https://openalex.org/${escapeHtml(identifiers.OPENALEX)}" target="_blank" rel="noopener noreferrer">OpenAlex ↗</a>`);
+  return links.join(" · ");
+}
+
+function renderMetricMember(kind, item) {
+  if (kind === "papers") {
+    const links = sourceLinks(item.identifiers || {});
+    return `<div class="metric-member"><div class="paper-title">${escapeHtml(item.title || "Untitled work")}</div><p>${escapeHtml(item.publication_year || "Year unknown")} · ${escapeHtml(item.venue_name || "Venue unknown")} · ${escapeHtml(item.current_access_level || "ACCESS_NOT_RECORDED")}</p><small>Work: ${escapeHtml(item.work_id)} · Review: ${escapeHtml(item.human_review_state || item.relevance_state || "NOT_RECORDED")} · Source: ${escapeHtml(item.source_key || "NOT_RECORDED")}</small>${links ? `<p>${links}</p>` : ""}</div>`;
+  }
+  if (kind === "decisions") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.decision_type || "HUMAN decision")}</span><p>${escapeHtml(item.rationale || "No rationale recorded")}</p><small>Decision: ${escapeHtml(item.decision_id || item.id || "ID_NOT_RECORDED")} · Actor: ${escapeHtml(item.actor || "NOT_RECORDED")} · ${escapeHtml(item.decided_at || "time unknown")}</small></div>`;
+  if (kind === "changes") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.change_type)}</span><p>${escapeHtml(item.canonical_label || item.primary_research_object_id)}</p><small>ChangeEvent: ${escapeHtml(item.change_event_id || item.id || "ID_NOT_RECORDED")} · ${escapeHtml(item.reasoning_delta || "No reasoning delta recorded")} · ${escapeHtml(item.observed_at || "time unknown")}</small></div>`;
+  if (kind === "coverage") return `<div class="metric-member"><span class="trace-label">CoverageContext</span><p>Counter-search: ${escapeHtml(item.counter_search_state || "UNKNOWN")}</p><small>Context: ${escapeHtml(item.coverage_context_id)} · ${escapeHtml(item.limitations || "No limitation recorded")}</small></div>`;
+  if (kind === "radar") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.change_type || "Radar item")}</span><p>${escapeHtml(item.canonical_label || "Canonical projection")}</p><small>${escapeHtml(item.observed_at || "time unknown")} · read-only ChangeEvent projection</small></div>`;
+  return "";
+}
+
+function showMetricMembers(kind) {
+  const panel=document.getElementById("metric-members"), list=document.getElementById("metric-members-list"), title=document.getElementById("metric-members-title"), summary=document.getElementById("metric-members-summary");
+  if (!panel || !list) return;
+  const config=todayMetricMembers[kind]; if (!config) return;
+  title.textContent=`${config.label} — ${config.items.length} canonical member${config.items.length === 1 ? "" : "s"}`;
+  summary.textContent=config.summary;
+  list.innerHTML=config.items.length ? config.items.map(item=>renderMetricMember(kind,item)).join("") : `<p>No canonical members persisted for this metric.</p>`;
+  panel.hidden=false; panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
 async function loadTodayMetrics() {
   const projectId = projectSelect.value;
   if (!projectId) return;
@@ -161,15 +192,23 @@ async function loadTodayMetrics() {
       if (!response.ok) throw new Error(`${name} HTTP ${response.status}`);
       return response.json();
     }));
-    const setMetric = (id, value, detail) => { const el = document.getElementById(id); if (el) { el.querySelector("strong").textContent = value; el.querySelector("small").textContent = detail; el.classList.remove("dummy-surface"); el.classList.add("real-surface"); } };
-    setMetric("metric-papers", papers.length, "Persisted works in selected project");
-    setMetric("metric-decisions", decisions.length, "Explicit persisted HUMAN decisions");
-    setMetric("metric-changes", changes.length, "Persisted canonical ChangeEvents");
-    setMetric("metric-coverage", coverage.coverage_context_id ? 1 : 0, coverage.counter_search_state ? `Counter-search: ${coverage.counter_search_state}` : "No CoverageContext persisted");
-    setMetric("metric-radar", radar.length, "Read-only projections from ChangeEvent");
+    todayMetricMembers={
+      papers:{label:"Persisted Papers",items:papers,summary:"Exact persisted works in the selected project. Paper titles and external identifiers are shown when canonically available."},
+      decisions:{label:"HUMAN Decisions",items:decisions,summary:"Exact explicit persisted HUMAN decisions returned for the selected project."},
+      changes:{label:"Knowledge Changes",items:changes,summary:"Exact persisted canonical ChangeEvents for the selected project."},
+      coverage:{label:"Coverage Context",items:coverage.coverage_context_id?[coverage]:[],summary:"The persisted CoverageContext represented by this count; it is context, not a scientific verdict."},
+      radar:{label:"Radar Items",items:radar,summary:"Exact read-only Radar projections derived from canonical ChangeEvents."}
+    };
+    const setMetric = (id, value, detail, kind) => { const el = document.getElementById(id); if (el) { el.querySelector("strong").textContent = value; el.querySelector("small").textContent = detail; el.dataset.metricMembers=kind; el.classList.remove("dummy-surface"); el.classList.add("real-surface"); } };
+    setMetric("metric-papers", papers.length, "Persisted works in selected project", "papers");
+    setMetric("metric-decisions", decisions.length, "Explicit persisted HUMAN decisions", "decisions");
+    setMetric("metric-changes", changes.length, "Persisted canonical ChangeEvents", "changes");
+    setMetric("metric-coverage", coverage.coverage_context_id ? 1 : 0, coverage.counter_search_state ? `Counter-search: ${coverage.counter_search_state}` : "No CoverageContext persisted", "coverage");
+    setMetric("metric-radar", radar.length, "Read-only projections from ChangeEvent", "radar");
     const pill = document.getElementById("today-coverage-pill");
     if (pill) pill.textContent = coverage.coverage_context_id ? `Coverage persisted · counter-search ${coverage.counter_search_state || "UNKNOWN"}` : "No persisted CoverageContext";
   } catch (error) {
+    todayMetricMembers={};
     document.querySelectorAll(".metric-card").forEach(el => { el.querySelector("strong").textContent = "—"; el.querySelector("small").textContent = `Canonical metric unavailable: ${error.message}`; });
   }
 }
@@ -486,10 +525,12 @@ function showView(name) {
 function bindOpenButtons() {
   document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => showView(b.dataset.open));
   document.querySelectorAll("[data-metric-open]").forEach(card => {
-    const open = () => showView(card.dataset.metricOpen);
+    const open = () => card.dataset.metricMembers ? showMetricMembers(card.dataset.metricMembers) : showView(card.dataset.metricOpen);
     card.onclick = open;
     card.onkeydown = event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } };
   });
+  const close=document.getElementById("metric-members-close");
+  if (close) close.onclick=()=>{ document.getElementById("metric-members").hidden=true; };
 }
 
 document.getElementById("main-nav").addEventListener("click", e => {

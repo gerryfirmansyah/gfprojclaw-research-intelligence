@@ -219,3 +219,11 @@ A shared `prototype/i18n.js` presentation layer now provides an EN/ID language p
 The language boundary is explicit: localization changes UI chrome only. Canonical paper titles, evidence text, Claims, persisted rationale, ChangeEvents, assessments, and other scientific/operational records returned by the API are not translated or rewritten. A future translated scientific view would require an explicit non-canonical label and separate design decision.
 
 This slice adds no database preference schema. It preserves the approved future precedence of system default -> administrator default -> permitted user preference without prematurely choosing persistence architecture. JavaScript syntax checks, diff checks, and a static i18n boundary assertion passed. HUMAN browser verification remains required; J15 is not HUMAN PASS.
+
+## 14. 2026-09-20 HUMAN trial remediation: Today exact-member drill-down
+
+HUMAN browser trial confirmed that Today counts such as `3 / 2 / 1 / 1 / 1` need to answer "which exact members make up this number?" without forcing the researcher to infer membership from a destination page. The Today metric cards now expand an inline canonical-member panel populated from the same API payload used to calculate each count.
+
+Persisted Papers enumerate exact Works with title, bibliographic/access/review/source context and DOI/OpenAlex links when canonical identifiers exist. HUMAN Decisions enumerate exact persisted decisions and rationale. Knowledge Changes enumerate exact ChangeEvents and reasoning delta. Coverage Context exposes the counted persisted CoverageContext and limitation/counter-search state. Radar Items enumerate exact read-only projections from ChangeEvent. The displayed member-list length therefore comes from the same canonical payload as the aggregate count.
+
+This is a UI projection only and creates no scientific records or decisions. Static exact-member assertions, JavaScript syntax checks, and diff checks passed. HUMAN browser re-trial remains required; J15 is not HUMAN PASS.

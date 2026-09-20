@@ -137,3 +137,8 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .dummy-zone::before { content:"ILLUSTRATIVE DATA — NOT CANONICAL"; display:block; grid-column:1/-1; color:var(--yellow); font-size:11px; font-weight:var(--font-weight-heading); letter-spacing:.08em; }
 .language-control { display:flex; gap:6px; align-items:center; color:var(--muted); font-size:11px; }
 .language-control select { width:64px; padding:8px; }
+.metric-members { margin:0 0 16px; padding:16px; border:1px solid var(--blue); border-radius:12px; background:var(--panel); }
+.metric-member { padding:11px 0; border-top:1px solid var(--border); }
+.metric-member:first-child { border-top:0; }
+.metric-member p { margin:5px 0; font-weight:var(--font-weight-body); }
+.metric-member small { color:var(--muted); }
