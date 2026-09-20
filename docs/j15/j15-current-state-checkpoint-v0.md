@@ -187,3 +187,11 @@ Public HTTPS contract checks now pass against the deployed API for both canonica
 The deployed GitHub Pages `app.js` also contains the expected HUMAN-facing markers for Research Quality, Evidence Verification, `PROJECT_LITERATURE_ONLY`, unavailable-explanation handling, historical `UNKNOWN/NOT_RECORDED` ChangeEvent membership, and Assessment transition display.
 
 These are machine-verifiable deployment preflight checks, not a substitute for the acceptance criterion requiring a HUMAN to complete the end-to-end Cockpit trial for both profiles. J15 therefore remains IN PROGRESS / HUMAN TRIAL.
+
+## 10. 2026-09-20 HUMAN UX direction pin
+
+HUMAN trial screenshots established the next UX architecture direction. GFPROJCLAW remains one application and canonical backend, while Research Copilot and Admin Copilot are separated into distinct workspaces/pages. Research users must not need to understand backend operations. Research-facing operational information is limited to scientifically relevant availability/coverage limitations; scheduler, worker, retry, quarantine, raw service health, and audit administration belong to Admin Copilot.
+
+The same trial pins four additional requirements: every meaningful aggregate must drill down to canonical members; Paper/EvidenceFragment/Claim/Relationship/explanation must have a consistent visual hierarchy with restrained bold use; illustrative data must be unmistakable from canonical REAL DATA; and styling/localization should use semantic CSS design tokens plus an Indonesian/English presentation layer. Theme preferences may later follow system default -> administrator default -> permitted user preference, without allowing customization to erase scientific status semantics.
+
+The detailed contract is `docs/j15/research-admin-copilot-ux-contract-v0.md`. This pin does not declare J15 HUMAN PASS.
