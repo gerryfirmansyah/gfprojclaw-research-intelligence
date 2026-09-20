@@ -13,12 +13,12 @@ Every scientifically meaningful aggregate must drill down to exact members. HUMA
 | Today — metric cards | All five counts open exact canonical member lists | PASS | None for aggregate traceability |
 | Today — Recent Important Changes | Shows event/reason/time; View all reaches ChangeEvent detail | PASS | HUMAN-readable Delta remediation already implemented |
 | Today — Research Stage Guide | Explicit GUIDE/non-canonical methodology | PASS | Do not add inferred canonical maturity |
-| Today — Top Research Opportunities | Shows support/challenge counts but table rows themselves are not drill-down controls | IMPROVE | Make each candidate open Opportunities detail/evidence path |
-| Today — Latest Papers | Shows Work/access/source state but no direct DOI/OpenAlex link in this panel | IMPROVE | Add source links or direct evidence inspection path |
+| Today — Top Research Opportunities | Each candidate now opens its exact Opportunities object/evidence context | PASS AFTER REMEDIATION | HUMAN visual recheck required |
+| Today — Latest Papers | Work/access/source plus canonical DOI/OpenAlex links when identifiers exist | PASS AFTER REMEDIATION | HUMAN visual recheck required |
 | Today — Research Coverage | Shows access aggregate + limitation and View all | PASS | Coverage full screen should expose source/provider members when canonical source observations exist |
 | Today — Knowledge Evolution | Shows ChangeEvent/reason + View all | PASS | None after Delta remediation |
 | Today — Telegram Radar | Shows projected events + View all | PASS | Keep read-only boundary explicit |
-| Research Journey R0–R16 | Explicit illustrative/non-canonical screen | PASS WITH CAUTION | Mock examples include numeric evidence and action buttons; visually ensure they cannot be mistaken for live state |
+| Research Journey R0–R16 | Explicit illustrative/non-canonical screen; example actions are non-interactive guidance | PASS AFTER REMEDIATION | HUMAN visual recheck required |
 | Opportunities — object/detail | Canonical object statement/type/state visible | PASS | Humanize technical state labels where possible |
 | Opportunities — Evidence & Coverage | Exact EvidenceRelationship → Claim → EvidenceFragment → Work + source links for GapCandidate | PASS | None |
 | Opportunities — Advice & Critic | Explanation, dimensions, evidence basis, limitations visible | PASS | Humanize dimension labels if technical names remain primary |
@@ -31,7 +31,7 @@ Every scientifically meaningful aggregate must drill down to exact members. HUMA
 | HUMAN Review | Claim/Work/evidence preview shown; explicit warning + route to Verifikasi Bukti before acceptance | PASS AFTER REMEDIATION | HUMAN visual recheck required |
 | Research Coverage | Aggregate counts + exact canonical source observations + limitations rendered | PASS AFTER REMEDIATION | HUMAN visual recheck required |
 | Profiles & Projects | Canonical active Profile/Project fields and versions visible | PASS | None |
-| Telegram Radar full screen | Change/reason/coverage/HUMAN context + button to evidence | PASS | Button currently routes to Opportunities generally; ideally preserve selected object context |
+| Telegram Radar full screen | Change/reason/coverage/HUMAN context; verification button preserves primary ResearchObject context | PASS AFTER REMEDIATION | HUMAN visual recheck required |
 
 ## Admin Copilot checklist
 | Screen | Verification path observed | Status | Improvement required |
@@ -47,13 +47,6 @@ Every scientifically meaningful aggregate must drill down to exact members. HUMA
 | Appearance & Language | Local/admin presentation preference; scientific boundary stated | PASS | None |
 
 ## Priority remediation queue
-1. **HIGH — Research Coverage:** source observations exist in API payload but are not rendered on the full Research Coverage screen.
-2. **HIGH — HUMAN Review:** reviewer needs direct evidence/source verification context on the same screen.
-3. **HIGH — Evidence Explorer:** add source links and explicit relationship context for end-to-end Claim verification.
-4. **MEDIUM — Machine Assessment:** translate assessment/dimension technical vocabulary before raw canonical detail.
-5. **MEDIUM — Today Opportunities:** make summary candidates drill directly into exact Opportunity detail.
-6. **MEDIUM — Today Latest Papers:** expose external source links/direct verification path.
-7. **LOW — Research Journey:** strengthen visual non-canonical boundary around illustrative numeric examples/actions.
-8. **LOW — Telegram Radar:** preserve selected object when opening evidence where feasible.
+All eight remediation items identified in the initial audit have now been implemented in code. Final status remains **HUMAN visual recheck required**; implementation PASS does not establish visual comprehensibility.
 
 This audit is a code/projection verification, not a HUMAN visual acceptance. Items marked PASS mean an inspectable path exists in the implemented UI logic; final visual comprehensibility remains a HUMAN judgment.

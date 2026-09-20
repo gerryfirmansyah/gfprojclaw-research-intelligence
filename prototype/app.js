@@ -204,6 +204,9 @@ function renderMetricMember(kind, item) {
   return "";
 }
 
+let pendingObjectId=null;
+function openObjectVerification(objectId){ pendingObjectId=objectId||null; showView("opportunities"); }
+
 function showMetricMembers(kind) {
   const panel=document.getElementById("metric-members"), list=document.getElementById("metric-members-list"), title=document.getElementById("metric-members-title"), summary=document.getElementById("metric-members-summary");
   if (!panel || !list) return;
@@ -275,7 +278,8 @@ async function loadTodayOpportunities() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const rows = await response.json();
-    box.innerHTML = rows.length ? `<table class="table"><thead><tr><th>Kandidat</th><th>Bukti</th><th>Counter-search</th><th>Status</th></tr></thead><tbody>${rows.slice(0, 5).map(r => `<tr><td><strong>${escapeHtml(r.canonical_label || r.gap_id)}</strong><br><small>${escapeHtml(r.statement || "Tidak ada pernyataan yang direkam")}</small></td><td>${escapeHtml(r.support_count)} mendukung · ${escapeHtml(r.challenge_count)} menantang</td><td>${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</td><td><span class="state ${stateClass(r.current_evolution_state || "CANDIDATE")}">${escapeHtml(r.current_evolution_state || "CANDIDATE")}</span></td></tr>`).join("")}</tbody></table>` : `<p>Belum ada peluang riset canonical yang tersimpan untuk proyek ini.</p>`;
+    box.innerHTML = rows.length ? `<div class="callout">Ringkasan ini bukan ranking ilmiah. Buka setiap kandidat untuk memeriksa statement, evidence, coverage, asesmen, kritik, kualitas, dan sumber yang mendasarinya.</div><table class="table"><thead><tr><th>Kandidat</th><th>Bukti</th><th>Counter-search</th><th>Status</th><th>Verifikasi</th></tr></thead><tbody>${rows.slice(0, 5).map(r => `<tr><td><strong>${escapeHtml(r.canonical_label || r.gap_id)}</strong><br><small>${escapeHtml(r.statement || "Tidak ada pernyataan yang direkam")}</small></td><td>${escapeHtml(r.support_count)} mendukung · ${escapeHtml(r.challenge_count)} menantang</td><td>${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</td><td><span class="state ${stateClass(r.current_evolution_state || "CANDIDATE")}">${escapeHtml(r.current_evolution_state || "CANDIDATE")}</span></td><td><button class="text-button" data-today-object="${escapeHtml(r.gap_id)}">Periksa dasar →</button></td></tr>`).join("")}</tbody></table>` : `<p>Belum ada peluang riset canonical yang tersimpan untuk proyek ini.</p>`;
+    box.querySelectorAll('[data-today-object]').forEach(b=>b.onclick=()=>openObjectVerification(b.dataset.todayObject));
   } catch (error) {
     box.innerHTML = `<p>Peluang canonical tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
@@ -307,7 +311,8 @@ async function renderLatestPapers() {
       const year = p.publication_year || "Tahun tidak diketahui";
       const venue = p.venue_name || "Venue tidak diketahui";
       const status = p.human_review_state || p.relevance_state || "UNREVIEWED";
-      return `<div class="paper-row"><div><div class="paper-title">${escapeHtml(p.title)}</div><small>${escapeHtml(year)} · ${escapeHtml(venue)} · ${escapeHtml(p.current_access_level)} · ${escapeHtml(p.source_key || "source unknown")}</small></div><span class="state ${stateClass(status)}">${escapeHtml(status)}</span></div>`;
+      const links=sourceLinks(p.identifiers||{});
+      return `<div class="paper-row"><div><div class="paper-title">${escapeHtml(p.title)}</div><small>${escapeHtml(year)} · ${escapeHtml(venue)} · ${escapeHtml(p.current_access_level)} · ${escapeHtml(p.source_key || "source unknown")}</small>${links?`<p>${links}</p>`:`<small>Identifier eksternal canonical belum tersedia untuk Work ini.</small>`}</div><span class="state ${stateClass(status)}">${escapeHtml(status)}</span></div>`;
     }).join("") : `<div class="paper-row"><div><strong>Belum ada karya nyata yang tersimpan untuk proyek ini.</strong><small>Paper Terbaru membaca PostgreSQL, bukan bukti ilmiah dummy.</small></div></div>`;
   } catch (error) {
     console.error(error);
@@ -326,7 +331,7 @@ function renderJourney() {
     <div class="callout warning dummy-warning">${escapeHtml(window.GF_I18N?.t("illustrativeBoundary") || "ILLUSTRATIVE / NON-CANONICAL demonstration data")}</div><div class="callout">Tahapan penelitian bersifat iteratif; bukti baru dapat membawa HUMAN kembali ke tahap sebelumnya. Deskripsi R0–R16 adalah panduan metodologis, bukan status ilmiah canonical.</div>
     <div class="detail-grid dummy-zone"><div class="stack"><div class="card"><h3>${escapeHtml(window.GF_I18N?.t("allStages") || "All stages")}</h3>${journeyStages.map(([r,n,s,c],index) => `<div class="journey-row"><span class="r-code">${r}</span><div><strong>${escapeHtml(window.GF_I18N?.stageName(index) || n)}</strong><small>${escapeHtml(window.GF_I18N?.stageDescription(index) || "")}</small></div><span class="state ${c}">${s}</span></div>`).join("")}</div></div>
     <div class="stack"><div class="card"><h3>R6 — Penempatan Teori</h3><div class="callout warning">PERLU PERHATIAN karena penjelasan yang bersaing kini mencakup sebagian mekanisme yang sama.</div><p><strong>Yang ditemukan</strong></p><ul><li>23 paper dipetakan</li><li>5 kandidat lensa teoretis</li><li>4 tautan bukti yang menantang</li><li>2 penjelasan yang bersaing</li></ul><p><strong>Panduan pemahaman</strong></p><p>Teori perlu dievaluasi berdasarkan kecocokan penjelasan dan kontribusinya, bukan popularitas semata.</p></div><div class="card"><h3>Jejak bukti</h3><div class="trace">R6 ALASAN → CLM-142 → MENANTANG THEORY-006 → EVF-0092 → Paper → Sumber</div></div></div>
-    <div class="stack"><div class="card"><h3>Tindakan HUMAN yang disarankan</h3><div class="decision-bar"><button class="primary">Bandingkan teori</button><button>Periksa mekanisme</button><button>Bukti pembanding</button><button>Perlu bukti tambahan</button></div></div><div class="card"><h3>Dampak tahap terkini</h3><p>CE-0048 memengaruhi R4, R5, R6, R11, dan R12. Ini adalah sinyal perhatian, bukan transisi yang dipaksakan.</p></div></div></div>`;
+    <div class="stack"><div class="card dummy-surface"><h3>Contoh tindakan HUMAN — ILUSTRATIF</h3><div class="callout warning">Bukan tombol tindakan dan tidak menulis state apa pun. Contoh ini hanya menunjukkan jenis pemeriksaan yang mungkin relevan pada tahap R6.</div><ul><li>Bandingkan teori</li><li>Periksa mekanisme</li><li>Cari bukti pembanding</li><li>Tandai kebutuhan bukti tambahan</li></ul></div><div class="card"><h3>Dampak tahap terkini</h3><p>CE-0048 memengaruhi R4, R5, R6, R11, dan R12. Ini adalah sinyal perhatian, bukan transisi yang dipaksakan.</p></div></div></div>`;
 }
 
 function renderOpportunities() {
@@ -358,7 +363,7 @@ async function loadProjectOpportunities() {
       await renderGapDecision(r);
     };
     document.querySelectorAll("[data-object-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.objectIndex)]));
-    await show(rows[0]);
+    const selected=pendingObjectId ? rows.find(r=>(r.research_object_id||r.gap_id)===pendingObjectId) : null; pendingObjectId=null; await show(selected||rows[0]);
   } catch (error) { console.error(error); list.innerHTML = `<p>API Objek Riset tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
@@ -548,7 +553,8 @@ async function loadProjectRadar() {
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/radar`, { cache: "no-store" });
     const rows = response.ok ? await response.json() : [];
-    box.innerHTML = rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)}</strong><small>${escapeHtml(r.profile_name)} / ${escapeHtml(r.project_name)}</small><p><strong>APA YANG BERUBAH</strong><br>${escapeHtml(r.canonical_label)}</p><p><strong>MENGAPA INI PENTING</strong><br>${escapeHtml(r.reasoning_delta)}</p><p><strong>CAKUPAN</strong><br>Pencarian pembanding: ${escapeHtml(r.counter_search_state || "UNKNOWN")} · ${escapeHtml(r.coverage_limitations || "Tidak ada keterbatasan yang direkam")}</p><p><strong>KONTEKS HUMAN</strong><br>Keputusan terbaru: ${escapeHtml(r.latest_human_decision || "NONE")}. Item Radar ini tidak mengubahnya.</p><button class="text-button" onclick="showView('opportunities')">Periksa bukti & sumber</button></div></div>`).join("") : `<p>Saat ini tidak ada ChangeEvent canonical yang tersedia untuk proyeksi Radar.</p>`;
+    box.innerHTML = rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)}</strong><small>${escapeHtml(r.profile_name)} / ${escapeHtml(r.project_name)}</small><p><strong>APA YANG BERUBAH</strong><br>${escapeHtml(r.canonical_label)}</p><p><strong>MENGAPA INI PENTING</strong><br>${escapeHtml(r.reasoning_delta)}</p><p><strong>CAKUPAN</strong><br>Pencarian pembanding: ${escapeHtml(r.counter_search_state || "UNKNOWN")} · ${escapeHtml(r.coverage_limitations || "Tidak ada keterbatasan yang direkam")}</p><p><strong>KONTEKS HUMAN</strong><br>Keputusan terbaru: ${escapeHtml(r.latest_human_decision || "NONE")}. Item Radar ini tidak mengubahnya.</p><button class="text-button" data-radar-object="${escapeHtml(r.primary_research_object_id||"")}">Periksa bukti & sumber</button></div></div>`).join("") : `<p>Saat ini tidak ada ChangeEvent canonical yang tersedia untuk proyeksi Radar.</p>`;
+    box.querySelectorAll('[data-radar-object]').forEach(b=>b.onclick=()=>openObjectVerification(b.dataset.radarObject||null));
   } catch (error) {
     box.innerHTML = `<p>Proyeksi Radar tidak tersedia. Pemrosesan riset canonical tidak terpengaruh.</p>`;
   }
