@@ -37,6 +37,13 @@ class Handler(SimpleHTTPRequestHandler):
             try: self.send_json(self.operational_health())
             except Exception as exc: self.send_json({"error":str(exc)},status=500)
             return
+        if path == "/api/admin/activity-audit":
+            try:
+                log=Path("/var/log/gfprojclaw-activity.log")
+                lines=log.read_text(errors="replace").splitlines()[-80:] if log.exists() else []
+                self.send_json({"entries":lines,"source":"gfprojclaw-activity.log" if log.exists() else "NOT_AVAILABLE","scientific_decision":False})
+            except Exception as exc: self.send_json({"error":str(exc)},status=500)
+            return
         if path == "/api/context":
             self.send_json(list_context())
             return

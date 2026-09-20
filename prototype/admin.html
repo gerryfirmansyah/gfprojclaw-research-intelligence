@@ -10,16 +10,7 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand"><div class="brand-mark">GF</div><div><strong>GFPROJCLAW</strong><span>Admin Copilot</span></div></div>
-      <nav class="nav-list">
-        <button class="nav-item active">System Overview</button>
-        <button class="nav-item">Continuous Pilot</button>
-        <button class="nav-item">Source Runs</button>
-        <button class="nav-item">Failures / Retry</button>
-        <button class="nav-item">Quarantine</button>
-        <button class="nav-item">API / Services</button>
-        <button class="nav-item">Activity / Audit</button>
-        <button class="nav-item">Appearance & Language</button>
-      </nav>
+      <nav class="nav-list"><button class="nav-item active" data-admin-view="overview">System Overview</button><button class="nav-item" data-admin-view="configuration">Profile & Project</button><button class="nav-item" data-admin-view="pilot">Continuous Pilot</button><button class="nav-item" data-admin-view="sources">Source Runs</button><button class="nav-item" data-admin-view="failures">Failures / Retry</button><button class="nav-item" data-admin-view="quarantine">Quarantine</button><button class="nav-item" data-admin-view="services">API / Services</button><button class="nav-item" data-admin-view="audit">Activity / Audit</button><button class="nav-item" data-admin-view="appearance">Appearance & Language</button></nav>
       <div class="researcher-card"><div class="avatar">GF</div><div><strong>Administrator</strong><span>Operations workspace</span></div></div>
     </aside>
     <main class="workspace">
@@ -29,14 +20,15 @@
       </header>
       <section class="view active-view">
         <div class="page-heading"><div><h1>Admin Copilot</h1><p>Operational observability and configuration. This workspace does not make scientific decisions.</p></div><span class="state blue">OPERATIONS</span></div>
-        <div class="dashboard-grid">
-          <article class="panel span-2"><div class="panel-header"><h2>Production Health</h2><span class="state blue">J16 OPERATIONS</span></div><div id="admin-ops-health"><p>Loading production health…</p></div></article>
-          <article class="panel span-2"><div class="panel-header"><h2>Profile & Project Configuration</h2><span class="state yellow">ADMIN CONFIG</span></div><div id="admin-config"><p>Loading canonical configuration…</p></div></article>
-          <article class="panel span-2"><div class="panel-header"><h2>Continuous Pilot</h2></div><div id="admin-pilot"><p>Loading operational runs…</p></div></article>
-          <article class="panel"><div class="panel-header"><h2>Source / Provider Health</h2></div><div id="admin-sources"><p>Loading source observations…</p></div></article>
-          <article class="panel span-2"><div class="panel-header"><h2>Operational Boundary</h2></div><div class="callout warning">Failures, retries, provider health, and service operations stay here. Research Copilot receives only research-relevant availability and coverage limitations.</div></article>
-          <article class="panel"><div class="panel-header"><h2>Appearance & Language</h2></div><p>Semantic CSS tokens and EN/ID preferences are the pinned configuration direction. User-adjustable controls will be added without allowing scientific status semantics to disappear.</p></article>
-        </div>
+        <div class="admin-view active" data-admin-panel="overview"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Production Health</h2><span class="state blue">J16 OPERATIONS</span></div><div id="admin-ops-health"><p>Loading production health…</p></div></article><article class="panel"><div class="panel-header"><h2>Operational Boundary</h2></div><div class="callout warning">Operational state never establishes a scientific conclusion. Continuous Pilot remains separately authorized.</div></article></div></div>
+        <div class="admin-view" data-admin-panel="configuration"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Profile & Project Configuration</h2><span class="state yellow">ADMIN CONFIG</span></div><div id="admin-config"><p>Loading canonical configuration…</p></div></article></div></div>
+        <div class="admin-view" data-admin-panel="pilot"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Continuous Pilot</h2></div><div id="admin-pilot"><p>Loading operational runs…</p></div></article></div></div>
+        <div class="admin-view" data-admin-panel="sources"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Source Runs / Provider Health</h2></div><div id="admin-sources"><p>Loading source observations…</p></div></article></div></div>
+        <div class="admin-view" data-admin-panel="failures"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Failures / Retry</h2></div><div id="admin-failures"><p>Loading failure projection…</p></div></article></div></div>
+        <div class="admin-view" data-admin-panel="quarantine"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Quarantine</h2></div><div id="admin-quarantine" class="callout">NOT_AVAILABLE — no canonical quarantine projection is exposed yet. No illustrative operational records are shown.</div></article></div></div>
+        <div class="admin-view" data-admin-panel="services"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>API / Services</h2></div><div id="admin-services"><p>Loading service projection…</p></div></article></div></div>
+        <div class="admin-view" data-admin-panel="audit"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Activity / Audit</h2></div><div id="admin-audit" class="callout">NOT_AVAILABLE — richer canonical activity/audit projection remains a J16 item.</div></article></div></div>
+        <div class="admin-view" data-admin-panel="appearance"><div class="dashboard-grid"><article class="panel span-2"><div class="panel-header"><h2>Appearance & Language</h2></div><p>Theme and EN/ID presentation preferences are local UI settings. Canonical scientific and operational payloads are not silently translated.</p></article></div></div>
       </section>
     </main>
   </div>
