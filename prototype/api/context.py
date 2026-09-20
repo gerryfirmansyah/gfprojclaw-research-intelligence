@@ -8,7 +8,9 @@ def list_context():
                    rpv.version_no AS profile_version,
                    p.id AS project_id, p.name AS project_name,
                    pv.version_no AS project_version,
-                   pv.research_intent, pv.provisional_rq_text
+                   pv.research_intent, pv.provisional_rq_text,
+                   rpv.summary AS profile_summary, rpv.configuration_jsonb AS profile_configuration_jsonb,
+                   pv.project_configuration_jsonb
             FROM research_profile rp
             JOIN research_profile_version rpv ON rpv.id = rp.current_version_id
             JOIN research_project p ON p.profile_id = rp.id AND p.status = 'ACTIVE'
@@ -653,3 +655,28 @@ def get_project_daily_attention(project_id, hours=24):
     return {'window_hours':hours,'new_papers':papers,'new_claims':claims,
             'new_contradictory_evidence':contradictory,'advice_critic_changes':assessments,
             'attention_claims':attention,'coverage':coverage or {},'scientific_decision':False}
+
+
+def update_research_profile(profile_id, name, summary, configuration, actor):
+    if not str(name or '').strip() or not str(actor or '').strip(): raise ValueError('name and actor are required')
+    configuration = configuration if isinstance(configuration, dict) else {}
+    with db() as conn:
+        row=conn.execute("SELECT current_version_id FROM research_profile WHERE id=%s AND status='ACTIVE' FOR UPDATE",(profile_id,)).fetchone()
+        if not row: raise ValueError('Active research profile not found')
+        old=row['current_version_id']
+        v=conn.execute("SELECT COALESCE(max(version_no),0)+1 n FROM research_profile_version WHERE profile_id=%s",(profile_id,)).fetchone()['n']
+        new=conn.execute("""INSERT INTO research_profile_version(profile_id,version_no,summary,configuration_jsonb,supersedes_version_id,created_by) VALUES(%s,%s,%s,%s::jsonb,%s,%s) RETURNING id,version_no""",(profile_id,v,summary,__import__('json').dumps(configuration),old,actor)).fetchone()
+        conn.execute("UPDATE research_profile SET name=%s,current_version_id=%s WHERE id=%s",(name.strip(),new['id'],profile_id)); conn.commit()
+    return {'profile_id':profile_id,'profile_version':new['version_no'],'scientific_decision':False}
+
+
+def update_research_project(project_id, name, research_intent, provisional_rq_text, configuration, actor):
+    if not str(name or '').strip() or not str(actor or '').strip(): raise ValueError('name and actor are required')
+    configuration = configuration if isinstance(configuration, dict) else {}
+    with db() as conn:
+        row=conn.execute("SELECT current_version_id FROM research_project WHERE id=%s AND status='ACTIVE' FOR UPDATE",(project_id,)).fetchone()
+        if not row: raise ValueError('Active research project not found')
+        old=row['current_version_id']; v=conn.execute("SELECT COALESCE(max(version_no),0)+1 n FROM research_project_version WHERE project_id=%s",(project_id,)).fetchone()['n']
+        new=conn.execute("""INSERT INTO research_project_version(project_id,version_no,research_intent,provisional_rq_text,project_configuration_jsonb,supersedes_version_id,created_by) VALUES(%s,%s,%s,%s,%s::jsonb,%s,%s) RETURNING id,version_no""",(project_id,v,research_intent,provisional_rq_text,__import__('json').dumps(configuration),old,actor)).fetchone()
+        conn.execute("UPDATE research_project SET name=%s,current_version_id=%s WHERE id=%s",(name.strip(),new['id'],project_id)); conn.commit()
+    return {'project_id':project_id,'project_version':new['version_no'],'scientific_decision':False}

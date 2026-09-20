@@ -499,11 +499,22 @@ async function loadProjectCoverageSummary() {
 }
 
 function renderProfiles() {
-  const isA = profileSelect.selectedIndex === 0;
-  return commonHeader("Profil Riset / Konfigurasi Proyek", "Konteks domain adalah konfigurasi; tujuan ilmiah berada pada Proyek.") + `
-  <div class="detail-grid"><div class="card"><h3>${isA ? "Profil A — Komputer / Sistem Informasi" : "Profil B — Manajemen / Studi Organisasi"}</h3><p><strong>Minat utama</strong></p><ul>${(isA ? ["IT Governance","e-Government / Digital Government","Enterprise Architecture"] : ["Organizational Resilience","Human Behaviour","Human Capability"]).map(x=>`<li>${x}</li>`).join("")}</ul><p><strong>Literatur awal:</strong> 12 karya</p><p><strong>Daftar pantau:</strong> 4 aktif</p></div>
-  <div class="card"><h3>Proyek Terpilih</h3><p><strong>${selectedProjectLabel()}</strong></p><p>Tujuan riset bersifat sementara dan menjadi masukan R0, bukan menyelesaikan perjalanan riset terlebih dahulu.</p><div class="callout">Saran AI: 3 konsep · 2 kandidat teori · 2 kandidat metode. HUMAN menerima / mengubah / menolak.</div></div>
-  <div class="card"><h3>Pemeriksaan Generalitas</h3><ul><li>Objek inti yang sama</li><li>Perjalanan R0–R16 yang sama</li><li>Penjelajah Bukti yang sama</li><li>Logika ChangeEvent yang sama</li><li>Tinjauan HUMAN yang sama</li></ul><p><strong>Tidak diperlukan cabang inti khusus domain.</strong></p></div></div>`;
+  const ctx=(window.GF_CONTEXT_ROWS||[]).find(r=>r.project_id===projectSelect.value)||{};
+  const pc=ctx.profile_configuration_jsonb||{}, qc=ctx.project_configuration_jsonb||{};
+  return commonHeader("Profil Riset / Konfigurasi Proyek", "Konfigurasi canonical dan versioned. Perubahan hanya dilakukan melalui tindakan HUMAN eksplisit.", "real") + `
+  <div class="detail-grid"><div class="card"><h3>Profil Riset · v${escapeHtml(ctx.profile_version||"—")}</h3><label>Nama profil<input id="profile-name-edit" value="${escapeHtml(ctx.profile_name||"")}"></label><label>Ringkasan<textarea id="profile-summary-edit">${escapeHtml(ctx.profile_summary||"")}</textarea></label><label>Konfigurasi JSON<textarea id="profile-config-edit">${escapeHtml(JSON.stringify(pc,null,2))}</textarea></label><button class="text-button" id="save-profile-config">Simpan versi Profil baru</button></div>
+  <div class="card"><h3>Proyek · v${escapeHtml(ctx.project_version||"—")}</h3><label>Nama proyek<input id="project-name-edit" value="${escapeHtml(ctx.project_name||"")}"></label><label>Tujuan / research intent<textarea id="project-intent-edit">${escapeHtml(ctx.research_intent||"")}</textarea></label><label>RQ sementara<textarea id="project-rq-edit">${escapeHtml(ctx.provisional_rq_text||"")}</textarea></label><label>Konfigurasi JSON<textarea id="project-config-edit">${escapeHtml(JSON.stringify(qc,null,2))}</textarea></label><label>Identitas HUMAN<input id="config-actor" placeholder="nama / identitas reviewer"></label><button class="text-button" id="save-project-config">Simpan versi Proyek baru</button><div id="profile-save-result" class="callout">Menyimpan konfigurasi tidak menerima/menolak klaim ilmiah dan tidak membuat keputusan ilmiah otomatis.</div></div>
+  <div class="card"><h3>Batas Ilmiah</h3><ul><li>Profile dan Project adalah konfigurasi canonical.</li><li>Setiap simpan membuat versi baru dan mempertahankan versi sebelumnya.</li><li>Tujuan/RQ tetap provisional.</li><li>Gap, novelty, teori, metode, dan penerimaan ilmiah tetap memerlukan proses serta keputusan HUMAN.</li></ul></div></div>`;
+}
+
+async function saveProfileConfig(kind){
+  const ctx=(window.GF_CONTEXT_ROWS||[]).find(r=>r.project_id===projectSelect.value)||{}, actor=document.getElementById("config-actor")?.value?.trim(), out=document.getElementById("profile-save-result");
+  if(!actor){out.textContent="Identitas HUMAN wajib diisi sebelum menyimpan.";return;}
+  try{ let url,payload;
+    if(kind==="profile"){url=`${API_BASE}/api/profiles/${encodeURIComponent(ctx.profile_id)}`;payload={name:document.getElementById("profile-name-edit").value,summary:document.getElementById("profile-summary-edit").value,configuration:JSON.parse(document.getElementById("profile-config-edit").value||"{}"),actor};}
+    else{url=`${API_BASE}/api/projects/${encodeURIComponent(ctx.project_id)}`;payload={name:document.getElementById("project-name-edit").value,research_intent:document.getElementById("project-intent-edit").value,provisional_rq_text:document.getElementById("project-rq-edit").value,configuration:JSON.parse(document.getElementById("project-config-edit").value||"{}"),actor};}
+    const r=await fetch(url,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}); const x=await r.json(); if(!r.ok) throw new Error(x.error||`HTTP ${r.status}`); out.textContent=`Tersimpan sebagai versi baru. scientific_decision=${x.scientific_decision}. Muat ulang halaman untuk membaca context terbaru.`;
+  }catch(e){out.textContent=`Tidak tersimpan: ${e.message}`;}
 }
 
 function renderTelegram() {
@@ -547,6 +558,7 @@ function showView(name) {
   if (name === "coverage") loadProjectCoverage();
   if (name === "evolution") loadProjectChanges();
   if (name === "telegram") loadProjectRadar();
+  if (name === "profiles") { setTimeout(()=>{ document.getElementById("save-profile-config")?.addEventListener("click",()=>saveProfileConfig("profile")); document.getElementById("save-project-config")?.addEventListener("click",()=>saveProfileConfig("project")); },0); }
 }
 
 function bindOpenButtons() {
@@ -570,6 +582,7 @@ projectSelect.addEventListener("change", () => { loadHumanReviewBadge(); const a
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
 fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(`Context HTTP ${r.status}`); return r.json(); }).then(rows => {
+  window.GF_CONTEXT_ROWS=rows;
   const profiles = [...new Map(rows.map(r => [r.profile_id, r])).values()];
   profileSelect.innerHTML = profiles.map(r => `<option value="${r.profile_id}">${r.profile_name}</option>`).join("");
   const bindProjects = () => {

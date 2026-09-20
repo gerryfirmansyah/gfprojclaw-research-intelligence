@@ -3,7 +3,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-from context import create_human_decision, get_project_quality, get_project_coverage, get_project_daily_attention, list_context, list_project_advice_critic, list_project_assessments, list_project_changes, list_project_decisions, list_project_evidence, list_project_evidence_verification, list_project_gaps, list_project_opportunities, list_project_papers, list_project_radar, list_project_research_objects, list_project_pilot_health
+from context import create_human_decision, get_project_quality, get_project_coverage, get_project_daily_attention, list_context, list_project_advice_critic, list_project_assessments, list_project_changes, list_project_decisions, list_project_evidence, list_project_evidence_verification, list_project_gaps, list_project_opportunities, list_project_papers, list_project_radar, list_project_research_objects, list_project_pilot_health, update_research_profile, update_research_project
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -126,6 +126,17 @@ class Handler(SimpleHTTPRequestHandler):
 
         super().do_GET()
 
+
+    def do_PUT(self):
+        path = urlparse(self.path).path; parts = path.strip("/").split("/")
+        try:
+            length=int(self.headers.get("Content-Length","0")); payload=json.loads(self.rfile.read(length) or b"{}")
+            if len(parts)==3 and parts[:2]==["api","profiles"]:
+                self.send_json(update_research_profile(parts[2],payload.get("name"),payload.get("summary"),payload.get("configuration"),payload.get("actor"))); return
+            if len(parts)==3 and parts[:2]==["api","projects"]:
+                self.send_json(update_research_project(parts[2],payload.get("name"),payload.get("research_intent"),payload.get("provisional_rq_text"),payload.get("configuration"),payload.get("actor"))); return
+            self.send_json({"error":"Not found"},status=404)
+        except Exception as exc: self.send_json({"error":str(exc)},status=400)
 
     def do_POST(self):
         path = urlparse(self.path).path
