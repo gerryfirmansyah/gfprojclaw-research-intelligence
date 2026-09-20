@@ -11,6 +11,19 @@ api.116.212.72.79.nip.io {
 		respond "" 204
 	}
 
+	@admin_api path /api/admin/*
+	handle @admin_api {
+		basicauth {
+			{$GFPROJ_ADMIN_USER} {$GFPROJ_ADMIN_PASSWORD_HASH}
+		}
+		header Access-Control-Allow-Origin "https://gerryfirmansyah.github.io"
+		header Access-Control-Allow-Methods "GET, PUT, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+		header Vary "Origin"
+		header X-Content-Type-Options "nosniff"
+		reverse_proxy 127.0.0.1:8080
+	}
+
 	handle /api/* {
 		header Access-Control-Allow-Origin "https://gerryfirmansyah.github.io"
 		header Access-Control-Allow-Methods "GET, POST, OPTIONS"

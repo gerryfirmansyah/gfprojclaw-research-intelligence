@@ -17,3 +17,8 @@ A replacement host must create fresh Admin credentials out-of-band, validate Cad
 
 ## Activation gate
 Do not activate a credentialed production gate until a real HUMAN Admin credential has been provisioned out-of-band and the Admin origin/API routing has been smoke-tested. Never commit a default password or generated credential to the repository.
+
+## Repository implementation
+`ops/Caddyfile` now contains an authenticated handler for `/api/admin/*` before the general `/api/*` route. `ops/j16/install_admin_auth.sh` provisions a bcrypt hash into `/etc/gfprojclaw/admin-auth.env` from an out-of-band plaintext environment variable; plaintext is not written to disk by the script. `ops/j16/caddy-admin-auth-override.conf` declares the protected EnvironmentFile for the Caddy service. `ops/j16/verify_admin_auth.sh` verifies public context remains HTTP 200 while unauthenticated Admin API is HTTP 401 after activation.
+
+Production is intentionally not switched to this repository Caddyfile until the HUMAN supplies/provisions the real Admin credential. This avoids a default credential and avoids locking the HUMAN out of the Admin surface.
