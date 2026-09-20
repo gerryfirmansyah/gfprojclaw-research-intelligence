@@ -62,6 +62,50 @@ WHERE ce.change_type = 'ASSESSMENT_CHANGED'
 
 -- No historical change_event_evidence backfill: exact trigger membership is not persisted.
 
+-- Enforce exact nullable Assessment supersession lineage. MATCH SIMPLE is required
+-- for valid initial Assessments, so this narrow integrity trigger closes the case where
+-- a superseding current Assessment could otherwise be paired with NULL transition refs.
+CREATE OR REPLACE FUNCTION enforce_change_event_assessment_transition()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  canonical_supersedes uuid;
+BEGIN
+  IF NEW.change_type <> 'ASSESSMENT_CHANGED' OR NEW.current_assessment_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT a.supersedes_assessment_id
+    INTO canonical_supersedes
+    FROM assessment a
+   WHERE a.id = NEW.current_assessment_id
+     AND a.project_id = NEW.project_id
+     AND a.target_research_object_id = NEW.primary_research_object_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'current Assessment does not match ChangeEvent lineage'
+      USING ERRCODE = '23503';
+  END IF;
+
+  IF NEW.previous_assessment_id IS DISTINCT FROM canonical_supersedes
+     OR NEW.current_supersedes_assessment_id IS DISTINCT FROM canonical_supersedes THEN
+    RAISE EXCEPTION 'ChangeEvent Assessment transition does not match canonical supersession'
+      USING ERRCODE = '23514';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE CONSTRAINT TRIGGER change_event_assessment_transition_exact_trg
+AFTER INSERT OR UPDATE OF project_id, primary_research_object_id, change_type,
+  previous_assessment_id, current_assessment_id, current_supersedes_assessment_id
+ON change_event
+DEFERRABLE INITIALLY IMMEDIATE
+FOR EACH ROW
+EXECUTE FUNCTION enforce_change_event_assessment_transition();
+
 -- Validate semantic requirements only after deterministic historical Assessment backfill.
 ALTER TABLE change_event
   ADD CONSTRAINT change_event_assessment_required_ck

@@ -245,3 +245,17 @@ GitHub Actions PostgreSQL 16 run 35480019858 rejected the first executable Migra
 Correction: use `MATCH SIMPLE` for the composite supersession FK. The independent `change_event_current_assessment_fk` continues to enforce current Assessment project/object lineage. For non-initial transitions, all supersession-key columns are non-null, so the composite FK enforces that the current Assessment canonically supersedes the recorded previous Assessment. The transition CHECK continues to require previous/current-supersedes nullness alignment or equality.
 
 This correction replaces the earlier MATCH FULL proposal; the failed disposable run is retained as executable evidence and no production schema was changed.
+
+## 19. Pre-production supersession integrity audit
+
+A pre-production audit after commit `ae3b55f` found that `MATCH SIMPLE` fixes the nullable initial-Assessment deployment case but does not, by itself, prove exact canonical supersession when an event supplies `current_assessment_id` while both transition-side supersession fields are NULL. PostgreSQL skips the composite FK check when any referencing column is NULL.
+
+Therefore production deployment remains blocked until an executable negative test proves rejection of this omission case. A CHECK comparing only the two ChangeEvent-side nullable fields is insufficient because it cannot inspect `assessment.supersedes_assessment_id`.
+
+If the negative test demonstrates the gap, the declarative-only decision in Section 16 must be revisited explicitly. A narrowly scoped integrity trigger is the leading candidate because the invariant crosses a nullable referenced row and cannot be expressed by the current CHECK + MATCH SIMPLE FK combination without losing valid initial-Assessment rows. No production trigger is authorized by this audit alone.
+
+## 20. Narrow exact-supersession trigger candidate
+
+The executable candidate uses one narrowly scoped PostgreSQL constraint trigger on ChangeEvent. It does not derive scientific state, mutate Assessment, or create evidence. For ASSESSMENT_CHANGED only, it reads the already-selected canonical current Assessment on the same project/object lineage and requires both recorded transition-side supersession references to be exactly `IS NOT DISTINCT FROM` the Assessment's canonical `supersedes_assessment_id`.
+
+The existing declarative FKs and CHECKs remain in place. The trigger closes only the nullable cross-row invariant that MATCH SIMPLE cannot express. Disposable verification must prove both sides before production review: omission of a real canonical predecessor is rejected, while an exact previous -> current supersession succeeds. This candidate is not production authorization.

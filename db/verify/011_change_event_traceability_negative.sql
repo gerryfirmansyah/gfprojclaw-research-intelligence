@@ -48,6 +48,50 @@ SELECT pg_temp.expect_failure(
     LIMIT 1$$
 );
 
+-- MATCH SIMPLE intentionally permits NULL in the composite FK for an initial Assessment.
+-- Prove that it cannot hide a real canonical supersession: create a current Assessment
+-- that canonically supersedes another Assessment, then omit that previous Assessment
+-- from the ChangeEvent transition. The insert must be rejected.
+WITH base AS (
+  SELECT * FROM assessment ORDER BY assessed_at LIMIT 1
+)
+INSERT INTO assessment (
+  id, project_id, target_research_object_id, coverage_context_id,
+  assessment_type, model_or_agent, model_version, explanation_summary,
+  assessed_at, supersedes_assessment_id
+)
+SELECT '05000000-0000-0000-0000-000000000099'::uuid,
+       project_id, target_research_object_id, coverage_context_id,
+       assessment_type, model_or_agent, model_version,
+       'Negative-test superseding Assessment', assessed_at + interval '1 minute', id
+FROM base;
+
+SELECT pg_temp.expect_failure(
+  'superseding current Assessment cannot omit canonical previous Assessment',
+  $$INSERT INTO change_event (
+      id,project_id,primary_research_object_id,change_type,observed_at,reasoning_delta,
+      current_assessment_id,current_supersedes_assessment_id,previous_assessment_id
+    )
+    SELECT gen_random_uuid(),project_id,target_research_object_id,
+           'ASSESSMENT_CHANGED',now(),'negative supersession omission test',
+           id,NULL,NULL
+    FROM assessment
+    WHERE id='05000000-0000-0000-0000-000000000099'::uuid$$
+);
+
+-- The same superseding Assessment must succeed when the canonical previous Assessment
+-- is recorded exactly. This row remains inside the rollback-only negative-test transaction.
+INSERT INTO change_event (
+  id,project_id,primary_research_object_id,change_type,observed_at,reasoning_delta,
+  current_assessment_id,current_supersedes_assessment_id,previous_assessment_id
+)
+SELECT '06000000-0000-0000-0000-000000000099'::uuid,
+       project_id,target_research_object_id,'ASSESSMENT_CHANGED',now(),
+       'positive control for exact canonical supersession',
+       id,supersedes_assessment_id,supersedes_assessment_id
+FROM assessment
+WHERE id='05000000-0000-0000-0000-000000000099'::uuid;
+
 SELECT pg_temp.expect_failure(
   'cross-object current Assessment',
   $$UPDATE change_event ce
