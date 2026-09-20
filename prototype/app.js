@@ -418,6 +418,19 @@ async function loadProjectBukti() {
   }
 }
 
+function humanAssessmentState(state){
+  if(!state || typeof state!=="object") return "Kondisi asesmen sebelumnya tidak direkam dalam bentuk yang dapat dijelaskan.";
+  const gap=state.gap_evolution_state||"NOT_RECORDED", type=state.assessment_type||"NOT_RECORDED", agent=state.model_or_agent||"NOT_RECORDED", version=state.model_version||"NOT_RECORDED";
+  if(type==="GAP_CANDIDATE_EVIDENCE_CONTEXT_V1" && gap==="CANDIDATE") return `Sistem telah membuat asesmen awal terhadap kandidat gap riset ini berdasarkan konteks evidence yang tersedia saat asesmen dibuat. Statusnya masih CANDIDATE: gap ini masih kandidat yang perlu diperiksa lebih lanjut oleh HUMAN. Ini bukan bukti bahwa research gap sudah terbukti, bukan keputusan penerimaan ilmiah, dan bukan keputusan HUMAN. Asesmen dibuat oleh ${agent} versi ${version}.`;
+  return `Asesmen canonical saat ini bertipe ${type} dengan state ${gap}. Asesmen ini adalah konteks mesin untuk pemeriksaan HUMAN, bukan keputusan ilmiah otomatis.`;
+}
+function humanAssessmentTransition(r){
+  if(!r.previous_assessment_id && r.current_assessment_id) return "Ini adalah asesmen pertama yang tercatat untuk objek riset ini. Tidak ada asesmen sebelumnya yang dapat dibandingkan secara canonical.";
+  if(r.previous_assessment_id && r.current_assessment_id) return "Asesmen canonical telah berubah dari asesmen sebelumnya ke asesmen saat ini. Periksa alasan dan evidence pemicu sebelum menafsirkan perubahan tersebut.";
+  return "Transisi asesmen tidak tersedia dari state canonical yang direkam.";
+}
+function technicalAssessmentState(state){return state==null?"null":JSON.stringify(state,null,2);}
+
 function renderEvolution() {
   return commonHeader("Evolusi Pengetahuan", "ChangeEvent tersimpan menjelaskan apa yang berubah dan alasannya tanpa menulis ulang keputusan HUMAN.", "real") + `
   <div class="detail-grid"><div class="card real-surface"><h3>Linimasa ChangeEvent <span class="data-badge real">DATA NYATA</span></h3><div id="real-change-list">Memuat ChangeEvent canonical…</div></div>
@@ -438,7 +451,7 @@ async function loadProjectChanges() {
     const show = r => {
       const members = Array.isArray(r.evidence_members) ? r.evidence_members : [];
       const memberTrace = members.length ? members.map(m => `<div class="trace"><strong>${escapeHtml(m.role)} · ${escapeHtml(m.semantic_type)}</strong> — ${escapeHtml(m.work_title || m.work_id)}<br><small>EvidenceRelationship: ${escapeHtml(m.evidence_relationship_id)} · Claim: ${escapeHtml(m.claim_text || m.claim_id)} · EvidenceFragment: ${escapeHtml(m.evidence_fragment_id)} · ${escapeHtml(m.access_level || "ACCESS_NOT_RECORDED")}</small></div>`).join("") : `<p>Tidak ada keanggotaan pemicu bukti canonical yang direkam untuk ChangeEvent ini. Ini adalah detail pemicu historis UNKNOWN/NOT_RECORDED, bukan bukti bahwa tidak ada bukti yang pernah tersedia.</p>`;
-      detail.innerHTML = `<p><strong>Alasan:</strong> ${escapeHtml(r.reasoning_delta || "Penjelasan tidak tersedia dari status canonical saat ini")}</p><p><strong>Transisi asesmen:</strong> ${escapeHtml(r.previous_assessment_id || "INITIAL / NOT_RECORDED")} → ${escapeHtml(r.current_assessment_id || "NOT_APPLICABLE / NOT_RECORDED")}</p><p><strong>Pendahulu canonical dari Asesmen saat ini:</strong> ${escapeHtml(r.current_supersedes_assessment_id || "NONE / NOT_RECORDED")}</p><p><strong>Sebelumnya:</strong> ${escapeHtml(JSON.stringify(r.previous_state_jsonb ?? null))}</p><p><strong>Saat ini:</strong> ${escapeHtml(JSON.stringify(r.current_state_jsonb ?? null))}</p><h4>Anggota bukti canonical (${members.length})</h4>${memberTrace}<div class="callout warning">Hanya observasi historis; tidak ada keputusan HUMAN yang diubah secara otomatis. Anggota bukti hanya muncul ketika disimpan secara eksplisit di change_event_evidence.</div>`;
+      detail.innerHTML = `<div class="callout"><strong>Apa yang berubah?</strong><br>${escapeHtml(humanAssessmentTransition(r))}</div><p><strong>Mengapa perubahan ini direkam?</strong><br>${escapeHtml(r.reasoning_delta || "Penjelasan tidak tersedia dari state canonical saat ini.")}</p><div class="human-current-state"><h4>Kondisi saat ini — dalam bahasa manusia</h4><p>${escapeHtml(humanAssessmentState(r.current_state_jsonb))}</p><p><strong>Yang perlu HUMAN periksa:</strong><br>Periksa evidence yang mendasari kandidat gap, batas akses sumber, konteks metodologi, dan apakah counter-search telah dilakukan sebelum membuat penilaian tentang gap atau novelty.</p></div><h4>Evidence yang tercatat sebagai pemicu perubahan (${members.length})</h4>${memberTrace}<details class="quality-technical"><summary>Detail teknis / canonical</summary><p><strong>Assessment sebelumnya:</strong> <code>${escapeHtml(r.previous_assessment_id || "INITIAL / NOT_RECORDED")}</code><br><strong>Assessment saat ini:</strong> <code>${escapeHtml(r.current_assessment_id || "NOT_APPLICABLE / NOT_RECORDED")}</code><br><strong>Pendahulu canonical:</strong> <code>${escapeHtml(r.current_supersedes_assessment_id || "NONE / NOT_RECORDED")}</code></p><p><strong>State sebelumnya</strong></p><pre>${escapeHtml(technicalAssessmentState(r.previous_state_jsonb))}</pre><p><strong>State saat ini</strong></p><pre>${escapeHtml(technicalAssessmentState(r.current_state_jsonb))}</pre></details><div class="callout warning">ChangeEvent adalah observasi historis. Tidak ada keputusan HUMAN yang diubah secara otomatis. Evidence pemicu hanya ditampilkan jika keanggotaannya memang disimpan secara eksplisit di change_event_evidence.</div>`;
     };
     document.querySelectorAll("[data-change-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.changeIndex)]));
     show(rows[0]);

@@ -24,3 +24,6 @@ Date: HUMAN TO FILL
 - Missing capability that would materially improve research:
 - Would I use this in a real research day? Why?
 - HUMAN usefulness acceptance: PENDING
+
+## Friction discovered during preparation
+- Evolution / Delta Penalaran exposed raw current Assessment JSON as the primary HUMAN view. Severity: HIGH for comprehension. Remediation implemented: HUMAN-readable current-state explanation first, raw canonical JSON collapsed under technical detail; scientific semantics unchanged. HUMAN visual verification remains pending.
