@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.12.5";
+const PROTOTYPE_VERSION = "0.16.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 const themeToggle = document.getElementById("theme-toggle");
 
@@ -401,7 +401,7 @@ async function loadHumanReview() {
 }
 
 function renderCoverage() {
-  return commonHeader("Coverage & Health", "Observed coverage state from the latest persisted CoverageContext.", "real") + `
+  return commonHeader("Research Coverage", "Scientific coverage limits from the latest persisted CoverageContext; operational health belongs in Admin Copilot.", "real") + `
   <div id="real-coverage-detail" class="detail-grid"><div class="card real-surface"><h3>Loading coverage…</h3></div></div>`;
 }
 
@@ -416,7 +416,7 @@ async function loadProjectCoverage(targetId = "real-coverage-detail") {
     const access = c.access_summary_jsonb || {};
     const extraction = c.extraction_summary_jsonb || {};
     const sources = c.sources || [];
-    box.innerHTML = `<div class="card real-surface"><h3>Source observations <span class="data-badge real">REAL DATA</span></h3>${sources.length ? sources.map(src => `<div class="health-row"><div><strong>${escapeHtml(src.source_key)}</strong><small>${escapeHtml(src.access_limitations || "No access limitation recorded")}</small></div><span class="state yellow">${escapeHtml(src.health_state)}</span></div>`).join("") : `<p>No source observations persisted.</p>`}</div><div class="card real-surface"><h3>Persisted corpus coverage</h3><ul><li>FULL_TEXT — ${access.FULL_TEXT || 0}</li><li>ABSTRACT_ONLY — ${access.ABSTRACT_ONLY || 0}</li><li>METADATA_ONLY — ${access.METADATA_ONLY || 0}</li><li>Claims — ${extraction.claims || 0}</li><li>Quarantined claims — ${extraction.quarantined || 0}</li></ul><p><strong>Counter-search:</strong> ${escapeHtml(c.counter_search_state)}</p></div><div class="card real-surface"><h3>Boundary</h3><p><strong>Observed:</strong> ${escapeHtml(c.observed_at)}</p><div class="callout warning">${escapeHtml(c.limitations || "No limitations recorded.")}</div></div>`;
+    box.innerHTML = `<div class="card real-surface"><h3>Persisted corpus coverage <span class="data-badge real">REAL DATA</span></h3><ul><li>FULL_TEXT — ${access.FULL_TEXT || 0}</li><li>ABSTRACT_ONLY — ${access.ABSTRACT_ONLY || 0}</li><li>METADATA_ONLY — ${access.METADATA_ONLY || 0}</li><li>Claims — ${extraction.claims || 0}</li></ul><p><strong>Counter-search:</strong> ${escapeHtml(c.counter_search_state)}</p></div><div class="card real-surface"><h3>Scientific coverage boundary</h3><p><strong>Observed:</strong> ${escapeHtml(c.observed_at)}</p><div class="callout warning">${escapeHtml(c.limitations || "No limitations recorded.")}</div><p>Provider runs, retries, service health, and operational quarantine are available in Admin Copilot.</p></div>`;
   } catch (error) { box.innerHTML = `<div class="card"><p>Coverage API unavailable: ${escapeHtml(error.message)}</p></div>`; }
 }
 
@@ -427,7 +427,7 @@ async function loadProjectCoverageSummary() {
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/coverage`, { cache: "no-store" });
     const c = response.ok ? await response.json() : {};
-    box.innerHTML = c.coverage_context_id ? (c.sources || []).map(src => `<div class="health-row"><div><strong>${escapeHtml(src.source_key)}</strong><small>${escapeHtml(src.observed_record_count)} observed record(s)</small></div><span class="state yellow">${escapeHtml(src.health_state)}</span></div>`).join("") + `<div class="callout">Counter-search: ${escapeHtml(c.counter_search_state)}</div>` : `<p>No persisted coverage snapshot yet.</p>`;
+    const access = c.access_summary_jsonb || {}; box.innerHTML = c.coverage_context_id ? `<div class="health-row"><div><strong>Evidence access</strong><small>${access.FULL_TEXT || 0} full text · ${access.ABSTRACT_ONLY || 0} abstract only · ${access.METADATA_ONLY || 0} metadata only</small></div></div><div class="callout">Counter-search: ${escapeHtml(c.counter_search_state)} · ${escapeHtml(c.limitations || "No limitation recorded")}</div>` : `<p>No persisted coverage snapshot yet.</p>`;
   } catch (error) { box.innerHTML = `<p>Coverage unavailable.</p>`; }
 }
 
@@ -441,7 +441,6 @@ function renderProfiles() {
 
 function renderTelegram() {
   return commonHeader("Telegram Research Radar", "Read-only projection of canonical ChangeEvent. Telegram never becomes scientific state.", "real") + `
-  <div id="pilot-health-live" class="card"><p>Loading Continuous Pilot health…</p></div>
   <div id="radar-live" class="card"><p>Loading canonical Radar projection…</p></div>
   <div class="card"><h3>Radar Rules</h3><ul><li>No raw crawler logs</li><li>No automatic scientific decisions</li><li>No canonical state in Telegram</li><li>Delivery failure stays local</li><li>Inspect full context in Dashboard</li></ul></div>`;
 }
@@ -480,7 +479,7 @@ function showView(name) {
   if (name === "opportunities") loadProjectOpportunities();
   if (name === "coverage") loadProjectCoverage();
   if (name === "evolution") loadProjectChanges();
-  if (name === "telegram") { loadPilotHealth(); loadProjectRadar(); }
+  if (name === "telegram") loadProjectRadar();
 }
 
 function bindOpenButtons() {

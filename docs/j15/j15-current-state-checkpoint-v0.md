@@ -195,3 +195,11 @@ HUMAN trial screenshots established the next UX architecture direction. GFPROJCL
 The same trial pins four additional requirements: every meaningful aggregate must drill down to canonical members; Paper/EvidenceFragment/Claim/Relationship/explanation must have a consistent visual hierarchy with restrained bold use; illustrative data must be unmistakable from canonical REAL DATA; and styling/localization should use semantic CSS design tokens plus an Indonesian/English presentation layer. Theme preferences may later follow system default -> administrator default -> permitted user preference, without allowing customization to erase scientific status semantics.
 
 The detailed contract is `docs/j15/research-admin-copilot-ux-contract-v0.md`. This pin does not declare J15 HUMAN PASS.
+
+## 11. 2026-09-20 Research/Admin workspace split implementation
+
+The prototype now implements the first approved workspace split. `prototype/index.html` is the Research Copilot surface and links to a separate `prototype/admin.html` Admin Copilot page. Research Coverage retains epistemically relevant access counts, counter-search state, and coverage limitations, while provider health and Continuous Pilot run details are projected on Admin Copilot instead of the researcher page. Telegram Research Radar no longer embeds Continuous Pilot health.
+
+The CSS now begins a semantic token layer for typography, paper-title presentation, and workspace controls. This is an implementation foundation for later administrator defaults and permitted user preferences; it does not yet implement persisted preference management or EN/ID translation.
+
+Static contract checks and JavaScript syntax checks passed. HUMAN browser re-trial remains required before J15 HUMAN PASS.

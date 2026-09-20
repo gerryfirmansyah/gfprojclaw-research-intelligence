@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GFPROJCLAW Research Cockpit Prototype</title>
-  <link rel="stylesheet" href="styles.css?v=0.15.2" />
+  <title>GFPROJCLAW Research Copilot</title>
+  <link rel="stylesheet" href="styles.css?v=0.16.0" />
 </head>
 <body>
   <div class="app-shell">
@@ -13,7 +13,7 @@
         <div class="brand-mark">GF</div>
         <div>
           <strong>GFPROJCLAW</strong>
-          <span>Research Intelligence</span>
+          <span>Research Copilot</span>
         </div>
       </div>
 
@@ -24,7 +24,7 @@
         <button class="nav-item" data-view="evidence">Evidence Explorer</button>
         <button class="nav-item" data-view="evolution">Knowledge Evolution</button>
         <button class="nav-item" data-view="review">Human Review <span id="human-review-badge" class="badge">…</span></button>
-        <button class="nav-item" data-view="coverage">Coverage & Health</button>
+        <button class="nav-item" data-view="coverage">Research Coverage</button>
       </nav>
 
       <div class="sidebar-divider"></div>
@@ -58,8 +58,9 @@
         </div>
         <div class="topbar-actions">
           <input id="global-search" type="search" placeholder="Search papers, concepts, gaps…" />
+          <a class="workspace-link" href="admin.html">Admin Copilot</a>
           <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">🌙 Dark</button>
-          <span id="prototype-version" class="sync-status">Prototype v0.15.2 · J15 explainable critic trial</span>
+          <span id="prototype-version" class="sync-status">Prototype v0.16.0 · Research Copilot split trial</span>
         </div>
       </header>
 
@@ -102,7 +103,7 @@
           </article>
 
           <article class="panel">
-            <div class="panel-header"><h2>Coverage & Health</h2><button class="text-button" data-open="coverage">View all</button></div>
+            <div class="panel-header"><h2>Research Coverage</h2><button class="text-button" data-open="coverage">View all</button></div>
             <div id="health-mini"></div>
           </article>
 
@@ -129,6 +130,6 @@
     </main>
   </div>
 
-  <script src="app.js?v=0.15.2"></script>
+  <script src="app.js?v=0.16.0"></script>
 </body>
 </html>
