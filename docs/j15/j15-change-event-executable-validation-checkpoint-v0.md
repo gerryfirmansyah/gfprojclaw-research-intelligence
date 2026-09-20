@@ -86,3 +86,13 @@ The existing historical `ASSESSMENT_CHANGED` event `10d5b1f3-5248-5bba-9400-d3dd
 Migration 012 then committed. Explicit production privilege verification for `gfproj_app` returned `t|t|f|f`: SELECT and INSERT are allowed on `change_event_evidence`; UPDATE and DELETE are not.
 
 This production PASS establishes the persistence and bounded-runtime-privilege deployment checkpoint only. It does not establish scientific truth or HUMAN acceptance, does not authorize continuous-pilot timer activation, and does not by itself make ChangeEvent member traceability available through the API/UI. Writer `--apply` remains unexecuted at this checkpoint.
+
+## 2026-09-20 API and Knowledge Evolution traceability deployment
+
+Commit `050e0e8fd2380cb1d123516bcf1b071762986c62` extended the ChangeEvent API projection with canonical previous/current Assessment references and `evidence_members` derived only from persisted `change_event_evidence` membership. A controlled restart of `gfprojclaw-cockpit-api` activated the projection. Both localhost and public HTTPS returned the expected historical event with canonical current Assessment `dea6a217-e8ec-49e9-9bed-0101b20185c3`, null initial predecessor fields, and `evidence_members=[]`.
+
+Commit `618bd4254d2b099a4a5b94656fea067b57fcc630` extended Knowledge Evolution to expose the Assessment transition and canonical evidence-member trace. For a historical event with no persisted member association, the UI explicitly reports UNKNOWN/NOT_RECORDED trigger detail rather than inferring that no evidence existed. Evidence members are displayed only when explicitly persisted.
+
+GitHub Pages retrieval confirmed the deployed `app.js` contains both the canonical member-trace UI and the UNKNOWN/NOT_RECORDED historical boundary. A public API contract assertion also passed against the production HTTPS endpoint.
+
+This is a deployment/traceability checkpoint, not J15 HUMAN PASS. No writer `--apply` or continuous-pilot timer activation is authorized by this result.
