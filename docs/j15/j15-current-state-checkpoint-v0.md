@@ -211,3 +211,11 @@ The Research Copilot prototype now applies a consistent Paper title component ac
 Research Journey remains illustrative rather than canonical. Its page now carries an explicit high-visibility NON-CANONICAL warning and a dashed illustrative zone stating that stage statuses, counts, identifiers, traces, and suggested actions are demonstration data. This does not convert those values into canonical research state.
 
 Static traceability assertions, JavaScript syntax checks, and `git diff --check` passed. Browser/HUMAN verification remains required; J15 is not HUMAN PASS.
+
+## 13. 2026-09-20 EN/ID presentation preference foundation
+
+A shared `prototype/i18n.js` presentation layer now provides an EN/ID language preference to both Research Copilot and Admin Copilot. The preference is browser-local (`gfprojclaw-language`) and is shared across the two workspaces. The first slice localizes high-value Research Copilot navigation and Today-page chrome plus workspace/language controls; it intentionally does not claim complete UI translation yet.
+
+The language boundary is explicit: localization changes UI chrome only. Canonical paper titles, evidence text, Claims, persisted rationale, ChangeEvents, assessments, and other scientific/operational records returned by the API are not translated or rewritten. A future translated scientific view would require an explicit non-canonical label and separate design decision.
+
+This slice adds no database preference schema. It preserves the approved future precedence of system default -> administrator default -> permitted user preference without prematurely choosing persistence architecture. JavaScript syntax checks, diff checks, and a static i18n boundary assertion passed. HUMAN browser verification remains required; J15 is not HUMAN PASS.

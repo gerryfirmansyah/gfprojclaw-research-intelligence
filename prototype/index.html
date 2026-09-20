@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GFPROJCLAW Research Copilot</title>
-  <link rel="stylesheet" href="styles.css?v=0.16.1" />
+  <link rel="stylesheet" href="styles.css?v=0.16.2" />
 </head>
 <body>
   <div class="app-shell">
@@ -18,19 +18,19 @@
       </div>
 
       <nav id="main-nav" class="nav-list">
-        <button class="nav-item active" data-view="today">Today</button>
-        <button class="nav-item" data-view="journey">Research Journey</button>
-        <button class="nav-item" data-view="opportunities">Opportunities</button>
-        <button class="nav-item" data-view="evidence">Evidence Explorer</button>
-        <button class="nav-item" data-view="evolution">Knowledge Evolution</button>
+        <button class="nav-item active" data-view="today" data-i18n="today">Today</button>
+        <button class="nav-item" data-view="journey" data-i18n="journey">Research Journey</button>
+        <button class="nav-item" data-view="opportunities" data-i18n="opportunities">Opportunities</button>
+        <button class="nav-item" data-view="evidence" data-i18n="evidence">Evidence Explorer</button>
+        <button class="nav-item" data-view="evolution" data-i18n="evolution">Knowledge Evolution</button>
         <button class="nav-item" data-view="review">Human Review <span id="human-review-badge" class="badge">…</span></button>
-        <button class="nav-item" data-view="coverage">Research Coverage</button>
+        <button class="nav-item" data-view="coverage" data-i18n="coverage">Research Coverage</button>
       </nav>
 
       <div class="sidebar-divider"></div>
-      <div class="sidebar-section-title">Profile</div>
+      <div class="sidebar-section-title" data-i18n="profile">Profile</div>
       <nav class="nav-list small">
-        <button class="nav-item" data-view="profiles">Profiles & Projects</button>
+        <button class="nav-item" data-view="profiles" data-i18n="profiles">Profiles & Projects</button>
         <button class="nav-item" data-view="telegram">Telegram Radar</button>
       </nav>
 
@@ -46,29 +46,30 @@
     <main class="workspace">
       <header class="topbar">
         <div class="context-switchers">
-          <label>Profile
+          <label><span data-i18n="profile">Profile</span>
             <select id="profile-select">
               <option value="A">A — Computer / Information Systems</option>
               <option value="B">B — Management / Organization Studies</option>
             </select>
           </label>
-          <label>Project
+          <label><span data-i18n="project">Project</span>
             <select id="project-select"></select>
           </label>
         </div>
         <div class="topbar-actions">
           <input id="global-search" type="search" placeholder="Search papers, concepts, gaps…" />
-          <a class="workspace-link" href="admin.html">Admin Copilot</a>
+          <a class="workspace-link" href="admin.html" data-i18n="admin">Admin Copilot</a>
+          <label class="language-control"><span data-i18n="language">Language</span><select data-language-select><option value="en">EN</option><option value="id">ID</option></select></label>
           <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">🌙 Dark</button>
-          <span id="prototype-version" class="sync-status">Prototype v0.16.1 · traceable UX trial</span>
+          <span id="prototype-version" class="sync-status">Prototype v0.16.2 · EN/ID presentation trial</span>
         </div>
       </header>
 
       <section id="view-today" class="view active-view">
         <div class="page-heading">
           <div>
-            <h1>Today</h1>
-            <p>What changed, why it matters, and where HUMAN attention is useful.</p>
+            <h1 data-i18n="todayTitle">Today</h1>
+            <p data-i18n="todaySubtitle">What changed, why it matters, and where HUMAN attention is useful.</p>
           </div>
           <div class="coverage-pill" id="today-coverage-pill">Loading persisted coverage context…</div>
         </div>
@@ -130,6 +131,7 @@
     </main>
   </div>
 
-  <script src="app.js?v=0.16.1"></script>
+  <script src="i18n.js?v=0.16.2"></script>
+  <script src="app.js?v=0.16.2"></script>
 </body>
 </html>

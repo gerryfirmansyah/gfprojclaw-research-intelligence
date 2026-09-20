@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.16.1";
+const PROTOTYPE_VERSION = "0.16.2";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 const themeToggle = document.getElementById("theme-toggle");
 
@@ -616,3 +616,11 @@ async function renderEvidenceVerification(row) {
     box.innerHTML=`<p>Evidence Verification unavailable: ${escapeHtml(error.message)}</p>`;
   }
 }
+
+// Presentation language affects UI chrome only; canonical scientific records remain untouched.
+document.querySelectorAll("[data-language-select]").forEach(el => el.addEventListener("change", event => window.GF_I18N?.setLanguage(event.target.value)));
+window.GF_I18N?.apply();
+window.addEventListener("gfprojclaw-language-change", () => {
+  const dark = document.documentElement.dataset.theme === "dark";
+  if (themeToggle) themeToggle.textContent = `${dark ? "☀️" : "🌙"} ${window.GF_I18N.t(dark ? "light" : "dark")}`;
+});

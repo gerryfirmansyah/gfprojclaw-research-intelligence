@@ -20,3 +20,7 @@ async function loadAdmin() {
   } catch(e) { sources.innerHTML=`<p>Source health unavailable: ${esc(e.message)}</p>`; }
 }
 fetch(`${API_BASE}/api/context`,{cache:"no-store"}).then(r=>r.json()).then(rows=>{projectSelect.innerHTML=rows.map(x=>`<option value="${esc(x.project_id)}">${esc(x.profile_name)} / ${esc(x.project_name)}</option>`).join(""); projectSelect.onchange=loadAdmin; loadAdmin();}).catch(e=>{projectSelect.innerHTML="<option>Context unavailable</option>";});
+
+// Presentation language is local UI preference; operational/canonical payloads are not translated.
+document.querySelectorAll("[data-language-select]").forEach(el=>el.addEventListener("change",event=>window.GF_I18N?.setLanguage(event.target.value)));
+window.GF_I18N?.apply();
