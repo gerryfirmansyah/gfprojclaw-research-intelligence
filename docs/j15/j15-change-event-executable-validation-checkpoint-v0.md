@@ -49,3 +49,26 @@ No historical evidence trigger membership has been inferred.
 No continuous-pilot timer is authorized.
 J15 remains IN PROGRESS / HUMAN TRIAL.
 Production deployment of Migrations 011/012 requires a separate HUMAN deployment decision.
+
+## 2026-09-20 production-like DBA disposable rerun
+
+Candidate commit: `b47f456683b6b66dd8d956ab7bd743cdf6655a89`.
+
+An authorized DBA (`postgres`) ran the full disposable PostgreSQL 16 suite on the GFPROJCLAW VPS using a separate `gfprojclaw_j15_test` database. Result: `J15_DISPOSABLE_FULL_SUITE_PASS`.
+
+The rerun reproduced the pre-migration historical `ASSESSMENT_CHANGED` condition and confirmed deterministic backfill with `UPDATE 1`. Migration 011 committed successfully, Migration 012 applied in the disposable database, the schema verifier passed, and the bounded runtime privilege assertions passed.
+
+Integrity cases confirmed by executable test:
+- `ASSESSMENT_CHANGED` without current Assessment is rejected;
+- invalid evidence role is rejected;
+- cross-object EvidenceRelationship is rejected;
+- a current Assessment that canonically supersedes another Assessment cannot omit that predecessor from the ChangeEvent transition;
+- the exact canonical predecessor -> current Assessment transition succeeds as a positive control;
+- cross-object current Assessment is rejected;
+- historical `change_event_evidence` remains empty rather than being inferred from current evidence.
+
+This rerun also validates the historical UUID guard correction: GFPROJCLAW canonical hexadecimal UUIDs are accepted without imposing RFC version/variant nibbles that the canonical schema does not require.
+
+### Deployment boundary after rerun
+
+The executable blocker for Migration 011 is cleared for controlled production deployment. This is not J15 HUMAN PASS and does not authorize continuous-pilot timer activation. Production Migration 011 must be applied first and verified in production before Migration 012 is considered.
