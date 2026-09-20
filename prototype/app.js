@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.16.3";
+const PROTOTYPE_VERSION = "0.16.4";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 const themeToggle = document.getElementById("theme-toggle");
 
@@ -192,12 +192,13 @@ async function loadTodayMetrics() {
       if (!response.ok) throw new Error(`${name} HTTP ${response.status}`);
       return response.json();
     }));
+    const id=window.GF_I18N?.current?.() === "id";
     todayMetricMembers={
-      papers:{label:"Persisted Papers",items:papers,summary:"Exact persisted works in the selected project. Paper titles and external identifiers are shown when canonically available."},
-      decisions:{label:"HUMAN Decisions",items:decisions,summary:"Exact explicit persisted HUMAN decisions returned for the selected project."},
-      changes:{label:"Knowledge Changes",items:changes,summary:"Exact persisted canonical ChangeEvents for the selected project."},
-      coverage:{label:"Coverage Context",items:coverage.coverage_context_id?[coverage]:[],summary:"The persisted CoverageContext represented by this count; it is context, not a scientific verdict."},
-      radar:{label:"Radar Items",items:radar,summary:"Exact read-only Radar projections derived from canonical ChangeEvents."}
+      papers:{label:window.GF_I18N?.t("persistedPapers") || "Persisted Papers",items:papers,summary:id?"Work tersimpan persis dalam proyek terpilih. Judul paper dan identifier eksternal ditampilkan bila tersedia secara canonical.":"Exact persisted works in the selected project. Paper titles and external identifiers are shown when canonically available."},
+      decisions:{label:window.GF_I18N?.t("humanDecisions") || "HUMAN Decisions",items:decisions,summary:id?"Keputusan HUMAN tersimpan persis yang dikembalikan untuk proyek terpilih.":"Exact explicit persisted HUMAN decisions returned for the selected project."},
+      changes:{label:window.GF_I18N?.t("knowledgeChanges") || "Knowledge Changes",items:changes,summary:id?"ChangeEvent canonical tersimpan persis untuk proyek terpilih.":"Exact persisted canonical ChangeEvents for the selected project."},
+      coverage:{label:window.GF_I18N?.t("coverageContext") || "Coverage Context",items:coverage.coverage_context_id?[coverage]:[],summary:id?"CoverageContext tersimpan yang dihitung oleh kartu ini; konteks ini bukan keputusan ilmiah.":"The persisted CoverageContext represented by this count; it is context, not a scientific verdict."},
+      radar:{label:window.GF_I18N?.t("radarItems") || "Radar Items",items:radar,summary:id?"Proyeksi Radar read-only persis yang berasal dari ChangeEvent canonical.":"Exact read-only Radar projections derived from canonical ChangeEvents."}
     };
     const setMetric = (id, value, detail, kind) => { const el = document.getElementById(id); if (el) { el.querySelector("strong").textContent = value; el.querySelector("small").textContent = detail; el.dataset.metricMembers=kind; el.classList.remove("dummy-surface"); el.classList.add("real-surface"); } };
     setMetric("metric-papers", papers.length, "Persisted works in selected project", "papers");
@@ -660,8 +661,11 @@ async function renderEvidenceVerification(row) {
 
 // Presentation language affects UI chrome only; canonical scientific records remain untouched.
 document.querySelectorAll("[data-language-select]").forEach(el => el.addEventListener("change", event => window.GF_I18N?.setLanguage(event.target.value)));
+function applyMetricActionLabels() { document.querySelectorAll(".metric-action").forEach(el => el.dataset.memberActionLabel = window.GF_I18N?.t("inspectMembers") || "Inspect members →"); }
 window.GF_I18N?.apply();
+applyMetricActionLabels();
 window.addEventListener("gfprojclaw-language-change", () => {
+  applyMetricActionLabels();
   const dark = document.documentElement.dataset.theme === "dark";
   if (themeToggle) themeToggle.textContent = `${dark ? "☀️" : "🌙"} ${window.GF_I18N.t(dark ? "light" : "dark")}`;
 });

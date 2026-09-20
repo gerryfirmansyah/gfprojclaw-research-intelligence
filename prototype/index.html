@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GFPROJCLAW Research Copilot</title>
-  <link rel="stylesheet" href="styles.css?v=0.16.3" />
+  <link rel="stylesheet" href="styles.css?v=0.16.4" />
 </head>
 <body>
   <div class="app-shell">
@@ -61,7 +61,7 @@
           <a class="workspace-link" href="admin.html" data-i18n="admin">Admin Copilot</a>
           <label class="language-control"><span data-i18n="language">Language</span><select data-language-select><option value="en">EN</option><option value="id">ID</option></select></label>
           <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">🌙 Dark</button>
-          <span id="prototype-version" class="sync-status">Prototype v0.16.3 · exact member trace trial</span>
+          <span id="prototype-version" class="sync-status">Prototype v0.16.4 · localized member trace trial</span>
         </div>
       </header>
 
@@ -75,14 +75,14 @@
         </div>
 
         <div class="metric-grid">
-          <article class="metric-card metric-action" id="metric-papers" tabindex="0" role="button" data-metric-open="evidence" aria-label="Open persisted papers"><span>Persisted Papers</span><strong>…</strong><small>Loading canonical project data</small></article>
-          <article class="metric-card metric-action" id="metric-decisions" tabindex="0" role="button" data-metric-open="review" aria-label="Open HUMAN review and decisions"><span>HUMAN Decisions</span><strong>…</strong><small>Loading persisted decisions</small></article>
-          <article class="metric-card metric-action" id="metric-changes" tabindex="0" role="button" data-metric-open="evolution" aria-label="Open knowledge changes"><span>Knowledge Changes</span><strong>…</strong><small>Loading canonical ChangeEvents</small></article>
-          <article class="metric-card metric-action" id="metric-coverage" tabindex="0" role="button" data-metric-open="coverage" aria-label="Open research coverage"><span>Coverage Context</span><strong>…</strong><small>Loading persisted coverage state</small></article>
-          <article class="metric-card metric-action" id="metric-radar" tabindex="0" role="button" data-metric-open="telegram" aria-label="Open radar items"><span>Radar Items</span><strong>…</strong><small>Loading canonical projection</small></article>
+          <article class="metric-card metric-action" id="metric-papers" tabindex="0" role="button" data-metric-open="evidence" aria-label="Open persisted papers"><span data-i18n="persistedPapers">Persisted Papers</span><strong>…</strong><small>Loading canonical project data</small></article>
+          <article class="metric-card metric-action" id="metric-decisions" tabindex="0" role="button" data-metric-open="review" aria-label="Open HUMAN review and decisions"><span data-i18n="humanDecisions">HUMAN Decisions</span><strong>…</strong><small>Loading persisted decisions</small></article>
+          <article class="metric-card metric-action" id="metric-changes" tabindex="0" role="button" data-metric-open="evolution" aria-label="Open knowledge changes"><span data-i18n="knowledgeChanges">Knowledge Changes</span><strong>…</strong><small>Loading canonical ChangeEvents</small></article>
+          <article class="metric-card metric-action" id="metric-coverage" tabindex="0" role="button" data-metric-open="coverage" aria-label="Open research coverage"><span data-i18n="coverageContext">Coverage Context</span><strong>…</strong><small>Loading persisted coverage state</small></article>
+          <article class="metric-card metric-action" id="metric-radar" tabindex="0" role="button" data-metric-open="telegram" aria-label="Open radar items"><span data-i18n="radarItems">Radar Items</span><strong>…</strong><small>Loading canonical projection</small></article>
         </div>
         <section id="metric-members" class="metric-members" hidden aria-live="polite">
-          <div class="panel-header"><div><h2 id="metric-members-title">Canonical members</h2><p id="metric-members-summary">Select a metric to inspect its exact members.</p></div><button id="metric-members-close" class="text-button" type="button">Close</button></div>
+          <div class="panel-header"><div><h2 id="metric-members-title" data-i18n="canonicalMembers">Canonical members</h2><p id="metric-members-summary" data-i18n="selectMetric">Select a metric to inspect its exact members.</p></div><button id="metric-members-close" class="text-button" type="button" data-i18n="close">Close</button></div>
           <div id="metric-members-list"></div>
         </section>
 
@@ -135,7 +135,7 @@
     </main>
   </div>
 
-  <script src="i18n.js?v=0.16.2"></script>
-  <script src="app.js?v=0.16.3"></script>
+  <script src="i18n.js?v=0.16.4"></script>
+  <script src="app.js?v=0.16.4"></script>
 </body>
 </html>

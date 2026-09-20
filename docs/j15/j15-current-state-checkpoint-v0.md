@@ -227,3 +227,9 @@ HUMAN browser trial confirmed that Today counts such as `3 / 2 / 1 / 1 / 1` need
 Persisted Papers enumerate exact Works with title, bibliographic/access/review/source context and DOI/OpenAlex links when canonical identifiers exist. HUMAN Decisions enumerate exact persisted decisions and rationale. Knowledge Changes enumerate exact ChangeEvents and reasoning delta. Coverage Context exposes the counted persisted CoverageContext and limitation/counter-search state. Radar Items enumerate exact read-only projections from ChangeEvent. The displayed member-list length therefore comes from the same canonical payload as the aggregate count.
 
 This is a UI projection only and creates no scientific records or decisions. Static exact-member assertions, JavaScript syntax checks, and diff checks passed. HUMAN browser re-trial remains required; J15 is not HUMAN PASS.
+
+## 15. 2026-09-20 localized exact-member affordance
+
+The Today exact-member remediation is now integrated with the EN/ID presentation layer. Metric labels, the `Inspect members` affordance, canonical-member panel controls, and member-panel explanatory summaries switch with the UI language. Canonical member payload values remain untouched: paper titles, identifiers, rationale, ChangeEvent content, coverage state, and other persisted scientific records are not translated.
+
+This keeps the language preference a presentation concern while making the new aggregate traceability feature understandable in both supported UI languages. Static localization/member-trace assertions, JavaScript syntax checks, and diff checks passed. HUMAN browser re-trial remains required; J15 is not HUMAN PASS.
