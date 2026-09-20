@@ -96,3 +96,17 @@ Commit `618bd4254d2b099a4a5b94656fea067b57fcc630` extended Knowledge Evolution t
 GitHub Pages retrieval confirmed the deployed `app.js` contains both the canonical member-trace UI and the UNKNOWN/NOT_RECORDED historical boundary. A public API contract assertion also passed against the production HTTPS endpoint.
 
 This is a deployment/traceability checkpoint, not J15 HUMAN PASS. No writer `--apply` or continuous-pilot timer activation is authorized by this result.
+
+## 2026-09-20 canonical evidence-member projection regression
+
+A connection-aware internal projection helper, `_list_project_changes(conn, ...)`, now allows the exact ChangeEvent projection to be exercised inside a rollback-only transaction while preserving the existing public `list_project_changes(...)` wrapper. This addresses the earlier test-isolation issue where a second database connection correctly could not observe an uncommitted disposable event.
+
+The permanent regression harness `tests/test_change_event_projection.py` creates a disposable `EVIDENCE_ADDED` event and explicit `TRIGGER` membership using the existing canonical Profile A EvidenceRelationship, exercises the production projection, and verifies one member with `SUPPORTS`, the canonical Claim, `ABSTRACT_ONLY` EvidenceFragment, and Work. The transaction is always rolled back. Post-test production checks confirmed zero disposable events and zero `change_event_evidence` rows remain.
+
+This validates member projection mechanics without asserting that the canonical relationship historically triggered a real ChangeEvent. It does not authorize synthetic production history, writer `--apply`, timer activation, or J15 HUMAN PASS.
+
+## Writer scope audit after member-projection regression
+
+Repository and J15 contract audit found one implemented ChangeEvent writer: `tools/record_assessment_change_event.py`, scoped to `ASSESSMENT_CHANGED`. The persistence contract defines semantics for evidence-driven event types and requires explicit `TRIGGER`/`CONTEXT` roles, but the repository contains no evidence-event writer implementation and no prior J15 scope decision authorizing one.
+
+Accordingly, the member-projection regression does not silently expand writer scope. Evidence-event writing remains an explicit architecture/HUMAN decision. The current executable J15 writer remains Assessment-only, and its production `--apply` path remains unexecuted.
