@@ -46,8 +46,27 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/migrations/001_canonical_vertical_slice.sql
       - name: Apply deterministic fixture
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/fixtures/001_vertical_slice_reference.sql
+      - name: Seed pre-migration Assessment change event
+        run: |
+          psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test <<'SQL'
+          INSERT INTO change_event (
+            id, project_id, primary_research_object_id, coverage_context_id,
+            change_type, observed_at, previous_state_jsonb, current_state_jsonb, reasoning_delta
+          ) VALUES (
+            '06000000-0000-0000-0000-000000000003',
+            'a2000000-0000-0000-0000-000000000001',
+            'a4000000-0000-0000-0000-000000000001',
+            '04000000-0000-0000-0000-000000000001',
+            'ASSESSMENT_CHANGED', '2026-09-08T09:19:00+07:00', NULL,
+            '{"assessment_id":"05000000-0000-0000-0000-000000000001","gap_state":"CANDIDATE"}'::jsonb,
+            'Pre-migration fixture reproduces a historical Assessment event requiring deterministic backfill.'
+          );
+          SQL
       - name: Apply J15 migration
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/migrations/011_change_event_canonical_traceability.sql
+      - name: Verify historical Assessment backfill
+        run: |
+          test "$(psql -At -d gfprojclaw_j15_test -c "select current_assessment_id from change_event where id='06000000-0000-0000-0000-000000000003'")" = "05000000-0000-0000-0000-000000000001"
       - name: Create runtime role for privilege migration
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -c "CREATE ROLE gfproj_app NOLOGIN;"
       - name: Apply J15 runtime privileges

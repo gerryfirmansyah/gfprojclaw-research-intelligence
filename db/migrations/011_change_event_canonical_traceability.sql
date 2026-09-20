@@ -20,14 +20,7 @@ ALTER TABLE change_event
   ADD CONSTRAINT change_event_current_transition_fk
     FOREIGN KEY (current_assessment_id, current_supersedes_assessment_id, project_id, primary_research_object_id)
     REFERENCES assessment(id, supersedes_assessment_id, project_id, target_research_object_id)
-    MATCH SIMPLE ON DELETE RESTRICT,
-  ADD CONSTRAINT change_event_assessment_required_ck
-    CHECK (change_type <> 'ASSESSMENT_CHANGED' OR current_assessment_id IS NOT NULL),
-  ADD CONSTRAINT change_event_assessment_transition_ck
-    CHECK (
-      (previous_assessment_id IS NULL AND current_supersedes_assessment_id IS NULL)
-      OR previous_assessment_id = current_supersedes_assessment_id
-    );
+    MATCH SIMPLE ON DELETE RESTRICT;
 
 ALTER TABLE evidence_relationship
   ADD CONSTRAINT evidence_relationship_id_target_uk
@@ -68,5 +61,15 @@ WHERE ce.change_type = 'ASSESSMENT_CHANGED'
   AND a.target_research_object_id = ce.primary_research_object_id;
 
 -- No historical change_event_evidence backfill: exact trigger membership is not persisted.
+
+-- Validate semantic requirements only after deterministic historical Assessment backfill.
+ALTER TABLE change_event
+  ADD CONSTRAINT change_event_assessment_required_ck
+    CHECK (change_type <> 'ASSESSMENT_CHANGED' OR current_assessment_id IS NOT NULL),
+  ADD CONSTRAINT change_event_assessment_transition_ck
+    CHECK (
+      (previous_assessment_id IS NULL AND current_supersedes_assessment_id IS NULL)
+      OR previous_assessment_id = current_supersedes_assessment_id
+    );
 
 COMMIT;
