@@ -20,7 +20,7 @@ ALTER TABLE change_event
   ADD CONSTRAINT change_event_current_transition_fk
     FOREIGN KEY (current_assessment_id, current_supersedes_assessment_id, project_id, primary_research_object_id)
     REFERENCES assessment(id, supersedes_assessment_id, project_id, target_research_object_id)
-    MATCH FULL ON DELETE RESTRICT,
+    MATCH SIMPLE ON DELETE RESTRICT,
   ADD CONSTRAINT change_event_assessment_required_ck
     CHECK (change_type <> 'ASSESSMENT_CHANGED' OR current_assessment_id IS NOT NULL),
   ADD CONSTRAINT change_event_assessment_transition_ck

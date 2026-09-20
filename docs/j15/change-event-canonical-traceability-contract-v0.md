@@ -237,3 +237,11 @@ Results:
 Conclusion: the proposed CHECK + UNIQUE + composite FOREIGN KEY + MATCH FULL approach is executable on the production PostgreSQL version without introducing a persistent trigger.
 
 This proof authorizes drafting a migration proposal for HUMAN review; it does not itself authorize applying that migration.
+
+## 18. Disposable PostgreSQL correction: nullable initial Assessment transition
+
+GitHub Actions PostgreSQL 16 run 35480019858 rejected the first executable Migration 011 candidate while adding `change_event_current_transition_fk`: `MATCH FULL does not allow mixing of null and nonnull key values`. This is the expected initial-Assessment shape: current Assessment/project/object are present while `supersedes_assessment_id` is NULL.
+
+Correction: use `MATCH SIMPLE` for the composite supersession FK. The independent `change_event_current_assessment_fk` continues to enforce current Assessment project/object lineage. For non-initial transitions, all supersession-key columns are non-null, so the composite FK enforces that the current Assessment canonically supersedes the recorded previous Assessment. The transition CHECK continues to require previous/current-supersedes nullness alignment or equality.
+
+This correction replaces the earlier MATCH FULL proposal; the failed disposable run is retained as executable evidence and no production schema was changed.
