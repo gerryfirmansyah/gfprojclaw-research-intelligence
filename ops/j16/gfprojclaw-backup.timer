@@ -1,0 +1,11 @@
+[Unit]
+Description=GFPROJCLAW Daily PostgreSQL Backup
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 Asia/Jakarta
+Persistent=true
+RandomizedDelaySec=10m
+Unit=gfprojclaw-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=GFPROJCLAW PostgreSQL Backup
+After=postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=oneshot
+User=gfproj
+Group=gfproj
+WorkingDirectory=/opt/gfprojclaw-research-intelligence
+ExecStart=/opt/gfprojclaw-research-intelligence/ops/j16/backup_postgres.sh
+ExecStart=/opt/gfprojclaw-research-intelligence/ops/j16/prune_backups.sh
