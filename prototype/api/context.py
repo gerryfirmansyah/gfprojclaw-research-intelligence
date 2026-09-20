@@ -248,9 +248,8 @@ def list_project_assessments(project_id, object_id=None, limit=50):
     return rows
 
 
-def list_project_changes(project_id, object_id=None, limit=50):
-    with db() as conn:
-        rows = conn.execute("""
+def _list_project_changes(conn, project_id, object_id=None, limit=50):
+    rows = conn.execute("""
             SELECT ce.id AS change_event_id,
                    ce.primary_research_object_id,
                    roi.canonical_label,
@@ -293,6 +292,11 @@ def list_project_changes(project_id, object_id=None, limit=50):
             LIMIT %s
         """, (project_id, object_id, object_id, limit)).fetchall()
     return rows
+
+
+def list_project_changes(project_id, object_id=None, limit=50):
+    with db() as conn:
+        return _list_project_changes(conn, project_id, object_id, limit)
 
 
 def list_project_opportunities(project_id, limit=50):
