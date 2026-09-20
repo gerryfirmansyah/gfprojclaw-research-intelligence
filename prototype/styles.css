@@ -142,3 +142,4 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .metric-member:first-child { border-top:0; }
 .metric-member p { margin:5px 0; font-weight:var(--font-weight-body); }
 .metric-member small { color:var(--muted); }
+.presentation-translation{display:block;line-height:1.55}.canonical-original{margin-top:8px;font-size:.88em;opacity:.86}.canonical-original summary{cursor:pointer;font-weight:600}.canonical-original p{margin:7px 0 0}.source-language-note{font-size:.88em;opacity:.78;margin-top:6px}

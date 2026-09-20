@@ -44,23 +44,23 @@ const data = {
 };
 
 const journeyStages = [
-  ["R0", "Research Intent", "HUMAN REVIEWED", "green"],
-  ["R1", "Research Landscape", "MATURE", "green"],
-  ["R2", "Bukti Mapping", "EVIDENCE GROWING", "blue"],
-  ["R3", "Problem Formulation", "DEVELOPING", "blue"],
-  ["R4", "Gap Formation", "NEEDS ATTENTION", "red"],
-  ["R5", "Gap Falsification", "EVIDENCE GROWING", "blue"],
-  ["R6", "Theory Positioning", "NEEDS ATTENTION", "red"],
-  ["R7", "Research Question", "DEVELOPING", "blue"],
-  ["R8", "Conceptualization", "DEVELOPING", "blue"],
-  ["R9", "Method Intelligence", "EVIDENCE GROWING", "blue"],
-  ["R10", "Research Design", "NOT STARTED", "gray"],
-  ["R11", "Contribution Formation", "DEVELOPING", "blue"],
-  ["R12", "Novelty Challenge", "NEEDS ATTENTION", "red"],
-  ["R13", "Bukti & Argument Audit", "NOT STARTED", "gray"],
-  ["R14", "Adversarial Review", "NOT STARTED", "gray"],
-  ["R15", "Scholarly Positioning", "DEVELOPING", "blue"],
-  ["R16", "Research Readiness", "DEVELOPING", "blue"]
+  ["R0", "Research Intent", "DITINJAU HUMAN", "green"],
+  ["R1", "Research Landscape", "MATANG", "green"],
+  ["R2", "Bukti Mapping", "BUKTI BERTUMBUH", "blue"],
+  ["R3", "Problem Formulation", "BERKEMBANG", "blue"],
+  ["R4", "Gap Formation", "PERLU PERHATIAN", "red"],
+  ["R5", "Gap Falsification", "BUKTI BERTUMBUH", "blue"],
+  ["R6", "Theory Positioning", "PERLU PERHATIAN", "red"],
+  ["R7", "Research Question", "BERKEMBANG", "blue"],
+  ["R8", "Conceptualization", "BERKEMBANG", "blue"],
+  ["R9", "Method Intelligence", "BUKTI BERTUMBUH", "blue"],
+  ["R10", "Research Design", "BELUM DIMULAI", "gray"],
+  ["R11", "Contribution Formation", "BERKEMBANG", "blue"],
+  ["R12", "Novelty Challenge", "PERLU PERHATIAN", "red"],
+  ["R13", "Bukti & Argument Audit", "BELUM DIMULAI", "gray"],
+  ["R14", "Adversarial Review", "BELUM DIMULAI", "gray"],
+  ["R15", "Scholarly Positioning", "BERKEMBANG", "blue"],
+  ["R16", "Research Readiness", "BERKEMBANG", "blue"]
 ];
 
 const health = [
@@ -86,8 +86,33 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.17.0";
+const PROTOTYPE_VERSION = "0.17.1";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
+
+
+// Presentation-only Indonesian translations for persisted machine-authored scientific prose.
+// Canonical API/DB values remain unchanged and source-origin titles/evidence excerpts stay original.
+const presentationId = new Map(Object.entries({
+  "Candidate: empirical and explanatory specificity in AI public governance":"Kandidat: kekhususan empiris dan eksplanatori dalam tata kelola publik berbasis AI",
+  "Current synthesized evidence suggests that empirical and explanatory research focused on specific forms of AI in public governance may remain underdeveloped.":"Bukti sintesis saat ini menunjukkan bahwa riset empiris dan eksplanatori yang berfokus pada bentuk-bentuk spesifik AI dalam tata kelola publik mungkin masih kurang berkembang.",
+  "The reviewed literature is described as largely exploratory, conceptual, qualitative, and practice-driven, motivating more public-sector-focused, empirical, multidisciplinary, and explanatory research on specific forms of AI.":"Literatur yang ditinjau digambarkan sebagian besar bersifat eksploratif, konseptual, kualitatif, dan didorong praktik; hal ini mendorong riset yang lebih berfokus pada sektor publik, empiris, multidisipliner, dan eksplanatori mengenai bentuk-bentuk spesifik AI.",
+  "Coverage reflects the current persisted project slice only; discovery breadth and counter-search are not yet complete.":"Cakupan hanya mencerminkan bagian proyek yang saat ini tersimpan; keluasan discovery dan pencarian pembanding belum lengkap.",
+  "Research-opportunity prioritization is advisory context only; HUMAN scientific judgment remains authoritative.":"Prioritas peluang riset hanya merupakan konteks saran; penilaian ilmiah HUMAN tetap menjadi otoritas.",
+  "Current evidence slice does not support a defensible method-feasibility judgment.":"Bagian bukti saat ini belum mendukung penilaian kelayakan metode yang dapat dipertanggungjawabkan.",
+  "Novelty is not established; counter/prior-solution search state is NOT_RUN.":"Kebaruan belum ditetapkan; status pencarian pembanding/solusi terdahulu adalah NOT_RUN.",
+  "Advisory attention signal from 1 supporting and 0 challenging persisted relationship(s).":"Sinyal perhatian bersifat saran berdasarkan 1 relasi pendukung dan 0 relasi penantang yang tersimpan.",
+  "Current evidence slice does not support a defensible theory-significance judgment.":"Bagian bukti saat ini belum mendukung penilaian signifikansi teori yang dapat dipertanggungjawabkan.",
+  "Advice & Critic surfaces weaknesses and falsification work; it is not a scientific verdict and HUMAN authority remains explicit.":"Saran & Kritik menampilkan kelemahan dan pekerjaan falsifikasi; ini bukan keputusan ilmiah dan otoritas HUMAN tetap eksplisit.",
+  "Persisted relationships: 1 supporting, 0 challenging/contradicting; this is observed evidence balance, not a truth probability.":"Relasi tersimpan: 1 mendukung, 0 menantang/bertentangan; ini adalah keseimbangan bukti yang diamati, bukan probabilitas kebenaran.",
+  "Advice & Critic recommendation only; falsification work should precede stronger claims and HUMAN scientific judgment remains authoritative.":"Ini hanya rekomendasi Saran & Kritik; pekerjaan falsifikasi perlu mendahului Claim yang lebih kuat dan penilaian ilmiah HUMAN tetap menjadi otoritas.",
+  "Single abstract-derived claim is consistent with this tentative synthesis gap; HUMAN review required.":"Satu Claim yang diturunkan dari abstrak konsisten dengan gap sintesis tentatif ini; tinjauan HUMAN diperlukan."
+}));
+const presentId = value => value == null ? value : (presentationId.get(String(value)) || String(value));
+const canonicalWithId = value => {
+  if (value == null) return "";
+  const original=String(value), translated=presentId(original);
+  return translated === original ? escapeHtml(original) : `<span class="presentation-translation">${escapeHtml(translated)}</span><details class="canonical-original"><summary>Lihat teks canonical asli</summary><p>${escapeHtml(original)}</p></details>`;
+};
 const themeToggle = document.getElementById("theme-toggle");
 
 function applyTheme(theme) {
@@ -114,14 +139,14 @@ function selectedDummyData() {
 }
 
 function selectedProjectLabel() {
-  return projectSelect.selectedOptions[0]?.textContent || "Selected project";
+  return projectSelect.selectedOptions[0]?.textContent || "Proyek terpilih";
 }
 
 function stateClass(label) {
-  if (/CONTESTED|CHALLENGED|NEEDS ATTENTION/i.test(label)) return "red";
-  if (/STRENGTH|MATURE|HUMAN REVIEWED|HEALTHY/i.test(label)) return "green";
-  if (/POSSIBLY|DEGRADED|REVIEW/i.test(label)) return "yellow";
-  if (/NOT STARTED/i.test(label)) return "gray";
+  if (/CONTESTED|CHALLENGED|NEEDS ATTENTION|PERLU PERHATIAN/i.test(label)) return "red";
+  if (/STRENGTH|MATURE|HUMAN REVIEWED|HEALTHY|MATANG|DITINJAU HUMAN/i.test(label)) return "green";
+  if (/POSSIBLY|DEGRADED|REVIEW|TINJAU/i.test(label)) return "yellow";
+  if (/NOT STARTED|BELUM DIMULAI/i.test(label)) return "gray";
   return "blue";
 }
 
@@ -316,13 +341,13 @@ async function loadProjectOpportunities() {
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-object-index="${i}"><div class="change-main"><strong>${escapeHtml(r.canonical_label)}</strong><small>${escapeHtml(r.object_type)} · ${escapeHtml(r.object_state)}</small></div><span class="state ${stateClass(r.object_state)}">${escapeHtml(r.object_state)}</span></div>`).join("");
     const show = async r => {
       const isGap = r.object_type === "GAP_CANDIDATE";
-      detail.innerHTML = `<p><strong>Pernyataan:</strong> ${escapeHtml(r.statement)}</p><p><strong>Tipe objek:</strong> ${escapeHtml(r.object_type)}</p>${isGap ? `<p><strong>Tipe gap:</strong> ${escapeHtml(r.gap_type)}</p>` : ""}<p><strong>Status:</strong> ${escapeHtml(r.object_state)}</p><p><strong>Status ilmiah:</strong> ${escapeHtml(r.scope_jsonb?.scientific_status || (isGap ? "GAP_CANDIDATE_REQUIRES_HUMAN_VALIDATION" : "NOT_RECORDED"))}</p>`;
+      detail.innerHTML = `<p><strong>Pernyataan:</strong> ${canonicalWithId(r.statement)}</p><p><strong>Tipe objek:</strong> ${escapeHtml(r.object_type)}</p>${isGap ? `<p><strong>Tipe gap:</strong> ${escapeHtml(r.gap_type)}</p>` : ""}<p><strong>Status:</strong> ${escapeHtml(r.object_state)}</p><p><strong>Status ilmiah:</strong> ${escapeHtml(r.scope_jsonb?.scientific_status || (isGap ? "GAP_CANDIDATE_REQUIRES_HUMAN_VALIDATION" : "NOT_RECORDED"))}</p>`;
       relation.innerHTML = isGap ? `<p>Memuat relasi bukti gap yang tersimpan…</p>` : `<p><strong>Status relasi bukti:</strong> tidak ada yang diimplikasikan oleh proyeksi ini.</p><p>Tinjau record EvidenceFragment dan Claim canonical di Penjelajah Bukti. Investigation Direction bukan bukti adanya gap, kebaruan, atau mekanisme kausal.</p><div class="callout warning">EvidenceRelationship harus disimpan dan ditinjau secara eksplisit; layar ini tidak menyimpulkan SUPPORTS atau CHALLENGES.</div>`;
       document.getElementById("real-gap-assessment").innerHTML = isGap ? `<p>Memuat asesmen yang tersimpan…</p>` : `<p>Tidak diperlukan asesmen untuk menampilkan arah investigasi yang dipilih HUMAN ini.</p>`;
       document.getElementById("real-gap-critic").innerHTML = isGap ? `<p>Memuat Saran & Kritik yang tersimpan…</p>` : `<p>Saran & Kritik belum digeneralisasi untuk Investigation Direction. Lanjutkan penyaringan bukti tanpa memperlakukan ketiadaan ini sebagai penguncian global.</p>`;
-      if (isGap) { const legacy = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, {cache:"no-store"}); const oldRows = legacy.ok ? await legacy.json() : []; const old = oldRows.find(x => x.gap_id === r.research_object_id); if (old) { Object.assign(r, old); const trace = Array.isArray(old.evidence_trace) ? old.evidence_trace : []; relation.innerHTML = `<p><strong>Tautan bukti tersimpan:</strong> ${escapeHtml(old.support_count)} mendukung · ${escapeHtml(old.challenge_count)} menantang · ${escapeHtml(old.linked_claim_count)} Claim tertaut</p><p><strong>Pencarian pembanding:</strong> ${escapeHtml(old.counter_search_state || "NOT_RECORDED")}</p><p><strong>Keterbatasan cakupan:</strong> ${escapeHtml(old.coverage_limitations || "Tidak direkam")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a class="source-link source-link-doi" href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Buka sumber DOI">DOI ↗</a>` : i.type === "OPENALEX" ? `<a class="source-link source-link-openalex" href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Buka di OpenAlex">OpenAlex ↗</a>` : "").filter(Boolean).join(" · "); const access = t.access_level || "NOT_RECORDED"; const accessNote = access === "ABSTRACT_ONLY" ? " — akses bukti terbatas" : access === "METADATA_ONLY" ? " — hanya metadata; tidak ada teks bukti" : ""; return `<div class="trace"><span class="trace-label">${escapeHtml(t.semantic_type)}</span><div class="paper-title">${escapeHtml(t.work_title)}</div><span class="access-badge ${access === "FULL_TEXT" ? "full" : "limited"}">${escapeHtml(access)}${escapeHtml(accessNote)}</span>${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · EvidenceFragment: ${escapeHtml(t.evidence_fragment_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`; }).join("") : `<p>Tidak ada jejak bukti canonical yang tersimpan.</p>`}`; await renderGapCritic(r); await renderGapAssessment(r); } }
+      if (isGap) { const legacy = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, {cache:"no-store"}); const oldRows = legacy.ok ? await legacy.json() : []; const old = oldRows.find(x => x.gap_id === r.research_object_id); if (old) { Object.assign(r, old); const trace = Array.isArray(old.evidence_trace) ? old.evidence_trace : []; relation.innerHTML = `<p><strong>Tautan bukti tersimpan:</strong> ${escapeHtml(old.support_count)} mendukung · ${escapeHtml(old.challenge_count)} menantang · ${escapeHtml(old.linked_claim_count)} Claim tertaut</p><p><strong>Pencarian pembanding:</strong> ${escapeHtml(old.counter_search_state || "NOT_RECORDED")}</p><p><strong>Keterbatasan cakupan:</strong> ${canonicalWithId(old.coverage_limitations || "Tidak direkam")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a class="source-link source-link-doi" href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Buka sumber DOI">DOI ↗</a>` : i.type === "OPENALEX" ? `<a class="source-link source-link-openalex" href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Buka di OpenAlex">OpenAlex ↗</a>` : "").filter(Boolean).join(" · "); const access = t.access_level || "NOT_RECORDED"; const accessNote = access === "ABSTRACT_ONLY" ? " — akses bukti terbatas" : access === "METADATA_ONLY" ? " — hanya metadata; tidak ada teks bukti" : ""; return `<div class="trace"><span class="trace-label">${escapeHtml(t.semantic_type)}</span><div class="paper-title">${escapeHtml(t.work_title)}</div><span class="access-badge ${access === "FULL_TEXT" ? "full" : "limited"}">${escapeHtml(access)}${escapeHtml(accessNote)}</span>${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · EvidenceFragment: ${escapeHtml(t.evidence_fragment_id)} · Claim: ${escapeHtml(presentId(t.claim_text))}</small></div>`; }).join("") : `<p>Tidak ada jejak bukti canonical yang tersimpan.</p>`}`; await renderGapCritic(r); await renderGapAssessment(r); } }
       await renderResearchQuality(r);
-      await renderBuktiVerification(r);
+      await renderEvidenceVerification(r);
       await renderGapDecision(r);
     };
     document.querySelectorAll("[data-object-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.objectIndex)]));
@@ -343,9 +368,9 @@ async function renderGapCritic(gap) {
     gap.assessment_id = critic.assessment_id || null;
     const dimensions = Array.isArray(critic.dimensions) ? critic.dimensions : [];
     const evidence = Array.isArray(critic.evidence_basis) ? critic.evidence_basis : [];
-    const dimensionCards = dimensions.map(d => `<div class="trace"><strong>${escapeHtml(d.dimension_type)} — ${escapeHtml(d.value_text || "NOT_RECORDED")}</strong><p>${escapeHtml(d.explanation || "Penjelasan tidak tersedia dari asesmen canonical saat ini.")}</p></div>`).join("");
-    const evidenceCards = evidence.length ? evidence.map(e => `<div class="trace"><span class="trace-label">${escapeHtml(e.semantic_type)}</span><div class="paper-title">${escapeHtml(e.work_title || "Work tidak tersedia")}</div><p><span class="trace-label">Claim yang ditinjau:</span> ${escapeHtml(e.claim_text || "Claim tidak tersedia")}</p><p><span class="trace-label">Alasan ditautkan:</span> ${escapeHtml(e.relationship_rationale || "Alasan relasi tidak tersedia.")}</p><small>Akses bukti: ${escapeHtml(e.access_level || "NOT_RECORDED")} · Claim: ${escapeHtml(e.claim_review_state || "NOT_RECORDED")} · Relasi: ${escapeHtml(e.relationship_review_state || "NOT_RECORDED")}</small></div>`).join("") : "<p>Tidak ada EvidenceRelationship canonical eksplisit yang tersedia sebagai dasar Asesmen Saran & Kritik ini.</p>";
-    box.innerHTML = `<p><strong>Asesmen Saran & Kritik</strong></p><p>${escapeHtml(critic.explanation_summary || "Ringkasan penjelasan tidak tersedia dari asesmen canonical saat ini.")}</p><div class="trace"><strong>Target asesmen</strong><p>${escapeHtml(critic.canonical_label || critic.statement || "Objek Riset tidak tersedia")} · ${escapeHtml(critic.gap_type || "TYPE_NOT_RECORDED")}</p><p>Asesmen ini berlaku pada Objek Riset dan kumpulan bukti canonical yang saat ini tertaut; ini bukan asesmen terhadap satu paper.</p><small>Cakupan bukti: ${escapeHtml(critic.linked_claim_count ?? 0)} Claim tertaut · ${escapeHtml(critic.support_count ?? 0)} SUPPORTS · ${escapeHtml(critic.challenge_count ?? 0)} CHALLENGES/CONTRADICTS</small></div><p><strong>Penalaran mesin yang dapat ditinjau</strong></p>${dimensionCards}<p><strong>Dasar bukti canonical</strong></p>${evidenceCards}<p><strong>Cakupan / keterbatasan yang belum terselesaikan</strong></p><p>Pencarian pembanding: ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")}. ${escapeHtml(critic.coverage_limitations || "Tidak ada keterbatasan cakupan tambahan yang direkam.")}</p><div class="callout warning">Verifikasi penjelasan terhadap Verifikasi Bukti dan sumber eksternal sebelum menerima Claim ilmiah yang lebih kuat. Saran & Kritik tidak menetapkan kebaruan, kebenaran, penerimaan, atau keputusan ilmiah.</div>`;
+    const dimensionCards = dimensions.map(d => `<div class="trace"><strong>${escapeHtml(d.dimension_type)} — ${escapeHtml(d.value_text || "NOT_RECORDED")}</strong><p>${canonicalWithId(d.explanation || "Penjelasan tidak tersedia dari asesmen canonical saat ini.")}</p></div>`).join("");
+    const evidenceCards = evidence.length ? evidence.map(e => `<div class="trace"><span class="trace-label">${escapeHtml(e.semantic_type)}</span><div class="paper-title">${escapeHtml(e.work_title || "Work tidak tersedia")}</div><p><span class="trace-label">Claim yang ditinjau:</span> ${canonicalWithId(e.claim_text || "Claim tidak tersedia")}</p><p><span class="trace-label">Alasan ditautkan:</span> ${canonicalWithId(e.relationship_rationale || "Alasan relasi tidak tersedia.")}</p><small>Akses bukti: ${escapeHtml(e.access_level || "NOT_RECORDED")} · Claim: ${escapeHtml(e.claim_review_state || "NOT_RECORDED")} · Relasi: ${escapeHtml(e.relationship_review_state || "NOT_RECORDED")}</small></div>`).join("") : "<p>Tidak ada EvidenceRelationship canonical eksplisit yang tersedia sebagai dasar Asesmen Saran & Kritik ini.</p>";
+    box.innerHTML = `<p><strong>Asesmen Saran & Kritik</strong></p><p>${canonicalWithId(critic.explanation_summary || "Ringkasan penjelasan tidak tersedia dari asesmen canonical saat ini.")}</p><div class="trace"><strong>Target asesmen</strong><p>${canonicalWithId(critic.canonical_label || critic.statement || "Objek Riset tidak tersedia")} · ${escapeHtml(critic.gap_type || "TYPE_NOT_RECORDED")}</p><p>Asesmen ini berlaku pada Objek Riset dan kumpulan bukti canonical yang saat ini tertaut; ini bukan asesmen terhadap satu paper.</p><small>Cakupan bukti: ${escapeHtml(critic.linked_claim_count ?? 0)} Claim tertaut · ${escapeHtml(critic.support_count ?? 0)} SUPPORTS · ${escapeHtml(critic.challenge_count ?? 0)} CHALLENGES/CONTRADICTS</small></div><p><strong>Penalaran mesin yang dapat ditinjau</strong></p>${dimensionCards}<p><strong>Dasar bukti canonical</strong></p>${evidenceCards}<p><strong>Cakupan / keterbatasan yang belum terselesaikan</strong></p><p>Pencarian pembanding: ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")}. ${canonicalWithId(critic.coverage_limitations || "Tidak ada keterbatasan cakupan tambahan yang direkam.")}</p><div class="callout warning">Verifikasi penjelasan terhadap Verifikasi Bukti dan sumber eksternal sebelum menerima Claim ilmiah yang lebih kuat. Saran & Kritik tidak menetapkan kebaruan, kebenaran, penerimaan, atau keputusan ilmiah.</div>`;
   } catch (error) {
     console.error(error);
     box.innerHTML = `<p>Saran & Kritik tidak tersedia: ${escapeHtml(error.message)}</p>`;
@@ -356,7 +381,7 @@ function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-function renderBukti() {
+function renderEvidence() {
   return commonHeader("Penjelajah Bukti", "Record EvidenceFragment dan Claim nyata untuk Proyek yang dipilih.", "real") + `
   <div class="detail-grid"><div class="card"><h3>Hasil Bukti</h3><div id="real-evidence-list">Memuat bukti canonical…</div></div>
   <div class="card"><h3>Detail Bukti</h3><div id="real-evidence-detail">Pilih Claim yang tersimpan.</div></div>
@@ -376,8 +401,8 @@ async function loadProjectBukti() {
       detail.innerHTML = "<p>Belum ada yang perlu ditinjau.</p>";
       return;
     }
-    list.innerHTML = rows.map((r, i) => `<div class="change-row" data-evidence-index="${i}"><div class="change-main"><strong>${escapeHtml(r.claim_text)}</strong><small>${escapeHtml(r.work_title)} · ${escapeHtml(r.access_level)}</small></div><span class="state ${stateClass(r.review_state)}">${escapeHtml(r.review_state)}</span></div>`).join("");
-    const show = r => { detail.innerHTML = `<div class="paper-title">${escapeHtml(r.work_title)}</div><p><span class="trace-label">Fragmen:</span> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><span class="trace-label">Pratinjau bukti:</span> ${escapeHtml(r.fragment_preview)}…</p><p><span class="trace-label">Claim:</span> ${escapeHtml(r.claim_text)}</p><p><span class="trace-label">Ekstraksi:</span> ${escapeHtml(r.extraction_origin)} · ${escapeHtml(r.extraction_version)}</p><div class="callout warning">${escapeHtml(r.review_state)} — validasi HUMAN diperlukan sebelum penerimaan ilmiah.</div>`; };
+    list.innerHTML = rows.map((r, i) => `<div class="change-row" data-evidence-index="${i}"><div class="change-main"><strong>${escapeHtml(presentId(r.claim_text))}</strong><small><span class="paper-title">${escapeHtml(r.work_title)}</span> · ${escapeHtml(r.access_level)}</small></div><span class="state ${stateClass(r.review_state)}">${escapeHtml(r.review_state)}</span></div>`).join("");
+    const show = r => { detail.innerHTML = `<div class="paper-title">${escapeHtml(r.work_title)}</div><p class="source-language-note">Judul paper dan pratinjau bukti dipertahankan dalam bahasa sumber asli.</p><p><span class="trace-label">Fragmen:</span> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><span class="trace-label">Pratinjau bukti asli:</span> ${escapeHtml(r.fragment_preview)}…</p><p><span class="trace-label">Claim — penjelasan Bahasa Indonesia:</span> ${canonicalWithId(r.claim_text)}</p><p><span class="trace-label">Ekstraksi:</span> ${escapeHtml(r.extraction_origin)} · ${escapeHtml(r.extraction_version)}</p><div class="callout warning">${escapeHtml(r.review_state)} — validasi HUMAN diperlukan sebelum penerimaan ilmiah.</div>`; };
     document.querySelectorAll("[data-evidence-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.evidenceIndex)]));
     show(rows[0]);
   } catch (error) {
@@ -508,7 +533,7 @@ async function loadProjectRadar() {
   }
 }
 
-const renderers = { journey:renderJourney, opportunities:renderOpportunities, evidence:renderBukti, evolution:renderEvolution, review:renderReview, coverage:renderCoverage, profiles:renderProfiles, telegram:renderTelegram };
+const renderers = { journey:renderJourney, opportunities:renderOpportunities, evidence:renderEvidence, evolution:renderEvolution, review:renderReview, coverage:renderCoverage, profiles:renderProfiles, telegram:renderTelegram };
 
 function showView(name) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active-view"));
@@ -607,8 +632,8 @@ async function renderGapAssessment(gap) {
     const rows = (await response.json()).filter(a => a.target_research_object_id === gap.gap_id);
     if (!rows.length) { box.innerHTML = "<p>Belum ada Asesmen tersimpan untuk GapCandidate ini.</p>"; return; }
     const a = rows[0];
-    const dims = (a.dimensions || []).map(d => `<li><strong>${escapeHtml(d.dimension_type)}</strong>: ${escapeHtml(d.value_text ?? d.value_numeric)}<br><small>${escapeHtml(d.explanation || "")}</small></li>`).join("");
-    box.innerHTML = `<p><strong>${escapeHtml(a.assessment_type)}</strong></p><p>${escapeHtml(a.explanation_summary || "")}</p><ul>${dims}</ul><div class="callout warning">Dimensi mesin adalah saran kontekstual, bukan probabilitas atau penerimaan ilmiah.</div>`;
+    const dims = (a.dimensions || []).map(d => `<li><strong>${escapeHtml(d.dimension_type)}</strong>: ${escapeHtml(d.value_text ?? d.value_numeric)}<br><small>${canonicalWithId(d.explanation || "")}</small></li>`).join("");
+    box.innerHTML = `<p><strong>${escapeHtml(a.assessment_type)}</strong></p><p>${canonicalWithId(a.explanation_summary || "")}</p><ul>${dims}</ul><div class="callout warning">Dimensi mesin adalah saran kontekstual, bukan probabilitas atau penerimaan ilmiah.</div>`;
   } catch (error) {
     console.error(error);
     box.innerHTML = `<p>API Asesmen tidak tersedia: ${escapeHtml(error.message)}</p>`;
@@ -638,7 +663,7 @@ async function renderResearchQuality(row) {
   }
 }
 
-async function renderBuktiVerification(row) {
+async function renderEvidenceVerification(row) {
   const box=document.getElementById("real-gap-verification");
   if(!box || !projectSelect.value || !row?.research_object_id) return;
   box.innerHTML="<p>Memuat bukti canonical yang dapat diperiksa…</p>";
@@ -650,7 +675,7 @@ async function renderBuktiVerification(row) {
       rows.map((x,i)=>{
         const links=[x.doi_url ? `<a class="source-link source-link-doi" href="${escapeHtml(x.doi_url)}" target="_blank" rel="noopener noreferrer">DOI ↗</a>`:"",x.openalex_url ? `<a class="source-link source-link-openalex" href="${escapeHtml(x.openalex_url)}" target="_blank" rel="noopener noreferrer">OpenAlex ↗</a>`:""].filter(Boolean).join(" · ");
         const text=x.evidence_text ? `<details ${i===0 ? "open":""}><summary>Baca ${escapeHtml(x.fragment_type || "fragmen bukti")} (${escapeHtml(x.access_level || "UNKNOWN")})</summary><p class="evidence-readable">${escapeHtml(x.evidence_text)}</p></details>` : `<p><em>Tidak ada teks BuktiFragment canonical yang tersimpan untuk karya ini.</em></p>`;
-        const claim=x.claim_id ? `<p><strong>Claim hasil ekstraksi:</strong> ${escapeHtml(x.claim_text)}<br><small>Tinjauan Claim: ${escapeHtml(x.claim_review_state)} · ekstraksi: ${escapeHtml(x.extraction_origin)}</small></p>` : "<p><strong>Claim hasil ekstraksi:</strong> tidak ada yang tersimpan.</p>";
+        const claim=x.claim_id ? `<p><strong>Claim hasil ekstraksi:</strong> ${canonicalWithId(x.claim_text)}<br><small>Tinjauan Claim: ${escapeHtml(x.claim_review_state)} · ekstraksi: ${escapeHtml(x.extraction_origin)}</small></p>` : "<p><strong>Claim hasil ekstraksi:</strong> tidak ada yang tersimpan.</p>";
         const rel=x.relationship_id ? `<p><strong>Relasi objek:</strong> ${escapeHtml(x.semantic_type)} · ${escapeHtml(x.relationship_review_state)}</p>` : "<p><strong>Relasi objek:</strong> tidak ada yang dinyatakan.</p>";
         return `<div class="trace"><strong>${escapeHtml(x.title)}</strong><br><small>${escapeHtml(x.publication_year || "Tahun tidak tersedia")} · ${escapeHtml(x.object_evidence_status)} · ${escapeHtml(x.access_level || x.current_access_level || "METADATA_ONLY")}</small>${links ? `<p>${links}</p>`:""}${text}${claim}${rel}</div>`;
       }).join("")+
