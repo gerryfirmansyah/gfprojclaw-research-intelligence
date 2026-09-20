@@ -226,9 +226,9 @@ function showMetricMembers(kind) {
 async function loadTodayMetrics() {
   const projectId = projectSelect.value;
   if (!projectId) return;
-  const endpoints = ["papers", "decisions", "changes", "coverage", "radar"];
+  const endpoints = ["papers", "decisions", "changes", "coverage", "radar", "corpus-layers"];
   try {
-    const [papers, decisions, changes, coverage, radar] = await Promise.all(endpoints.map(async name => {
+    const [papers, decisions, changes, coverage, radar, corpusLayers] = await Promise.all(endpoints.map(async name => {
       const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectId)}/${name}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`${name} HTTP ${response.status}`);
       return response.json();
@@ -242,13 +242,13 @@ async function loadTodayMetrics() {
       radar:{label:window.GF_I18N?.t("radarItems") || "Radar Items",items:radar,summary:id?"Proyeksi Radar read-only persis yang berasal dari ChangeEvent canonical.":"Exact read-only Radar projections derived from canonical ChangeEvents."}
     };
     const setMetric = (id, value, detail, kind) => { const el = document.getElementById(id); if (el) { el.querySelector("strong").textContent = value; el.querySelector("small").textContent = detail; el.dataset.metricMembers=kind; el.classList.remove("dummy-surface"); el.classList.add("real-surface"); } };
-    setMetric("metric-papers", papers.length, window.GF_I18N?.t("persistedWorksDetail") || "Persisted karya in selected project", "papers");
+    setMetric("metric-papers", papers.length, `Project Corpus: ${papers.length} persisted Works · Research Universe ${corpusLayers.research_universe?.state || "UNKNOWN"} · Discovery coverage ${corpusLayers.discovery_corpus?.state || "NOT_AVAILABLE"}`, "papers");
     setMetric("metric-decisions", decisions.length, window.GF_I18N?.t("humanDecisionsDetail") || "Explicit persisted Keputusan HUMANs", "decisions");
     setMetric("metric-changes", changes.length, window.GF_I18N?.t("knowledgeChangesDetail") || "Persisted canonical ChangeEvents", "changes");
     setMetric("metric-coverage", coverage.coverage_context_id ? 1 : 0, coverage.counter_search_state ? `Pencarian pembanding: ${coverage.counter_search_state}` : "Tidak ada CoverageContext tersimpan", "coverage");
     setMetric("metric-radar", radar.length, window.GF_I18N?.t("radarDetail") || "Read-only projections from ChangeEvent", "radar");
     const pill = document.getElementById("today-coverage-pill");
-    if (pill) pill.textContent = coverage.coverage_context_id ? `Cakupan tersimpan · pencarian pembanding ${coverage.counter_search_state || "UNKNOWN"}` : "Tidak ada CoverageContext tersimpan";
+    if (pill) pill.textContent = coverage.coverage_context_id ? `Project Corpus ${corpusLayers.project_corpus?.count ?? papers.length} Works · semesta global ${corpusLayers.research_universe?.state || "UNKNOWN"} · pencarian pembanding ${coverage.counter_search_state || "UNKNOWN"}` : `Project Corpus ${papers.length} Works · coverage NOT_AVAILABLE`;
   } catch (error) {
     todayMetricMembers={};
     document.querySelectorAll(".metric-card").forEach(el => { el.querySelector("strong").textContent = "—"; el.querySelector("small").textContent = `Metrik canonical tidak tersedia: ${error.message}`; });
@@ -510,12 +510,16 @@ async function loadProjectCoverage(targetId = "real-coverage-detail") {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/coverage`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Coverage HTTP ${response.status}`);
     const c = await response.json();
+    const corpusResponse = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/corpus-layers`, { cache: "no-store" });
+    const corpus = corpusResponse.ok ? await corpusResponse.json() : {};
     if (!c.coverage_context_id) { box.innerHTML = `<div class="card real-surface"><p>Tidak ada CoverageContext tersimpan for this project yet.</p></div>`; return; }
     const access = c.access_summary_jsonb || {};
     const extraction = c.extraction_summary_jsonb || {};
     const sources = c.sources || [];
     const sourceRows=sources.length?sources.map(x=>`<div class="trace"><strong>${escapeHtml(x.source_key)}</strong><p>Record diamati: ${escapeHtml(x.observed_record_count ?? "NOT_RECORDED")} · dicoba: ${escapeHtml(x.attempted_record_count ?? "NOT_RECORDED")} · status sumber: ${escapeHtml(x.health_state || "NOT_RECORDED")}</p><small>${escapeHtml(x.access_limitations || x.degradation_reason || "Tidak ada keterbatasan sumber tambahan yang direkam")}</small></div>`).join(""):`<p>Source observation canonical tidak tersedia untuk CoverageContext ini.</p>`;
-    box.innerHTML = `<div class="card real-surface"><h3>Cakupan korpus tersimpan <span class="data-badge real">DATA NYATA</span></h3><ul><li>FULL_TEXT — ${access.FULL_TEXT || 0}</li><li>ABSTRACT_ONLY — ${access.ABSTRACT_ONLY || 0}</li><li>METADATA_ONLY — ${access.METADATA_ONLY || 0}</li><li>Claim — ${extraction.claims || 0}</li></ul><p><strong>Pencarian pembanding:</strong> ${escapeHtml(c.counter_search_state)}</p><p>Angka di atas adalah aggregate CoverageContext. Periksa observasi sumber di bawah untuk memahami cakupan yang benar-benar direkam.</p></div><div class="card real-surface"><h3>Observasi sumber canonical</h3>${sourceRows}</div><div class="card real-surface"><h3>Batas cakupan ilmiah</h3><p><strong>Diamati:</strong> ${escapeHtml(c.observed_at)}</p><div class="callout warning">${escapeHtml(c.limitations || "Tidak ada keterbatasan yang direkam.")}</div><p>Status sumber membantu memeriksa coverage; ini bukan bukti bahwa pencarian telah lengkap secara ilmiah. Run provider/retry dan kesehatan layanan tersedia di Admin Copilot.</p></div>`;
+    const layer = (label,key) => { const x=corpus[key]||{}; return `<li><strong>${label}</strong> — ${x.count == null ? escapeHtml(x.state||"NOT_AVAILABLE") : escapeHtml(x.count)}${x.state && x.count != null ? ` · ${escapeHtml(x.state)}` : ""}</li>`; };
+    const corpusLayers = `<div class="card real-surface"><h3>Peta lapisan corpus <span class="data-badge real">DATA NYATA</span></h3><ul>${layer("Research Universe","research_universe")}${layer("Discovery Corpus (source-record observations; dapat overlap)","discovery_corpus")}${layer("Deduplicated Corpus","deduplicated_corpus")}${layer("Screening Corpus","screening_corpus")}${layer("Project Corpus","project_corpus")}${layer("Evidence Corpus","evidence_corpus")}${layer("HUMAN-reviewed Evidence","human_reviewed_evidence")}</ul><div class="callout warning">Project Corpus bukan ukuran seluruh literatur. Research Universe hanya dapat dinyatakan sesuai sumber, query, waktu, dan akses yang benar-benar dicari. UNKNOWN/NOT_AVAILABLE berarti sistem belum memiliki dasar canonical untuk menyatakan jumlahnya.</div></div>`;
+    box.innerHTML = corpusLayers + `<div class="card real-surface"><h3>Cakupan korpus tersimpan <span class="data-badge real">DATA NYATA</span></h3><ul><li>FULL_TEXT — ${access.FULL_TEXT || 0}</li><li>ABSTRACT_ONLY — ${access.ABSTRACT_ONLY || 0}</li><li>METADATA_ONLY — ${access.METADATA_ONLY || 0}</li><li>Claim — ${extraction.claims || 0}</li></ul><p><strong>Pencarian pembanding:</strong> ${escapeHtml(c.counter_search_state)}</p><p>Angka di atas adalah aggregate CoverageContext. Periksa observasi sumber di bawah untuk memahami cakupan yang benar-benar direkam.</p></div><div class="card real-surface"><h3>Observasi sumber canonical</h3>${sourceRows}</div><div class="card real-surface"><h3>Batas cakupan ilmiah</h3><p><strong>Diamati:</strong> ${escapeHtml(c.observed_at)}</p><div class="callout warning">${escapeHtml(c.limitations || "Tidak ada keterbatasan yang direkam.")}</div><p>Status sumber membantu memeriksa coverage; ini bukan bukti bahwa pencarian telah lengkap secara ilmiah. Run provider/retry dan kesehatan layanan tersedia di Admin Copilot.</p></div>`;
   } catch (error) { box.innerHTML = `<div class="card"><p>API Cakupan tidak tersedia: ${escapeHtml(error.message)}</p></div>`; }
 }
 

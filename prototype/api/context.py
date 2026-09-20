@@ -106,6 +106,31 @@ def get_project_coverage(project_id):
     return row
 
 
+def get_project_corpus_layers(project_id):
+    """Read-only, scope-explicit corpus projection. No scientific judgment."""
+    with db() as conn:
+        row = conn.execute("""
+            SELECT
+              (SELECT count(*) FROM project_work_relevance pwr WHERE pwr.project_id=%s) AS project_corpus,
+              (SELECT count(DISTINCT ef.work_id) FROM project_work_relevance pwr JOIN evidence_fragment ef ON ef.work_id=pwr.work_id WHERE pwr.project_id=%s) AS evidence_corpus,
+              (SELECT count(DISTINCT c.evidence_fragment_id) FROM project_work_relevance pwr JOIN evidence_fragment ef ON ef.work_id=pwr.work_id JOIN claim c ON c.evidence_fragment_id=ef.id WHERE pwr.project_id=%s AND c.review_state NOT IN ('NEEDS_REVIEW','MACHINE_SUGGESTED')) AS human_reviewed_evidence
+        """, (project_id, project_id, project_id)).fetchone()
+    coverage = get_project_coverage(project_id) or {}
+    sources = coverage.get('sources') or []
+    observed = sum((x.get('observed_record_count') or 0) for x in sources)
+    return {
+      'research_universe': {'state':'UNKNOWN','count':None,'reason':'Global literature universe is not asserted by current source/query coverage.'},
+      'discovery_corpus': {'state':'OBSERVED_SOURCE_RECORDS' if sources else 'NOT_AVAILABLE','count':observed if sources else None,'note':'Source-record observations may overlap; this is not a unique-work count.'},
+      'deduplicated_corpus': {'state':'NOT_AVAILABLE','count':None},
+      'screening_corpus': {'state':'NOT_AVAILABLE','count':None},
+      'project_corpus': {'state':'AVAILABLE','count':row['project_corpus']},
+      'evidence_corpus': {'state':'AVAILABLE','count':row['evidence_corpus']},
+      'human_reviewed_evidence': {'state':'AVAILABLE','count':row['human_reviewed_evidence']},
+      'coverage_context_id': coverage.get('coverage_context_id'), 'observed_at': coverage.get('observed_at'),
+      'counter_search_state': coverage.get('counter_search_state','NOT_AVAILABLE'), 'limitations': coverage.get('limitations'),
+      'sources': sources, 'scientific_decision': False
+    }
+
 def list_project_research_objects(project_id, limit=50):
     with db() as conn:
         rows = conn.execute("""
