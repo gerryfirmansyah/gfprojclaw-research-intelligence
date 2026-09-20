@@ -259,3 +259,9 @@ If the negative test demonstrates the gap, the declarative-only decision in Sect
 The executable candidate uses one narrowly scoped PostgreSQL constraint trigger on ChangeEvent. It does not derive scientific state, mutate Assessment, or create evidence. For ASSESSMENT_CHANGED only, it reads the already-selected canonical current Assessment on the same project/object lineage and requires both recorded transition-side supersession references to be exactly `IS NOT DISTINCT FROM` the Assessment's canonical `supersedes_assessment_id`.
 
 The existing declarative FKs and CHECKs remain in place. The trigger closes only the nullable cross-row invariant that MATCH SIMPLE cannot express. Disposable verification must prove both sides before production review: omission of a real canonical predecessor is rejected, while an exact previous -> current supersession succeeds. This candidate is not production authorization.
+
+## 21. Historical Assessment UUID guard correction
+
+The first DBA-run disposable suite for the trigger candidate stopped safely before COMMIT because deterministic historical Assessment backfill reported `UPDATE 0`. The seeded canonical Assessment id `05000000-0000-0000-0000-000000000001` is accepted by PostgreSQL `uuid` and by the existing GFPROJCLAW fixture, but the migration's textual guard incorrectly required RFC version nibble 1-5 and variant nibble 8/9/a/b. GFPROJCLAW canonical fixture UUIDs intentionally include zero nibbles, so that guard excluded a valid canonical identifier before the cast/join.
+
+Correction: retain a strict 8-4-4-4-12 hexadecimal textual-shape guard before the PostgreSQL uuid cast, but do not impose RFC version/variant semantics that the canonical schema does not require. Project/object lineage and exact Assessment identity remain enforced by the canonical join and foreign keys. Production remains blocked until the full disposable suite passes with this correction.

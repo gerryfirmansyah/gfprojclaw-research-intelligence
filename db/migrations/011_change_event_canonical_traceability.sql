@@ -55,7 +55,7 @@ FROM assessment a
 WHERE ce.change_type = 'ASSESSMENT_CHANGED'
   AND ce.current_assessment_id IS NULL
   AND ce.current_state_jsonb ? 'assessment_id'
-  AND (ce.current_state_jsonb->>'assessment_id') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+  AND (ce.current_state_jsonb->>'assessment_id') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
   AND a.id = (ce.current_state_jsonb->>'assessment_id')::uuid
   AND a.project_id = ce.project_id
   AND a.target_research_object_id = ce.primary_research_object_id;
