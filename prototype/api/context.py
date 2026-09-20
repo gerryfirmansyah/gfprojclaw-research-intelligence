@@ -602,3 +602,54 @@ def list_project_evidence_verification(project_id, object_id=None):
         x['full_text_available']=x.get('access_level')=='FULL_TEXT'
         out.append(x)
     return out
+
+
+def get_project_daily_attention(project_id, hours=24):
+    """Read-only attention projection: explicit time window + exact members."""
+    hours = max(1, min(int(hours), 168))
+    with db() as conn:
+        papers = conn.execute("""
+            SELECT w.id AS work_id,w.title,pwr.first_seen_at,w.current_access_level
+            FROM project_work_relevance pwr JOIN work w ON w.id=pwr.work_id
+            WHERE pwr.project_id=%s AND pwr.first_seen_at >= now()-(%s * interval '1 hour')
+            ORDER BY pwr.first_seen_at DESC
+        """,(project_id,hours)).fetchall()
+        claims = conn.execute("""
+            SELECT c.id AS claim_id,c.claim_text,c.review_state,c.created_at,
+                   ef.id AS evidence_fragment_id,ef.access_level,w.id AS work_id,w.title AS work_title
+            FROM project_work_relevance pwr JOIN work w ON w.id=pwr.work_id
+            JOIN evidence_fragment ef ON ef.work_id=w.id JOIN claim c ON c.evidence_fragment_id=ef.id
+            WHERE pwr.project_id=%s AND c.created_at >= now()-(%s * interval '1 hour')
+            ORDER BY c.created_at DESC
+        """,(project_id,hours)).fetchall()
+        contradictory = conn.execute("""
+            SELECT er.id AS relationship_id,er.semantic_type,er.review_state,er.created_at,
+                   er.target_research_object_id,c.id AS claim_id,c.claim_text,
+                   ef.id AS evidence_fragment_id,w.id AS work_id,w.title AS work_title
+            FROM evidence_relationship er JOIN claim c ON c.id=er.claim_id
+            JOIN evidence_fragment ef ON ef.id=c.evidence_fragment_id JOIN work w ON w.id=ef.work_id
+            JOIN project_work_relevance pwr ON pwr.work_id=w.id AND pwr.project_id=%s
+            WHERE er.semantic_type IN ('CHALLENGES','CONTRADICTS')
+              AND er.created_at >= now()-(%s * interval '1 hour')
+            ORDER BY er.created_at DESC
+        """,(project_id,hours)).fetchall()
+        assessments = conn.execute("""
+            SELECT a.id AS assessment_id,a.target_research_object_id,roi.canonical_label,
+                   a.assessed_at,a.explanation_summary
+            FROM assessment a JOIN research_object_identity roi ON roi.id=a.target_research_object_id
+            WHERE a.project_id=%s AND a.assessment_type='ADVICE_CRITIC_V1'
+              AND a.assessed_at >= now()-(%s * interval '1 hour')
+            ORDER BY a.assessed_at DESC
+        """,(project_id,hours)).fetchall()
+        attention = conn.execute("""
+            SELECT c.id AS claim_id,c.claim_text,c.review_state,ef.id AS evidence_fragment_id,
+                   ef.access_level,w.id AS work_id,w.title AS work_title
+            FROM project_work_relevance pwr JOIN work w ON w.id=pwr.work_id
+            JOIN evidence_fragment ef ON ef.work_id=w.id JOIN claim c ON c.evidence_fragment_id=ef.id
+            WHERE pwr.project_id=%s AND c.review_state IN ('NEEDS_REVIEW','CONTESTED')
+            ORDER BY c.created_at DESC
+        """,(project_id,)).fetchall()
+        coverage=get_project_coverage(project_id)
+    return {'window_hours':hours,'new_papers':papers,'new_claims':claims,
+            'new_contradictory_evidence':contradictory,'advice_critic_changes':assessments,
+            'attention_claims':attention,'coverage':coverage or {},'scientific_decision':False}
