@@ -2,7 +2,7 @@ const data = {
   A: {
     projects: ["Cross-agency Digital Government Governance", "Enterprise Architecture Capability Study"],
     changes: [
-      ["GAP-014", "New paper challenges the broad governance-capability formulation", "CONTESTED", "red"],
+      ["GAP-014", "New paper menantangs the broad governance-capability formulation", "CONTESTED", "red"],
       ["SOL-008", "Existing enterprise-architecture solution overlaps GAP-021", "POSSIBLY CLOSED", "yellow"],
       ["METHOD-012", "Longitudinal mixed-method alternative identified", "NEW ALTERNATIVE", "blue"],
       ["COVERAGE", "Semantic Scholar degraded; prior-solution search may be incomplete", "DEGRADED", "yellow"]
@@ -24,7 +24,7 @@ const data = {
     projects: ["Human Capability & Organizational Resilience", "Leadership Under Disruption"],
     changes: [
       ["GAP-014", "Behavioural construct overlaps the proposed human-capability mechanism", "CONTESTED", "red"],
-      ["THEORY-006", "Competing explanation gains support", "NEEDS REVIEW", "yellow"],
+      ["THEORY-006", "Competing explanation gains mendukung", "NEEDS REVIEW", "yellow"],
       ["CLM-204", "Level-of-analysis mismatch detected", "CHALLENGED", "red"],
       ["METHOD-012", "Multilevel longitudinal design identified", "NEW ALTERNATIVE", "blue"]
     ],
@@ -46,7 +46,7 @@ const data = {
 const journeyStages = [
   ["R0", "Research Intent", "HUMAN REVIEWED", "green"],
   ["R1", "Research Landscape", "MATURE", "green"],
-  ["R2", "Evidence Mapping", "EVIDENCE GROWING", "blue"],
+  ["R2", "Bukti Mapping", "EVIDENCE GROWING", "blue"],
   ["R3", "Problem Formulation", "DEVELOPING", "blue"],
   ["R4", "Gap Formation", "NEEDS ATTENTION", "red"],
   ["R5", "Gap Falsification", "EVIDENCE GROWING", "blue"],
@@ -57,7 +57,7 @@ const journeyStages = [
   ["R10", "Research Design", "NOT STARTED", "gray"],
   ["R11", "Contribution Formation", "DEVELOPING", "blue"],
   ["R12", "Novelty Challenge", "NEEDS ATTENTION", "red"],
-  ["R13", "Evidence & Argument Audit", "NOT STARTED", "gray"],
+  ["R13", "Bukti & Argument Audit", "NOT STARTED", "gray"],
   ["R14", "Adversarial Review", "NOT STARTED", "gray"],
   ["R15", "Scholarly Positioning", "DEVELOPING", "blue"],
   ["R16", "Research Readiness", "DEVELOPING", "blue"]
@@ -72,7 +72,7 @@ const health = [
 
 const evolution = [
   ["GAP-014", "STRENGTHENING → CONTESTED", "2h ago"],
-  ["GAP-009", "Evidence increased", "6h ago"],
+  ["GAP-009", "Bukti increased", "6h ago"],
   ["METHOD-012", "New alternative", "1d ago"],
   ["CLM-142", "Contradiction found", "1d ago"]
 ];
@@ -86,7 +86,7 @@ const telegram = [
 
 const profileSelect = document.getElementById("profile-select");
 const projectSelect = document.getElementById("project-select");
-const PROTOTYPE_VERSION = "0.16.5";
+const PROTOTYPE_VERSION = "0.17.0";
 const API_BASE = window.location.hostname.endsWith("github.io") ? "https://api.116.212.72.79.nip.io" : "";
 const themeToggle = document.getElementById("theme-toggle");
 
@@ -130,13 +130,13 @@ function renderProjects() {
 }
 
 function renderDashboard() {
-  document.getElementById("change-list").innerHTML = `<div class="change-row"><div class="change-main"><strong>Loading canonical ChangeEvents…</strong><small>Persisted project state</small></div></div>`;
+  document.getElementById("change-list").innerHTML = `<div class="change-row"><div class="change-main"><strong>Memuat ChangeEvent canonical…</strong><small>Status proyek tersimpan</small></div></div>`;
   loadTodayChanges();
 
   document.getElementById("journey-mini").innerHTML = journeyStages.slice(0, 7).map(([r, name], index) => `
     <div class="journey-row"><span class="r-code">${r}</span><div><strong>${escapeHtml(window.GF_I18N?.stageName(index) || name)}</strong><small>${escapeHtml(window.GF_I18N?.t("workflowGuideOnly") || "Workflow guide only · no canonical stage status persisted")}</small></div><span class="state gray">GUIDE</span></div>`).join("") + `<button class="text-button" data-open="journey">${escapeHtml(window.GF_I18N?.t("showRemainingStages") || "Show R7–R16 guide")}</button>`;
 
-  document.getElementById("opportunity-table").innerHTML = `<p>Loading canonical research opportunities…</p>`;
+  document.getElementById("opportunity-table").innerHTML = `<p>Memuat peluang riset canonical…</p>`;
   loadTodayOpportunities();
 
   renderLatestPapers();
@@ -163,12 +163,12 @@ function sourceLinks(identifiers = {}) {
 function renderMetricMember(kind, item) {
   if (kind === "papers") {
     const links = sourceLinks(item.identifiers || {});
-    return `<div class="metric-member"><div class="paper-title">${escapeHtml(item.title || "Untitled work")}</div><p>${escapeHtml(item.publication_year || "Year unknown")} · ${escapeHtml(item.venue_name || "Venue unknown")} · ${escapeHtml(item.current_access_level || "ACCESS_NOT_RECORDED")}</p><small>Work: ${escapeHtml(item.work_id)} · Review: ${escapeHtml(item.human_review_state || item.relevance_state || "NOT_RECORDED")} · Source: ${escapeHtml(item.source_key || "NOT_RECORDED")}</small>${links ? `<p>${links}</p>` : ""}</div>`;
+    return `<div class="metric-member"><div class="paper-title">${escapeHtml(item.title || "Karya tanpa judul")}</div><p>${escapeHtml(item.publication_year || "Tahun tidak diketahui")} · ${escapeHtml(item.venue_name || "Venue tidak diketahui")} · ${escapeHtml(item.current_access_level || "ACCESS_NOT_RECORDED")}</p><small>Work: ${escapeHtml(item.work_id)} · Tinjauan: ${escapeHtml(item.human_review_state || item.relevance_state || "NOT_RECORDED")} · Sumber: ${escapeHtml(item.source_key || "NOT_RECORDED")}</small>${links ? `<p>${links}</p>` : ""}</div>`;
   }
-  if (kind === "decisions") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.decision_type || "HUMAN decision")}</span><p>${escapeHtml(item.rationale || "No rationale recorded")}</p><small>Decision: ${escapeHtml(item.decision_id || item.id || "ID_NOT_RECORDED")} · Actor: ${escapeHtml(item.actor || "NOT_RECORDED")} · ${escapeHtml(item.decided_at || "time unknown")}</small></div>`;
-  if (kind === "changes") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.change_type)}</span><p>${escapeHtml(item.canonical_label || item.primary_research_object_id)}</p><small>ChangeEvent: ${escapeHtml(item.change_event_id || item.id || "ID_NOT_RECORDED")} · ${escapeHtml(item.reasoning_delta || "No reasoning delta recorded")} · ${escapeHtml(item.observed_at || "time unknown")}</small></div>`;
-  if (kind === "coverage") return `<div class="metric-member"><span class="trace-label">CoverageContext</span><p>Counter-search: ${escapeHtml(item.counter_search_state || "UNKNOWN")}</p><small>Context: ${escapeHtml(item.coverage_context_id)} · ${escapeHtml(item.limitations || "No limitation recorded")}</small></div>`;
-  if (kind === "radar") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.change_type || "Radar item")}</span><p>${escapeHtml(item.canonical_label || "Canonical projection")}</p><small>${escapeHtml(item.observed_at || "time unknown")} · read-only ChangeEvent projection</small></div>`;
+  if (kind === "decisions") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.decision_type || "Keputusan HUMAN")}</span><p>${escapeHtml(item.rationale || "Tidak ada alasan yang direkam")}</p><small>Keputusan: ${escapeHtml(item.decision_id || item.id || "ID_NOT_RECORDED")} · Aktor: ${escapeHtml(item.actor || "NOT_RECORDED")} · ${escapeHtml(item.decided_at || "waktu tidak diketahui")}</small></div>`;
+  if (kind === "changes") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.change_type)}</span><p>${escapeHtml(item.canonical_label || item.primary_research_object_id)}</p><small>ChangeEvent: ${escapeHtml(item.change_event_id || item.id || "ID_NOT_RECORDED")} · ${escapeHtml(item.reasoning_delta || "Tidak ada delta penalaran yang direkam")} · ${escapeHtml(item.observed_at || "waktu tidak diketahui")}</small></div>`;
+  if (kind === "coverage") return `<div class="metric-member"><span class="trace-label">CoverageContext</span><p>Pencarian pembanding: ${escapeHtml(item.counter_search_state || "UNKNOWN")}</p><small>Context: ${escapeHtml(item.coverage_context_id)} · ${escapeHtml(item.limitations || "Tidak ada keterbatasan yang direkam")}</small></div>`;
+  if (kind === "radar") return `<div class="metric-member"><span class="trace-label">${escapeHtml(item.change_type || "Item Radar")}</span><p>${escapeHtml(item.canonical_label || "Proyeksi canonical")}</p><small>${escapeHtml(item.observed_at || "waktu tidak diketahui")} · proyeksi read-only ChangeEvent</small></div>`;
   return "";
 }
 
@@ -178,7 +178,7 @@ function showMetricMembers(kind) {
   const config=todayMetricMembers[kind]; if (!config) return;
   title.textContent=`${config.label} — ${config.items.length} canonical member${config.items.length === 1 ? "" : "s"}`;
   summary.textContent=config.summary;
-  list.innerHTML=config.items.length ? config.items.map(item=>renderMetricMember(kind,item)).join("") : `<p>No canonical members persisted for this metric.</p>`;
+  list.innerHTML=config.items.length ? config.items.map(item=>renderMetricMember(kind,item)).join("") : `<p>Tidak ada anggota canonical yang tersimpan untuk metrik ini.</p>`;
   panel.hidden=false; panel.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
@@ -194,23 +194,23 @@ async function loadTodayMetrics() {
     }));
     const id=window.GF_I18N?.current?.() === "id";
     todayMetricMembers={
-      papers:{label:window.GF_I18N?.t("persistedPapers") || "Persisted Papers",items:papers,summary:id?"Work tersimpan persis dalam proyek terpilih. Judul paper dan identifier eksternal ditampilkan bila tersedia secara canonical.":"Exact persisted works in the selected project. Paper titles and external identifiers are shown when canonically available."},
-      decisions:{label:window.GF_I18N?.t("humanDecisions") || "HUMAN Decisions",items:decisions,summary:id?"Keputusan HUMAN tersimpan persis yang dikembalikan untuk proyek terpilih.":"Exact explicit persisted HUMAN decisions returned for the selected project."},
+      papers:{label:window.GF_I18N?.t("persistedPapers") || "Persisted Papers",items:papers,summary:id?"Work tersimpan persis dalam proyek terpilih. Judul paper dan identifier eksternal ditampilkan bila tersedia secara canonical.":"Exact persisted karya in the selected project. Paper titles and external identifiers are shown when canonically available."},
+      decisions:{label:window.GF_I18N?.t("humanDecisions") || "HUMAN Decisions",items:decisions,summary:id?"Keputusan HUMAN tersimpan persis yang dikembalikan untuk proyek terpilih.":"Exact explicit persisted Keputusan HUMANs returned for the selected project."},
       changes:{label:window.GF_I18N?.t("knowledgeChanges") || "Knowledge Changes",items:changes,summary:id?"ChangeEvent canonical tersimpan persis untuk proyek terpilih.":"Exact persisted canonical ChangeEvents for the selected project."},
       coverage:{label:window.GF_I18N?.t("coverageContext") || "Coverage Context",items:coverage.coverage_context_id?[coverage]:[],summary:id?"CoverageContext tersimpan yang dihitung oleh kartu ini; konteks ini bukan keputusan ilmiah.":"The persisted CoverageContext represented by this count; it is context, not a scientific verdict."},
       radar:{label:window.GF_I18N?.t("radarItems") || "Radar Items",items:radar,summary:id?"Proyeksi Radar read-only persis yang berasal dari ChangeEvent canonical.":"Exact read-only Radar projections derived from canonical ChangeEvents."}
     };
     const setMetric = (id, value, detail, kind) => { const el = document.getElementById(id); if (el) { el.querySelector("strong").textContent = value; el.querySelector("small").textContent = detail; el.dataset.metricMembers=kind; el.classList.remove("dummy-surface"); el.classList.add("real-surface"); } };
-    setMetric("metric-papers", papers.length, window.GF_I18N?.t("persistedWorksDetail") || "Persisted works in selected project", "papers");
-    setMetric("metric-decisions", decisions.length, window.GF_I18N?.t("humanDecisionsDetail") || "Explicit persisted HUMAN decisions", "decisions");
+    setMetric("metric-papers", papers.length, window.GF_I18N?.t("persistedWorksDetail") || "Persisted karya in selected project", "papers");
+    setMetric("metric-decisions", decisions.length, window.GF_I18N?.t("humanDecisionsDetail") || "Explicit persisted Keputusan HUMANs", "decisions");
     setMetric("metric-changes", changes.length, window.GF_I18N?.t("knowledgeChangesDetail") || "Persisted canonical ChangeEvents", "changes");
-    setMetric("metric-coverage", coverage.coverage_context_id ? 1 : 0, coverage.counter_search_state ? `Counter-search: ${coverage.counter_search_state}` : "No CoverageContext persisted", "coverage");
+    setMetric("metric-coverage", coverage.coverage_context_id ? 1 : 0, coverage.counter_search_state ? `Pencarian pembanding: ${coverage.counter_search_state}` : "Tidak ada CoverageContext tersimpan", "coverage");
     setMetric("metric-radar", radar.length, window.GF_I18N?.t("radarDetail") || "Read-only projections from ChangeEvent", "radar");
     const pill = document.getElementById("today-coverage-pill");
-    if (pill) pill.textContent = coverage.coverage_context_id ? `Coverage persisted · counter-search ${coverage.counter_search_state || "UNKNOWN"}` : "No persisted CoverageContext";
+    if (pill) pill.textContent = coverage.coverage_context_id ? `Cakupan tersimpan · pencarian pembanding ${coverage.counter_search_state || "UNKNOWN"}` : "Tidak ada CoverageContext tersimpan";
   } catch (error) {
     todayMetricMembers={};
-    document.querySelectorAll(".metric-card").forEach(el => { el.querySelector("strong").textContent = "—"; el.querySelector("small").textContent = `Canonical metric unavailable: ${error.message}`; });
+    document.querySelectorAll(".metric-card").forEach(el => { el.querySelector("strong").textContent = "—"; el.querySelector("small").textContent = `Metrik canonical tidak tersedia: ${error.message}`; });
   }
 }
 
@@ -221,8 +221,8 @@ async function loadTodayRadar() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/radar`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const rows = await response.json();
-    box.innerHTML = rows.length ? rows.slice(0, 4).map(r => `<div class="telegram-row"><time>${escapeHtml(r.observed_at || "")}</time><strong>${escapeHtml(r.change_type)} — ${escapeHtml(r.canonical_label)}</strong></div>`).join("") : `<p>No canonical Radar item yet.</p>`;
-  } catch (error) { box.innerHTML = `<p>Radar projection unavailable: ${escapeHtml(error.message)}</p>`; }
+    box.innerHTML = rows.length ? rows.slice(0, 4).map(r => `<div class="telegram-row"><time>${escapeHtml(r.observed_at || "")}</time><strong>${escapeHtml(r.change_type)} — ${escapeHtml(r.canonical_label)}</strong></div>`).join("") : `<p>Belum ada Item Radar canonical.</p>`;
+  } catch (error) { box.innerHTML = `<p>Proyeksi Radar tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
 async function loadTodayEvolution() {
@@ -232,8 +232,8 @@ async function loadTodayEvolution() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/changes`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const rows = await response.json();
-    box.innerHTML = rows.length ? rows.slice(0, 4).map(r => `<div class="evolution-row"><div><strong>${escapeHtml(r.canonical_label || r.primary_research_object_id)}</strong><small>${escapeHtml(r.change_type)} · ${escapeHtml(r.reasoning_delta || "No reasoning delta recorded")}</small></div><small>${escapeHtml(r.observed_at || "")}</small></div>`).join("") : `<p>No persisted evolution event yet.</p>`;
-  } catch (error) { box.innerHTML = `<p>Canonical evolution unavailable: ${escapeHtml(error.message)}</p>`; }
+    box.innerHTML = rows.length ? rows.slice(0, 4).map(r => `<div class="evolution-row"><div><strong>${escapeHtml(r.canonical_label || r.primary_research_object_id)}</strong><small>${escapeHtml(r.change_type)} · ${escapeHtml(r.reasoning_delta || "Tidak ada delta penalaran yang direkam")}</small></div><small>${escapeHtml(r.observed_at || "")}</small></div>`).join("") : `<p>Belum ada event evolusi yang tersimpan.</p>`;
+  } catch (error) { box.innerHTML = `<p>Evolusi canonical tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
 async function loadTodayOpportunities() {
@@ -243,9 +243,9 @@ async function loadTodayOpportunities() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const rows = await response.json();
-    box.innerHTML = rows.length ? `<table class="table"><thead><tr><th>Candidate</th><th>Evidence</th><th>Counter-search</th><th>State</th></tr></thead><tbody>${rows.slice(0, 5).map(r => `<tr><td><strong>${escapeHtml(r.canonical_label || r.gap_id)}</strong><br><small>${escapeHtml(r.statement || "No statement recorded")}</small></td><td>${escapeHtml(r.support_count)} support · ${escapeHtml(r.challenge_count)} challenge</td><td>${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</td><td><span class="state ${stateClass(r.current_evolution_state || "CANDIDATE")}">${escapeHtml(r.current_evolution_state || "CANDIDATE")}</span></td></tr>`).join("")}</tbody></table>` : `<p>No canonical research opportunity persisted for this project yet.</p>`;
+    box.innerHTML = rows.length ? `<table class="table"><thead><tr><th>Kandidat</th><th>Bukti</th><th>Counter-search</th><th>Status</th></tr></thead><tbody>${rows.slice(0, 5).map(r => `<tr><td><strong>${escapeHtml(r.canonical_label || r.gap_id)}</strong><br><small>${escapeHtml(r.statement || "Tidak ada pernyataan yang direkam")}</small></td><td>${escapeHtml(r.support_count)} mendukung · ${escapeHtml(r.challenge_count)} menantang</td><td>${escapeHtml(r.counter_search_state || "NOT_RECORDED")}</td><td><span class="state ${stateClass(r.current_evolution_state || "CANDIDATE")}">${escapeHtml(r.current_evolution_state || "CANDIDATE")}</span></td></tr>`).join("")}</tbody></table>` : `<p>Belum ada peluang riset canonical yang tersimpan untuk proyek ini.</p>`;
   } catch (error) {
-    box.innerHTML = `<p>Canonical opportunities unavailable: ${escapeHtml(error.message)}</p>`;
+    box.innerHTML = `<p>Peluang canonical tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
 }
 
@@ -256,9 +256,9 @@ async function loadTodayChanges() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/changes`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const rows = await response.json();
-    box.innerHTML = rows.length ? rows.slice(0, 5).map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)} — ${escapeHtml(r.canonical_label || r.primary_research_object_id)}</strong><small>${escapeHtml(r.reasoning_delta || "No reasoning delta recorded")} · ${escapeHtml(r.observed_at || "time unknown")}</small></div><span class="state blue">CANONICAL</span></div>`).join("") : `<p>No persisted ChangeEvent for this project yet.</p>`;
+    box.innerHTML = rows.length ? rows.slice(0, 5).map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)} — ${escapeHtml(r.canonical_label || r.primary_research_object_id)}</strong><small>${escapeHtml(r.reasoning_delta || "Tidak ada delta penalaran yang direkam")} · ${escapeHtml(r.observed_at || "waktu tidak diketahui")}</small></div><span class="state blue">CANONICAL</span></div>`).join("") : `<p>Belum ada ChangeEvent tersimpan untuk proyek ini.</p>`;
   } catch (error) {
-    box.innerHTML = `<p>Canonical ChangeEvents unavailable: ${escapeHtml(error.message)}</p>`;
+    box.innerHTML = `<p>ChangeEvent canonical tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
 }
 
@@ -266,25 +266,25 @@ async function renderLatestPapers() {
   const box = document.getElementById("paper-list");
   const projectId = projectSelect.value;
   if (!box || !projectId) return;
-  box.innerHTML = `<div class="paper-row"><div><strong>Loading real project works…</strong></div></div>`;
+  box.innerHTML = `<div class="paper-row"><div><strong>Memuat karya nyata proyek…</strong></div></div>`;
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectId)}/papers`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const papers = await response.json();
     box.innerHTML = papers.length ? papers.map(p => {
-      const year = p.publication_year || "Year unknown";
-      const venue = p.venue_name || "Venue unknown";
+      const year = p.publication_year || "Tahun tidak diketahui";
+      const venue = p.venue_name || "Venue tidak diketahui";
       const status = p.human_review_state || p.relevance_state || "UNREVIEWED";
       return `<div class="paper-row"><div><div class="paper-title">${escapeHtml(p.title)}</div><small>${escapeHtml(year)} · ${escapeHtml(venue)} · ${escapeHtml(p.current_access_level)} · ${escapeHtml(p.source_key || "source unknown")}</small></div><span class="state ${stateClass(status)}">${escapeHtml(status)}</span></div>`;
-    }).join("") : `<div class="paper-row"><div><strong>No real works stored for this project yet.</strong><small>Latest Papers is reading PostgreSQL, not dummy scientific evidence.</small></div></div>`;
+    }).join("") : `<div class="paper-row"><div><strong>Belum ada karya nyata yang tersimpan untuk proyek ini.</strong><small>Paper Terbaru membaca PostgreSQL, bukan bukti ilmiah dummy.</small></div></div>`;
   } catch (error) {
     console.error(error);
-    box.innerHTML = `<div class="paper-row"><div><strong>Real paper data unavailable</strong><small>${error.message}</small></div></div>`;
+    box.innerHTML = `<div class="paper-row"><div><strong>Data paper nyata tidak tersedia</strong><small>${error.message}</small></div></div>`;
   }
 }
 
 function commonHeader(title, subtitle, mode = "dummy") {
-  const label = mode === "real" ? "REAL DATA · PostgreSQL / API" : "DUMMY DATA · illustrative";
+  const label = mode === "real" ? "DATA NYATA · PostgreSQL / API" : "DATA DUMMY · ilustratif";
   return `<div class="detail-header"><div><h1>${title}</h1><p>${subtitle}</p></div><div class="coverage-pill ${mode === "real" ? "real-surface" : "dummy-surface"}">${label}</div></div>`;
 }
 
@@ -293,15 +293,15 @@ function renderJourney() {
   return commonHeader(id ? "Perjalanan Riset R0–R16" : "Research Journey R0–R16", id ? "Mock-up alur kerja ilustratif saja; belum ada status tahap canonical yang tersimpan." : "Illustrative workflow mock-up only; no canonical stage status is persisted.") + `
     <div class="callout warning dummy-warning">${escapeHtml(window.GF_I18N?.t("illustrativeBoundary") || "ILLUSTRATIVE / NON-CANONICAL demonstration data")}</div>
     <div class="detail-grid dummy-zone"><div class="stack"><div class="card"><h3>${escapeHtml(window.GF_I18N?.t("allStages") || "All stages")}</h3>${journeyStages.map(([r,n,s,c],index) => `<div class="journey-row"><span class="r-code">${r}</span><div><strong>${escapeHtml(window.GF_I18N?.stageName(index) || n)}</strong><small>${escapeHtml(window.GF_I18N?.t("stageStatusReversible") || "Status is reversible")}</small></div><span class="state ${c}">${s}</span></div>`).join("")}</div></div>
-    <div class="stack"><div class="card"><h3>R6 — Theory Positioning</h3><div class="callout warning">NEEDS ATTENTION because a competing explanation now covers part of the same mechanism.</div><p><strong>What we found</strong></p><ul><li>23 mapped papers</li><li>5 candidate theoretical lenses</li><li>4 challenging evidence links</li><li>2 competing explanations</li></ul><p><strong>Learn</strong></p><p>Theory should be evaluated for explanatory fit and contribution, not popularity alone.</p></div><div class="card"><h3>Evidence trace</h3><div class="trace">R6 WHY → CLM-142 → CHALLENGES THEORY-006 → EVF-0092 → Paper → Source</div></div></div>
-    <div class="stack"><div class="card"><h3>Suggested HUMAN actions</h3><div class="decision-bar"><button class="primary">Compare theories</button><button>Inspect mechanisms</button><button>Counter-evidence</button><button>Need more evidence</button></div></div><div class="card"><h3>Recent stage impacts</h3><p>CE-0048 affects R4, R5, R6, R11 and R12. These are attention signals, not forced transitions.</p></div></div></div>`;
+    <div class="stack"><div class="card"><h3>R6 — Penempatan Teori</h3><div class="callout warning">PERLU PERHATIAN karena penjelasan yang bersaing kini mencakup sebagian mekanisme yang sama.</div><p><strong>Yang ditemukan</strong></p><ul><li>23 paper dipetakan</li><li>5 kandidat lensa teoretis</li><li>4 tautan bukti yang menantang</li><li>2 penjelasan yang bersaing</li></ul><p><strong>Panduan pemahaman</strong></p><p>Teori perlu dievaluasi berdasarkan kecocokan penjelasan dan kontribusinya, bukan popularitas semata.</p></div><div class="card"><h3>Jejak bukti</h3><div class="trace">R6 ALASAN → CLM-142 → MENANTANG THEORY-006 → EVF-0092 → Paper → Sumber</div></div></div>
+    <div class="stack"><div class="card"><h3>Tindakan HUMAN yang disarankan</h3><div class="decision-bar"><button class="primary">Bandingkan teori</button><button>Periksa mekanisme</button><button>Bukti pembanding</button><button>Perlu bukti tambahan</button></div></div><div class="card"><h3>Dampak tahap terkini</h3><p>CE-0048 memengaruhi R4, R5, R6, R11, dan R12. Ini adalah sinyal perhatian, bukan transisi yang dipaksakan.</p></div></div></div>`;
 }
 
 function renderOpportunities() {
-  return commonHeader("Research Opportunities", "Evidence-backed advisory prioritization for HUMAN scientific review.", "real") + `
-  <div class="callout warning">Prioritization is advisory context only. It does not establish novelty, significance, feasibility, acceptance, or a scientific verdict.</div>
-  <div class="card real-surface"><h3>Research Opportunities <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-list">Loading persisted opportunity intelligence…</div></div>
-  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Research Object Detail</h3><div id="real-gap-detail">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Evidence & Coverage</h3><div id="real-gap-relationship">No evidence context loaded yet.</div></div><div class="card real-surface"><h3>Advisory Dimensions</h3><div id="real-gap-assessment">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Advice & Critic</h3><div id="real-gap-critic">Select a persisted opportunity.</div></div><div class="card real-surface"><h3>Research Quality <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-quality">Select a persisted research object.</div></div><div class="card real-surface"><h3>Evidence Verification <span class="data-badge real">REAL DATA</span></h3><div id="real-gap-verification">Select a persisted research object.</div></div><div class="card real-surface"><h3>HUMAN Authority</h3><div id="real-gap-decision">Select a persisted opportunity.</div></div></div>`;
+  return commonHeader("Peluang Riset", "Prioritas berbasis bukti untuk tinjauan ilmiah oleh HUMAN.", "real") + `
+  <div class="callout warning">Prioritas hanya merupakan konteks saran. Ini tidak menetapkan kebaruan, signifikansi, kelayakan, penerimaan, atau keputusan ilmiah.</div>
+  <div class="card real-surface"><h3>Peluang Riset <span class="data-badge real">DATA NYATA</span></h3><div id="real-gap-list">Memuat informasi peluang riset yang tersimpan…</div></div>
+  <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Detail Objek Riset</h3><div id="real-gap-detail">Pilih peluang riset yang tersimpan.</div></div><div class="card real-surface"><h3>Bukti & Cakupan</h3><div id="real-gap-relationship">Konteks bukti belum dimuat.</div></div><div class="card real-surface"><h3>Dimensi Saran</h3><div id="real-gap-assessment">Pilih peluang riset yang tersimpan.</div></div><div class="card real-surface"><h3>Saran & Kritik</h3><div id="real-gap-critic">Pilih peluang riset yang tersimpan.</div></div><div class="card real-surface"><h3>Kualitas Riset <span class="data-badge real">DATA NYATA</span></h3><div id="real-gap-quality">Pilih objek riset yang tersimpan.</div></div><div class="card real-surface"><h3>Verifikasi Bukti <span class="data-badge real">DATA NYATA</span></h3><div id="real-gap-verification">Pilih objek riset yang tersimpan.</div></div><div class="card real-surface"><h3>Otoritas HUMAN</h3><div id="real-gap-decision">Pilih peluang riset yang tersimpan.</div></div></div>`;
 }
 
 async function loadProjectOpportunities() {
@@ -312,43 +312,43 @@ async function loadProjectOpportunities() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/research-objects`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Research Objects HTTP ${response.status}`);
     const rows = await response.json();
-    if (!rows.length) { list.innerHTML = "<p>No active canonical research objects for this project yet.</p>"; detail.innerHTML = "<p>Nothing to inspect yet.</p>"; relation.innerHTML = "<p>No canonical evidence relationship is implied.</p>"; decision.innerHTML = "<p>No research object available for HUMAN review.</p>"; return; }
+    if (!rows.length) { list.innerHTML = "<p>Belum ada objek riset canonical aktif untuk proyek ini.</p>"; detail.innerHTML = "<p>Belum ada yang dapat diperiksa.</p>"; relation.innerHTML = "<p>Tidak ada EvidenceRelationship canonical yang diimplikasikan.</p>"; decision.innerHTML = "<p>Tidak ada objek riset yang tersedia untuk tinjauan HUMAN.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-object-index="${i}"><div class="change-main"><strong>${escapeHtml(r.canonical_label)}</strong><small>${escapeHtml(r.object_type)} · ${escapeHtml(r.object_state)}</small></div><span class="state ${stateClass(r.object_state)}">${escapeHtml(r.object_state)}</span></div>`).join("");
     const show = async r => {
       const isGap = r.object_type === "GAP_CANDIDATE";
-      detail.innerHTML = `<p><strong>Statement:</strong> ${escapeHtml(r.statement)}</p><p><strong>Object type:</strong> ${escapeHtml(r.object_type)}</p>${isGap ? `<p><strong>Gap type:</strong> ${escapeHtml(r.gap_type)}</p>` : ""}<p><strong>State:</strong> ${escapeHtml(r.object_state)}</p><p><strong>Scientific status:</strong> ${escapeHtml(r.scope_jsonb?.scientific_status || (isGap ? "GAP_CANDIDATE_REQUIRES_HUMAN_VALIDATION" : "NOT_RECORDED"))}</p>`;
-      relation.innerHTML = isGap ? `<p>Loading persisted gap evidence relationships…</p>` : `<p><strong>Evidence relationship status:</strong> none implied by this projection.</p><p>Review canonical EvidenceFragment and Claim records in Evidence Explorer. An Investigation Direction is not evidence of a gap, novelty, or causal mechanism.</p><div class="callout warning">EvidenceRelationships must be explicitly persisted and reviewed; this screen does not infer SUPPORTS or CHALLENGES.</div>`;
-      document.getElementById("real-gap-assessment").innerHTML = isGap ? `<p>Loading persisted assessment…</p>` : `<p>No assessment is required to display this HUMAN-selected investigation direction.</p>`;
-      document.getElementById("real-gap-critic").innerHTML = isGap ? `<p>Loading persisted Advice & Critic…</p>` : `<p>Advice & Critic has not been generalized for Investigation Direction. Continue evidence screening without treating this absence as a global lock.</p>`;
-      if (isGap) { const legacy = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, {cache:"no-store"}); const oldRows = legacy.ok ? await legacy.json() : []; const old = oldRows.find(x => x.gap_id === r.research_object_id); if (old) { Object.assign(r, old); const trace = Array.isArray(old.evidence_trace) ? old.evidence_trace : []; relation.innerHTML = `<p><strong>Persisted evidence links:</strong> ${escapeHtml(old.support_count)} supporting · ${escapeHtml(old.challenge_count)} challenging · ${escapeHtml(old.linked_claim_count)} linked claim(s)</p><p><strong>Counter-search:</strong> ${escapeHtml(old.counter_search_state || "NOT_RECORDED")}</p><p><strong>Coverage limitation:</strong> ${escapeHtml(old.coverage_limitations || "Not recorded")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a class="source-link source-link-doi" href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Open DOI source">DOI ↗</a>` : i.type === "OPENALEX" ? `<a class="source-link source-link-openalex" href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Open in OpenAlex">OpenAlex ↗</a>` : "").filter(Boolean).join(" · "); const access = t.access_level || "NOT_RECORDED"; const accessNote = access === "ABSTRACT_ONLY" ? " — limited evidence access" : access === "METADATA_ONLY" ? " — metadata only; no text evidence" : ""; return `<div class="trace"><span class="trace-label">${escapeHtml(t.semantic_type)}</span><div class="paper-title">${escapeHtml(t.work_title)}</div><span class="access-badge ${access === "FULL_TEXT" ? "full" : "limited"}">${escapeHtml(access)}${escapeHtml(accessNote)}</span>${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · EvidenceFragment: ${escapeHtml(t.evidence_fragment_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`; }).join("") : `<p>No canonical evidence trace persisted.</p>`}`; await renderGapCritic(r); await renderGapAssessment(r); } }
+      detail.innerHTML = `<p><strong>Pernyataan:</strong> ${escapeHtml(r.statement)}</p><p><strong>Tipe objek:</strong> ${escapeHtml(r.object_type)}</p>${isGap ? `<p><strong>Tipe gap:</strong> ${escapeHtml(r.gap_type)}</p>` : ""}<p><strong>Status:</strong> ${escapeHtml(r.object_state)}</p><p><strong>Status ilmiah:</strong> ${escapeHtml(r.scope_jsonb?.scientific_status || (isGap ? "GAP_CANDIDATE_REQUIRES_HUMAN_VALIDATION" : "NOT_RECORDED"))}</p>`;
+      relation.innerHTML = isGap ? `<p>Memuat relasi bukti gap yang tersimpan…</p>` : `<p><strong>Status relasi bukti:</strong> tidak ada yang diimplikasikan oleh proyeksi ini.</p><p>Tinjau record EvidenceFragment dan Claim canonical di Penjelajah Bukti. Investigation Direction bukan bukti adanya gap, kebaruan, atau mekanisme kausal.</p><div class="callout warning">EvidenceRelationship harus disimpan dan ditinjau secara eksplisit; layar ini tidak menyimpulkan SUPPORTS atau CHALLENGES.</div>`;
+      document.getElementById("real-gap-assessment").innerHTML = isGap ? `<p>Memuat asesmen yang tersimpan…</p>` : `<p>Tidak diperlukan asesmen untuk menampilkan arah investigasi yang dipilih HUMAN ini.</p>`;
+      document.getElementById("real-gap-critic").innerHTML = isGap ? `<p>Memuat Saran & Kritik yang tersimpan…</p>` : `<p>Saran & Kritik belum digeneralisasi untuk Investigation Direction. Lanjutkan penyaringan bukti tanpa memperlakukan ketiadaan ini sebagai penguncian global.</p>`;
+      if (isGap) { const legacy = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/opportunities`, {cache:"no-store"}); const oldRows = legacy.ok ? await legacy.json() : []; const old = oldRows.find(x => x.gap_id === r.research_object_id); if (old) { Object.assign(r, old); const trace = Array.isArray(old.evidence_trace) ? old.evidence_trace : []; relation.innerHTML = `<p><strong>Tautan bukti tersimpan:</strong> ${escapeHtml(old.support_count)} mendukung · ${escapeHtml(old.challenge_count)} menantang · ${escapeHtml(old.linked_claim_count)} Claim tertaut</p><p><strong>Pencarian pembanding:</strong> ${escapeHtml(old.counter_search_state || "NOT_RECORDED")}</p><p><strong>Keterbatasan cakupan:</strong> ${escapeHtml(old.coverage_limitations || "Tidak direkam")}</p>${trace.length ? trace.map(t => { const links = (Array.isArray(t.work_identifiers) ? t.work_identifiers : []).map(i => i.type === "DOI" ? `<a class="source-link source-link-doi" href="${escapeHtml(`https://doi.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Buka sumber DOI">DOI ↗</a>` : i.type === "OPENALEX" ? `<a class="source-link source-link-openalex" href="${escapeHtml(`https://openalex.org/${i.value}`)}" target="_blank" rel="noopener noreferrer" title="Buka di OpenAlex">OpenAlex ↗</a>` : "").filter(Boolean).join(" · "); const access = t.access_level || "NOT_RECORDED"; const accessNote = access === "ABSTRACT_ONLY" ? " — akses bukti terbatas" : access === "METADATA_ONLY" ? " — hanya metadata; tidak ada teks bukti" : ""; return `<div class="trace"><span class="trace-label">${escapeHtml(t.semantic_type)}</span><div class="paper-title">${escapeHtml(t.work_title)}</div><span class="access-badge ${access === "FULL_TEXT" ? "full" : "limited"}">${escapeHtml(access)}${escapeHtml(accessNote)}</span>${links ? ` · ${links}` : ""}<br><small>SourceRecord: ${escapeHtml(t.source_identifier || t.source_record_id)} · EvidenceFragment: ${escapeHtml(t.evidence_fragment_id)} · Claim: ${escapeHtml(t.claim_text)}</small></div>`; }).join("") : `<p>Tidak ada jejak bukti canonical yang tersimpan.</p>`}`; await renderGapCritic(r); await renderGapAssessment(r); } }
       await renderResearchQuality(r);
-      await renderEvidenceVerification(r);
+      await renderBuktiVerification(r);
       await renderGapDecision(r);
     };
     document.querySelectorAll("[data-object-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.objectIndex)]));
     await show(rows[0]);
-  } catch (error) { console.error(error); list.innerHTML = `<p>Research Objects API unavailable: ${escapeHtml(error.message)}</p>`; }
+  } catch (error) { console.error(error); list.innerHTML = `<p>API Objek Riset tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
 async function renderGapCritic(gap) {
   const box = document.getElementById("real-gap-critic");
   if (!box || !projectSelect.value) return;
-  box.innerHTML = "<p>Loading persisted Advice & Critic…</p>";
+  box.innerHTML = "<p>Memuat Saran & Kritik yang tersimpan…</p>";
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/advice-critic`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Advice & Critic HTTP ${response.status}`);
     const rows = await response.json();
     const critic = rows.find(r => r.gap_id === gap.gap_id);
-    if (!critic) { box.innerHTML = "<p>No persisted J10 Advice & Critic assessment for this candidate.</p>"; return; }
+    if (!critic) { box.innerHTML = "<p>Belum ada Asesmen Saran & Kritik J10 tersimpan untuk kandidat ini.</p>"; return; }
     gap.assessment_id = critic.assessment_id || null;
     const dimensions = Array.isArray(critic.dimensions) ? critic.dimensions : [];
     const evidence = Array.isArray(critic.evidence_basis) ? critic.evidence_basis : [];
-    const dimensionCards = dimensions.map(d => `<div class="trace"><strong>${escapeHtml(d.dimension_type)} — ${escapeHtml(d.value_text || "NOT_RECORDED")}</strong><p>${escapeHtml(d.explanation || "Explanation unavailable from current canonical assessment.")}</p></div>`).join("");
-    const evidenceCards = evidence.length ? evidence.map(e => `<div class="trace"><span class="trace-label">${escapeHtml(e.semantic_type)}</span><div class="paper-title">${escapeHtml(e.work_title || "Work unavailable")}</div><p><span class="trace-label">Claim under review:</span> ${escapeHtml(e.claim_text || "Claim unavailable")}</p><p><span class="trace-label">Why linked:</span> ${escapeHtml(e.relationship_rationale || "Relationship rationale unavailable.")}</p><small>Evidence access: ${escapeHtml(e.access_level || "NOT_RECORDED")} · Claim: ${escapeHtml(e.claim_review_state || "NOT_RECORDED")} · Relationship: ${escapeHtml(e.relationship_review_state || "NOT_RECORDED")}</small></div>`).join("") : "<p>No explicit canonical evidence relationship is available as a basis for this Advice & Critic assessment.</p>";
-    box.innerHTML = `<p><strong>Advice & Critic assessment</strong></p><p>${escapeHtml(critic.explanation_summary || "Explanation summary unavailable from current canonical assessment.")}</p><div class="trace"><strong>Assessment target</strong><p>${escapeHtml(critic.canonical_label || critic.statement || "Research Object unavailable")} · ${escapeHtml(critic.gap_type || "TYPE_NOT_RECORDED")}</p><p>This assessment applies to the Research Object and its currently linked canonical evidence set; it is not an assessment of an individual paper.</p><small>Evidence scope: ${escapeHtml(critic.linked_claim_count ?? 0)} linked Claim(s) · ${escapeHtml(critic.support_count ?? 0)} SUPPORTS · ${escapeHtml(critic.challenge_count ?? 0)} CHALLENGES/CONTRADICTS</small></div><p><strong>Reviewable machine reasoning</strong></p>${dimensionCards}<p><strong>Canonical evidence basis</strong></p>${evidenceCards}<p><strong>Coverage / unresolved limitation</strong></p><p>Counter-search: ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")}. ${escapeHtml(critic.coverage_limitations || "No additional coverage limitation is recorded.")}</p><div class="callout warning">Verify the explanation against Evidence Verification and the external source before accepting any stronger scientific claim. Advice & Critic does not establish novelty, truth, acceptance, or a scientific verdict.</div>`;
+    const dimensionCards = dimensions.map(d => `<div class="trace"><strong>${escapeHtml(d.dimension_type)} — ${escapeHtml(d.value_text || "NOT_RECORDED")}</strong><p>${escapeHtml(d.explanation || "Penjelasan tidak tersedia dari asesmen canonical saat ini.")}</p></div>`).join("");
+    const evidenceCards = evidence.length ? evidence.map(e => `<div class="trace"><span class="trace-label">${escapeHtml(e.semantic_type)}</span><div class="paper-title">${escapeHtml(e.work_title || "Work tidak tersedia")}</div><p><span class="trace-label">Claim yang ditinjau:</span> ${escapeHtml(e.claim_text || "Claim tidak tersedia")}</p><p><span class="trace-label">Alasan ditautkan:</span> ${escapeHtml(e.relationship_rationale || "Alasan relasi tidak tersedia.")}</p><small>Akses bukti: ${escapeHtml(e.access_level || "NOT_RECORDED")} · Claim: ${escapeHtml(e.claim_review_state || "NOT_RECORDED")} · Relasi: ${escapeHtml(e.relationship_review_state || "NOT_RECORDED")}</small></div>`).join("") : "<p>Tidak ada EvidenceRelationship canonical eksplisit yang tersedia sebagai dasar Asesmen Saran & Kritik ini.</p>";
+    box.innerHTML = `<p><strong>Asesmen Saran & Kritik</strong></p><p>${escapeHtml(critic.explanation_summary || "Ringkasan penjelasan tidak tersedia dari asesmen canonical saat ini.")}</p><div class="trace"><strong>Target asesmen</strong><p>${escapeHtml(critic.canonical_label || critic.statement || "Objek Riset tidak tersedia")} · ${escapeHtml(critic.gap_type || "TYPE_NOT_RECORDED")}</p><p>Asesmen ini berlaku pada Objek Riset dan kumpulan bukti canonical yang saat ini tertaut; ini bukan asesmen terhadap satu paper.</p><small>Cakupan bukti: ${escapeHtml(critic.linked_claim_count ?? 0)} Claim tertaut · ${escapeHtml(critic.support_count ?? 0)} SUPPORTS · ${escapeHtml(critic.challenge_count ?? 0)} CHALLENGES/CONTRADICTS</small></div><p><strong>Penalaran mesin yang dapat ditinjau</strong></p>${dimensionCards}<p><strong>Dasar bukti canonical</strong></p>${evidenceCards}<p><strong>Cakupan / keterbatasan yang belum terselesaikan</strong></p><p>Pencarian pembanding: ${escapeHtml(critic.counter_search_state || "NOT_RECORDED")}. ${escapeHtml(critic.coverage_limitations || "Tidak ada keterbatasan cakupan tambahan yang direkam.")}</p><div class="callout warning">Verifikasi penjelasan terhadap Verifikasi Bukti dan sumber eksternal sebelum menerima Claim ilmiah yang lebih kuat. Saran & Kritik tidak menetapkan kebaruan, kebenaran, penerimaan, atau keputusan ilmiah.</div>`;
   } catch (error) {
     console.error(error);
-    box.innerHTML = `<p>Advice & Critic unavailable: ${escapeHtml(error.message)}</p>`;
+    box.innerHTML = `<p>Saran & Kritik tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
 }
 
@@ -356,41 +356,41 @@ function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-function renderEvidence() {
-  return commonHeader("Evidence Explorer", "Real EvidenceFragment and Claim records for the selected Project.", "real") + `
-  <div class="detail-grid"><div class="card"><h3>Evidence Results</h3><div id="real-evidence-list">Loading canonical evidence…</div></div>
-  <div class="card"><h3>Evidence Detail</h3><div id="real-evidence-detail">Select a persisted claim.</div></div>
-  <div class="card"><h3>Canonical boundary</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>Only persisted EvidenceRelationships are shown or implied; no additional relationship is inferred.</p></div></div>`;
+function renderBukti() {
+  return commonHeader("Penjelajah Bukti", "Record EvidenceFragment dan Claim nyata untuk Proyek yang dipilih.", "real") + `
+  <div class="detail-grid"><div class="card"><h3>Hasil Bukti</h3><div id="real-evidence-list">Memuat bukti canonical…</div></div>
+  <div class="card"><h3>Detail Bukti</h3><div id="real-evidence-detail">Pilih Claim yang tersimpan.</div></div>
+  <div class="card"><h3>Batas canonical</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>Hanya EvidenceRelationship yang tersimpan yang ditampilkan atau diimplikasikan; tidak ada relasi tambahan yang disimpulkan.</p></div></div>`;
 }
 
-async function loadProjectEvidence() {
+async function loadProjectBukti() {
   const list = document.getElementById("real-evidence-list");
   const detail = document.getElementById("real-evidence-detail");
   if (!list || !projectSelect.value) return;
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/evidence`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Evidence HTTP ${response.status}`);
+    if (!response.ok) throw new Error(`Bukti HTTP ${response.status}`);
     const rows = await response.json();
     if (!rows.length) {
-      list.innerHTML = "<p>No persisted EvidenceFragment / Claim records for this project yet.</p>";
-      detail.innerHTML = "<p>Nothing to review yet.</p>";
+      list.innerHTML = "<p>Belum ada record EvidenceFragment / Claim tersimpan untuk proyek ini.</p>";
+      detail.innerHTML = "<p>Belum ada yang perlu ditinjau.</p>";
       return;
     }
     list.innerHTML = rows.map((r, i) => `<div class="change-row" data-evidence-index="${i}"><div class="change-main"><strong>${escapeHtml(r.claim_text)}</strong><small>${escapeHtml(r.work_title)} · ${escapeHtml(r.access_level)}</small></div><span class="state ${stateClass(r.review_state)}">${escapeHtml(r.review_state)}</span></div>`).join("");
-    const show = r => { detail.innerHTML = `<div class="paper-title">${escapeHtml(r.work_title)}</div><p><span class="trace-label">Fragment:</span> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><span class="trace-label">Evidence preview:</span> ${escapeHtml(r.fragment_preview)}…</p><p><span class="trace-label">Claim:</span> ${escapeHtml(r.claim_text)}</p><p><span class="trace-label">Extraction:</span> ${escapeHtml(r.extraction_origin)} · ${escapeHtml(r.extraction_version)}</p><div class="callout warning">${escapeHtml(r.review_state)} — HUMAN validation required before scientific acceptance.</div>`; };
+    const show = r => { detail.innerHTML = `<div class="paper-title">${escapeHtml(r.work_title)}</div><p><span class="trace-label">Fragmen:</span> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><span class="trace-label">Pratinjau bukti:</span> ${escapeHtml(r.fragment_preview)}…</p><p><span class="trace-label">Claim:</span> ${escapeHtml(r.claim_text)}</p><p><span class="trace-label">Ekstraksi:</span> ${escapeHtml(r.extraction_origin)} · ${escapeHtml(r.extraction_version)}</p><div class="callout warning">${escapeHtml(r.review_state)} — validasi HUMAN diperlukan sebelum penerimaan ilmiah.</div>`; };
     document.querySelectorAll("[data-evidence-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.evidenceIndex)]));
     show(rows[0]);
   } catch (error) {
     console.error(error);
-    list.innerHTML = `<p>Evidence API unavailable: ${escapeHtml(error.message)}</p>`;
+    list.innerHTML = `<p>API Bukti tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
 }
 
 function renderEvolution() {
-  return commonHeader("Knowledge Evolution", "Persisted ChangeEvents explain what changed and why without rewriting HUMAN decisions.", "real") + `
-  <div class="detail-grid"><div class="card real-surface"><h3>ChangeEvent Timeline <span class="data-badge real">REAL DATA</span></h3><div id="real-change-list">Loading canonical ChangeEvents…</div></div>
-  <div class="card real-surface"><h3>Reasoning Delta</h3><div id="real-change-detail">Select a persisted ChangeEvent.</div></div>
-  <div class="card real-surface"><h3>Scientific Authority Boundary</h3><div class="callout warning">ChangeEvents record historical knowledge evolution. They do not automatically mutate GapCandidate state or HumanDecision.</div></div></div>`;
+  return commonHeader("Evolusi Pengetahuan", "ChangeEvent tersimpan menjelaskan apa yang berubah dan alasannya tanpa menulis ulang keputusan HUMAN.", "real") + `
+  <div class="detail-grid"><div class="card real-surface"><h3>Linimasa ChangeEvent <span class="data-badge real">DATA NYATA</span></h3><div id="real-change-list">Memuat ChangeEvent canonical…</div></div>
+  <div class="card real-surface"><h3>Delta Penalaran</h3><div id="real-change-detail">Pilih ChangeEvent yang tersimpan.</div></div>
+  <div class="card real-surface"><h3>Batas Otoritas Ilmiah</h3><div class="callout warning">ChangeEvent merekam evolusi pengetahuan historis. ChangeEvent tidak otomatis mengubah status GapCandidate atau HumanDecision.</div></div></div>`;
 }
 
 async function loadProjectChanges() {
@@ -401,23 +401,23 @@ async function loadProjectChanges() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/changes`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Changes HTTP ${response.status}`);
     const rows = await response.json();
-    if (!rows.length) { list.innerHTML = "<p>No persisted ChangeEvents for this project yet.</p>"; detail.innerHTML = "<p>Nothing has been recorded yet.</p>"; return; }
+    if (!rows.length) { list.innerHTML = "<p>Belum ada ChangeEvent tersimpan untuk proyek ini.</p>"; detail.innerHTML = "<p>Belum ada yang direkam.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-change-index="${i}"><div class="change-main"><strong>${escapeHtml(r.change_type)}</strong><small>${escapeHtml(r.canonical_label)} · ${escapeHtml(r.observed_at)}</small></div></div>`).join("");
     const show = r => {
       const members = Array.isArray(r.evidence_members) ? r.evidence_members : [];
-      const memberTrace = members.length ? members.map(m => `<div class="trace"><strong>${escapeHtml(m.role)} · ${escapeHtml(m.semantic_type)}</strong> — ${escapeHtml(m.work_title || m.work_id)}<br><small>EvidenceRelationship: ${escapeHtml(m.evidence_relationship_id)} · Claim: ${escapeHtml(m.claim_text || m.claim_id)} · EvidenceFragment: ${escapeHtml(m.evidence_fragment_id)} · ${escapeHtml(m.access_level || "ACCESS_NOT_RECORDED")}</small></div>`).join("") : `<p>No canonical evidence trigger membership is recorded for this ChangeEvent. This is UNKNOWN/NOT_RECORDED historical trigger detail, not evidence that no evidence existed.</p>`;
-      detail.innerHTML = `<p><strong>Why:</strong> ${escapeHtml(r.reasoning_delta || "Explanation unavailable from current canonical state")}</p><p><strong>Assessment transition:</strong> ${escapeHtml(r.previous_assessment_id || "INITIAL / NOT_RECORDED")} → ${escapeHtml(r.current_assessment_id || "NOT_APPLICABLE / NOT_RECORDED")}</p><p><strong>Canonical predecessor of current Assessment:</strong> ${escapeHtml(r.current_supersedes_assessment_id || "NONE / NOT_RECORDED")}</p><p><strong>Previous:</strong> ${escapeHtml(JSON.stringify(r.previous_state_jsonb ?? null))}</p><p><strong>Current:</strong> ${escapeHtml(JSON.stringify(r.current_state_jsonb ?? null))}</p><h4>Canonical evidence members (${members.length})</h4>${memberTrace}<div class="callout warning">Historical observation only; no HUMAN decision was changed automatically. Evidence members appear only when explicitly persisted in change_event_evidence.</div>`;
+      const memberTrace = members.length ? members.map(m => `<div class="trace"><strong>${escapeHtml(m.role)} · ${escapeHtml(m.semantic_type)}</strong> — ${escapeHtml(m.work_title || m.work_id)}<br><small>EvidenceRelationship: ${escapeHtml(m.evidence_relationship_id)} · Claim: ${escapeHtml(m.claim_text || m.claim_id)} · EvidenceFragment: ${escapeHtml(m.evidence_fragment_id)} · ${escapeHtml(m.access_level || "ACCESS_NOT_RECORDED")}</small></div>`).join("") : `<p>Tidak ada keanggotaan pemicu bukti canonical yang direkam untuk ChangeEvent ini. Ini adalah detail pemicu historis UNKNOWN/NOT_RECORDED, bukan bukti bahwa tidak ada bukti yang pernah tersedia.</p>`;
+      detail.innerHTML = `<p><strong>Alasan:</strong> ${escapeHtml(r.reasoning_delta || "Penjelasan tidak tersedia dari status canonical saat ini")}</p><p><strong>Transisi asesmen:</strong> ${escapeHtml(r.previous_assessment_id || "INITIAL / NOT_RECORDED")} → ${escapeHtml(r.current_assessment_id || "NOT_APPLICABLE / NOT_RECORDED")}</p><p><strong>Pendahulu canonical dari Asesmen saat ini:</strong> ${escapeHtml(r.current_supersedes_assessment_id || "NONE / NOT_RECORDED")}</p><p><strong>Sebelumnya:</strong> ${escapeHtml(JSON.stringify(r.previous_state_jsonb ?? null))}</p><p><strong>Saat ini:</strong> ${escapeHtml(JSON.stringify(r.current_state_jsonb ?? null))}</p><h4>Anggota bukti canonical (${members.length})</h4>${memberTrace}<div class="callout warning">Hanya observasi historis; tidak ada keputusan HUMAN yang diubah secara otomatis. Anggota bukti hanya muncul ketika disimpan secara eksplisit di change_event_evidence.</div>`;
     };
     document.querySelectorAll("[data-change-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.changeIndex)]));
     show(rows[0]);
-  } catch (error) { console.error(error); list.innerHTML = `<p>ChangeEvent API unavailable: ${escapeHtml(error.message)}</p>`; }
+  } catch (error) { console.error(error); list.innerHTML = `<p>API ChangeEvent tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
 function renderReview() {
-  return commonHeader("Human Review", "Canonical claims needing HUMAN scientific review for the selected Project.", "real") + `
-  <div class="detail-grid"><div class="card real-surface"><h3>Review Queue <span class="data-badge real">REAL DATA</span></h3><div id="real-review-list">Loading canonical review queue…</div></div>
-  <div class="card real-surface"><h3>Review Context</h3><div id="real-review-detail">Select a persisted claim.</div></div>
-  <div class="card"><h3>Decision boundary</h3><p>This queue supports inspection of canonical claims. A HumanDecision is written only through an explicit HUMAN action in a workflow that provides decision controls.</p><div class="callout warning">NEEDS_REVIEW is an attention state, not scientific acceptance or rejection.</div></div></div>`;
+  return commonHeader("Tinjauan HUMAN", "Claim canonical yang memerlukan tinjauan ilmiah HUMAN untuk Proyek yang dipilih.", "real") + `
+  <div class="detail-grid"><div class="card real-surface"><h3>Antrean Tinjauan <span class="data-badge real">DATA NYATA</span></h3><div id="real-review-list">Memuat antrean tinjauan canonical…</div></div>
+  <div class="card real-surface"><h3>Konteks Tinjauan</h3><div id="real-review-detail">Pilih Claim yang tersimpan.</div></div>
+  <div class="card"><h3>Batas Keputusan</h3><p>Antrean ini mendukung pemeriksaan Claim canonical. HumanDecision hanya ditulis melalui tindakan HUMAN eksplisit pada alur kerja yang menyediakan kontrol keputusan.</p><div class="callout warning">NEEDS_REVIEW adalah status yang memerlukan perhatian, bukan penerimaan atau penolakan ilmiah.</div></div></div>`;
 }
 
 async function loadHumanReviewBadge() {
@@ -434,17 +434,17 @@ async function loadHumanReview() {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/evidence`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Review HTTP ${response.status}`);
     const rows = (await response.json()).filter(r => r.review_state === "NEEDS_REVIEW" || r.review_state === "CONTESTED");
-    if (!rows.length) { list.innerHTML = "<p>No persisted claims currently need review.</p>"; detail.innerHTML = "<p>Nothing to review yet.</p>"; return; }
+    if (!rows.length) { list.innerHTML = "<p>Saat ini tidak ada Claim tersimpan yang perlu ditinjau.</p>"; detail.innerHTML = "<p>Belum ada yang perlu ditinjau.</p>"; return; }
     list.innerHTML = rows.map((r,i) => `<div class="change-row" data-review-index="${i}"><div class="change-main"><strong>${escapeHtml(r.claim_text)}</strong><small>${escapeHtml(r.work_title)} · ${escapeHtml(r.access_level)}</small></div><span class="state ${stateClass(r.review_state)}">${escapeHtml(r.review_state)}</span></div>`).join("");
-    const show = r => { detail.innerHTML = `<div class="paper-title">${escapeHtml(r.work_title)}</div><p><span class="trace-label">Evidence basis:</span> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><span class="trace-label">Claim:</span> ${escapeHtml(r.claim_text)}</p><p><span class="trace-label">Extraction origin:</span> ${escapeHtml(r.extraction_origin)}</p><div class="callout warning">HUMAN review required. Persisted machine-suggested relationships are not HUMAN decisions or accepted scientific conclusions.</div>`; };
+    const show = r => { detail.innerHTML = `<div class="paper-title">${escapeHtml(r.work_title)}</div><p><span class="trace-label">Dasar bukti:</span> ${escapeHtml(r.fragment_type)} · ${escapeHtml(r.access_level)}</p><p><span class="trace-label">Claim:</span> ${escapeHtml(r.claim_text)}</p><p><span class="trace-label">Asal ekstraksi:</span> ${escapeHtml(r.extraction_origin)}</p><div class="callout warning">Tinjauan HUMAN diperlukan. Relasi saran mesin yang tersimpan bukan keputusan HUMAN atau kesimpulan ilmiah yang telah diterima.</div>`; };
     document.querySelectorAll("[data-review-index]").forEach(el => el.onclick = () => show(rows[Number(el.dataset.reviewIndex)]));
     show(rows[0]);
-  } catch (error) { console.error(error); list.innerHTML = `<p>Review API unavailable: ${escapeHtml(error.message)}</p>`; }
+  } catch (error) { console.error(error); list.innerHTML = `<p>API Tinjauan tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
 function renderCoverage() {
-  return commonHeader("Research Coverage", "Scientific coverage limits from the latest persisted CoverageContext; operational health belongs in Admin Copilot.", "real") + `
-  <div id="real-coverage-detail" class="detail-grid"><div class="card real-surface"><h3>Loading coverage…</h3></div></div>`;
+  return commonHeader("Cakupan Riset", "Batas cakupan ilmiah dari CoverageContext tersimpan terbaru; kesehatan operasional berada di Admin Copilot.", "real") + `
+  <div id="real-coverage-detail" class="detail-grid"><div class="card real-surface"><h3>Memuat cakupan…</h3></div></div>`;
 }
 
 async function loadProjectCoverage(targetId = "real-coverage-detail") {
@@ -454,37 +454,37 @@ async function loadProjectCoverage(targetId = "real-coverage-detail") {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/coverage`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Coverage HTTP ${response.status}`);
     const c = await response.json();
-    if (!c.coverage_context_id) { box.innerHTML = `<div class="card real-surface"><p>No persisted CoverageContext for this project yet.</p></div>`; return; }
+    if (!c.coverage_context_id) { box.innerHTML = `<div class="card real-surface"><p>Tidak ada CoverageContext tersimpan for this project yet.</p></div>`; return; }
     const access = c.access_summary_jsonb || {};
     const extraction = c.extraction_summary_jsonb || {};
     const sources = c.sources || [];
-    box.innerHTML = `<div class="card real-surface"><h3>Persisted corpus coverage <span class="data-badge real">REAL DATA</span></h3><ul><li>FULL_TEXT — ${access.FULL_TEXT || 0}</li><li>ABSTRACT_ONLY — ${access.ABSTRACT_ONLY || 0}</li><li>METADATA_ONLY — ${access.METADATA_ONLY || 0}</li><li>Claims — ${extraction.claims || 0}</li></ul><p><strong>Counter-search:</strong> ${escapeHtml(c.counter_search_state)}</p></div><div class="card real-surface"><h3>Scientific coverage boundary</h3><p><strong>Observed:</strong> ${escapeHtml(c.observed_at)}</p><div class="callout warning">${escapeHtml(c.limitations || "No limitations recorded.")}</div><p>Provider runs, retries, service health, and operational quarantine are available in Admin Copilot.</p></div>`;
-  } catch (error) { box.innerHTML = `<div class="card"><p>Coverage API unavailable: ${escapeHtml(error.message)}</p></div>`; }
+    box.innerHTML = `<div class="card real-surface"><h3>Cakupan korpus tersimpan <span class="data-badge real">DATA NYATA</span></h3><ul><li>FULL_TEXT — ${access.FULL_TEXT || 0}</li><li>ABSTRACT_ONLY — ${access.ABSTRACT_ONLY || 0}</li><li>METADATA_ONLY — ${access.METADATA_ONLY || 0}</li><li>Claim — ${extraction.claims || 0}</li></ul><p><strong>Pencarian pembanding:</strong> ${escapeHtml(c.counter_search_state)}</p></div><div class="card real-surface"><h3>Batas cakupan ilmiah</h3><p><strong>Diamati:</strong> ${escapeHtml(c.observed_at)}</p><div class="callout warning">${escapeHtml(c.limitations || "Tidak ada keterbatasan yang direkam.")}</div><p>Run provider, retry, kesehatan layanan, dan karantina operasional tersedia di Admin Copilot.</p></div>`;
+  } catch (error) { box.innerHTML = `<div class="card"><p>API Cakupan tidak tersedia: ${escapeHtml(error.message)}</p></div>`; }
 }
 
 async function loadProjectCoverageSummary() {
   const box = document.getElementById("health-mini");
   if (!box) return;
-  box.innerHTML = `<div class="health-row"><div><strong>Loading real coverage…</strong></div></div>`;
+  box.innerHTML = `<div class="health-row"><div><strong>Memuat cakupan nyata…</strong></div></div>`;
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/coverage`, { cache: "no-store" });
     const c = response.ok ? await response.json() : {};
-    const access = c.access_summary_jsonb || {}; box.innerHTML = c.coverage_context_id ? `<div class="health-row"><div><strong>Evidence access</strong><small>${access.FULL_TEXT || 0} full text · ${access.ABSTRACT_ONLY || 0} abstract only · ${access.METADATA_ONLY || 0} metadata only</small></div></div><div class="callout">Counter-search: ${escapeHtml(c.counter_search_state)} · ${escapeHtml(c.limitations || "No limitation recorded")}</div>` : `<p>No persisted coverage snapshot yet.</p>`;
-  } catch (error) { box.innerHTML = `<p>Coverage unavailable.</p>`; }
+    const access = c.access_summary_jsonb || {}; box.innerHTML = c.coverage_context_id ? `<div class="health-row"><div><strong>Akses bukti</strong><small>${access.FULL_TEXT || 0} teks penuh · ${access.ABSTRACT_ONLY || 0} hanya abstrak · ${access.METADATA_ONLY || 0} hanya metadata</small></div></div><div class="callout">Pencarian pembanding: ${escapeHtml(c.counter_search_state)} · ${escapeHtml(c.limitations || "Tidak ada keterbatasan yang direkam")}</div>` : `<p>Belum ada snapshot cakupan tersimpan.</p>`;
+  } catch (error) { box.innerHTML = `<p>Cakupan tidak tersedia.</p>`; }
 }
 
 function renderProfiles() {
   const isA = profileSelect.selectedIndex === 0;
-  return commonHeader("Research Profile / Project Configuration", "Domain context is configuration; scientific intent belongs to a Project.") + `
-  <div class="detail-grid"><div class="card"><h3>${isA ? "Profile A — Computer / Information Systems" : "Profile B — Management / Organization Studies"}</h3><p><strong>Core interests</strong></p><ul>${(isA ? ["IT Governance","e-Government / Digital Government","Enterprise Architecture"] : ["Organizational Resilience","Human Behaviour","Human Capability"]).map(x=>`<li>${x}</li>`).join("")}</ul><p><strong>Seed literature:</strong> 12 works</p><p><strong>Watchlists:</strong> 4 active</p></div>
-  <div class="card"><h3>Selected Project</h3><p><strong>${selectedProjectLabel()}</strong></p><p>Research intent is provisional and feeds R0 rather than pre-completing the research journey.</p><div class="callout">AI suggestions: 3 concepts · 2 theory candidates · 2 method candidates. HUMAN Accept / Modify / Reject.</div></div>
-  <div class="card"><h3>Generality Check</h3><ul><li>Same core objects</li><li>Same R0–R16 journey</li><li>Same Evidence Explorer</li><li>Same ChangeEvent logic</li><li>Same Human Review</li></ul><p><strong>No domain-specific core branch required.</strong></p></div></div>`;
+  return commonHeader("Profil Riset / Konfigurasi Proyek", "Konteks domain adalah konfigurasi; tujuan ilmiah berada pada Proyek.") + `
+  <div class="detail-grid"><div class="card"><h3>${isA ? "Profil A — Komputer / Sistem Informasi" : "Profil B — Manajemen / Studi Organisasi"}</h3><p><strong>Minat utama</strong></p><ul>${(isA ? ["IT Governance","e-Government / Digital Government","Enterprise Architecture"] : ["Organizational Resilience","Human Behaviour","Human Capability"]).map(x=>`<li>${x}</li>`).join("")}</ul><p><strong>Literatur awal:</strong> 12 karya</p><p><strong>Daftar pantau:</strong> 4 aktif</p></div>
+  <div class="card"><h3>Proyek Terpilih</h3><p><strong>${selectedProjectLabel()}</strong></p><p>Tujuan riset bersifat sementara dan menjadi masukan R0, bukan menyelesaikan perjalanan riset terlebih dahulu.</p><div class="callout">Saran AI: 3 konsep · 2 kandidat teori · 2 kandidat metode. HUMAN menerima / mengubah / menolak.</div></div>
+  <div class="card"><h3>Pemeriksaan Generalitas</h3><ul><li>Objek inti yang sama</li><li>Perjalanan R0–R16 yang sama</li><li>Penjelajah Bukti yang sama</li><li>Logika ChangeEvent yang sama</li><li>Tinjauan HUMAN yang sama</li></ul><p><strong>Tidak diperlukan cabang inti khusus domain.</strong></p></div></div>`;
 }
 
 function renderTelegram() {
-  return commonHeader("Telegram Research Radar", "Read-only projection of canonical ChangeEvent. Telegram never becomes scientific state.", "real") + `
-  <div id="radar-live" class="card"><p>Loading canonical Radar projection…</p></div>
-  <div class="card"><h3>Radar Rules</h3><ul><li>No raw crawler logs</li><li>No automatic scientific decisions</li><li>No canonical state in Telegram</li><li>Delivery failure stays local</li><li>Inspect full context in Dashboard</li></ul></div>`;
+  return commonHeader("Radar Riset Telegram", "Proyeksi read-only dari ChangeEvent canonical. Telegram tidak pernah menjadi status ilmiah.", "real") + `
+  <div id="radar-live" class="card"><p>Memuat proyeksi Radar canonical…</p></div>
+  <div class="card"><h3>Aturan Radar</h3><ul><li>Tidak ada log crawler mentah</li><li>Tidak ada keputusan ilmiah otomatis</li><li>Tidak ada status canonical di Telegram</li><li>Kegagalan pengiriman tetap lokal</li><li>Periksa konteks lengkap di Dashboard</li></ul></div>`;
 }
 
 async function loadPilotHealth() {
@@ -492,8 +492,8 @@ async function loadPilotHealth() {
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/pilot-health`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`); const rows = await response.json();
-    box.innerHTML = `<h3>Continuous Pilot Health</h3><p class="muted">Operational health only — never a scientific judgment.</p>` + (rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.status)} · ${escapeHtml(r.trigger_type)}</strong><small>Run ${escapeHtml(r.pilot_run_id)}</small><p>Started: ${escapeHtml(r.started_at)}<br>Finished: ${escapeHtml(r.finished_at || "RUNNING")}<br>Stage attempts: ${escapeHtml(r.stage_attempts)} · Failed attempts: ${escapeHtml(r.failed_stage_attempts)}</p><p>Stage history: ${escapeHtml((r.stage_history || []).join(" → ") || "none")}</p><p>Machine actions: ${escapeHtml(JSON.stringify(r.machine_actions_jsonb || []))}</p></div></div>`).join("") : `<p>No Continuous Pilot run recorded yet.</p>`);
-  } catch (error) { box.innerHTML = `<h3>Continuous Pilot Health</h3><p>Operational health unavailable; canonical scientific state is unaffected.</p>`; }
+    box.innerHTML = `<h3>Kesehatan Continuous Pilot</h3><p class="muted">Hanya kesehatan operasional — bukan penilaian ilmiah.</p>` + (rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.status)} · ${escapeHtml(r.trigger_type)}</strong><small>Run ${escapeHtml(r.pilot_run_id)}</small><p>Dimulai: ${escapeHtml(r.started_at)}<br>Selesai: ${escapeHtml(r.finished_at || "RUNNING")}<br>Percobaan tahap: ${escapeHtml(r.stage_attempts)} · Percobaan gagal: ${escapeHtml(r.failed_stage_attempts)}</p><p>Riwayat tahap: ${escapeHtml((r.stage_history || []).join(" → ") || "tidak ada")}</p><p>Tindakan mesin: ${escapeHtml(JSON.stringify(r.machine_actions_jsonb || []))}</p></div></div>`).join("") : `<p>Belum ada run Continuous Pilot yang direkam.</p>`);
+  } catch (error) { box.innerHTML = `<h3>Kesehatan Continuous Pilot</h3><p>Kesehatan operasional tidak tersedia; status ilmiah canonical tidak terpengaruh.</p>`; }
 }
 
 async function loadProjectRadar() {
@@ -502,13 +502,13 @@ async function loadProjectRadar() {
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/radar`, { cache: "no-store" });
     const rows = response.ok ? await response.json() : [];
-    box.innerHTML = rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)}</strong><small>${escapeHtml(r.profile_name)} / ${escapeHtml(r.project_name)}</small><p><strong>WHAT CHANGED</strong><br>${escapeHtml(r.canonical_label)}</p><p><strong>WHY IT MATTERS</strong><br>${escapeHtml(r.reasoning_delta)}</p><p><strong>COVERAGE</strong><br>Counter-search: ${escapeHtml(r.counter_search_state || "UNKNOWN")} · ${escapeHtml(r.coverage_limitations || "No limitation recorded")}</p><p><strong>HUMAN CONTEXT</strong><br>Latest decision: ${escapeHtml(r.latest_human_decision || "NONE")}. This Radar item does not change it.</p><button class="text-button" onclick="showView('opportunities')">Investigate evidence & source</button></div></div>`).join("") : `<p>No canonical ChangeEvent is currently available for Radar projection.</p>`;
+    box.innerHTML = rows.length ? rows.map(r => `<div class="change-row"><div class="change-main"><strong>${escapeHtml(r.change_type)}</strong><small>${escapeHtml(r.profile_name)} / ${escapeHtml(r.project_name)}</small><p><strong>APA YANG BERUBAH</strong><br>${escapeHtml(r.canonical_label)}</p><p><strong>MENGAPA INI PENTING</strong><br>${escapeHtml(r.reasoning_delta)}</p><p><strong>CAKUPAN</strong><br>Pencarian pembanding: ${escapeHtml(r.counter_search_state || "UNKNOWN")} · ${escapeHtml(r.coverage_limitations || "Tidak ada keterbatasan yang direkam")}</p><p><strong>KONTEKS HUMAN</strong><br>Keputusan terbaru: ${escapeHtml(r.latest_human_decision || "NONE")}. Item Radar ini tidak mengubahnya.</p><button class="text-button" onclick="showView('opportunities')">Periksa bukti & sumber</button></div></div>`).join("") : `<p>Saat ini tidak ada ChangeEvent canonical yang tersedia untuk proyeksi Radar.</p>`;
   } catch (error) {
-    box.innerHTML = `<p>Radar projection unavailable. Canonical research processing is unaffected.</p>`;
+    box.innerHTML = `<p>Proyeksi Radar tidak tersedia. Pemrosesan riset canonical tidak terpengaruh.</p>`;
   }
 }
 
-const renderers = { journey:renderJourney, opportunities:renderOpportunities, evidence:renderEvidence, evolution:renderEvolution, review:renderReview, coverage:renderCoverage, profiles:renderProfiles, telegram:renderTelegram };
+const renderers = { journey:renderJourney, opportunities:renderOpportunities, evidence:renderBukti, evolution:renderEvolution, review:renderReview, coverage:renderCoverage, profiles:renderProfiles, telegram:renderTelegram };
 
 function showView(name) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active-view"));
@@ -516,7 +516,7 @@ function showView(name) {
   const view = document.getElementById(`view-${name}`);
   if (name !== "today" && renderers[name]) view.innerHTML = renderers[name]();
   view.classList.add("active-view");
-  if (name === "evidence") loadProjectEvidence();
+  if (name === "evidence") loadProjectBukti();
   if (name === "review") loadHumanReview();
   if (name === "opportunities") loadProjectOpportunities();
   if (name === "coverage") loadProjectCoverage();
@@ -541,7 +541,7 @@ document.getElementById("main-nav").addEventListener("click", e => {
 });
 document.querySelectorAll(".nav-list.small [data-view]").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
 
-projectSelect.addEventListener("change", () => { loadHumanReviewBadge(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || active === "today") renderDashboard(); else showView(active); });
+projectSelect.addEventListener("change", () => { loadHumanReviewBadge(); const aktif = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || aktif === "today") renderDashboard(); else showView(active); });
 document.getElementById("global-search").addEventListener("keydown", e => { if (e.key === "Enter") showView("evidence"); });
 
 fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(`Context HTTP ${r.status}`); return r.json(); }).then(rows => {
@@ -552,7 +552,7 @@ fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) t
     projectSelect.innerHTML = projects.map(r => `<option value="${r.project_id}">${r.project_name}</option>`).join("");
     renderLatestPapers();
   };
-  profileSelect.onchange = () => { bindProjects(); loadHumanReviewBadge(); const active = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || active === "today") renderDashboard(); else showView(active); };
+  profileSelect.onchange = () => { bindProjects(); loadHumanReviewBadge(); const aktif = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || aktif === "today") renderDashboard(); else showView(active); };
   bindProjects();
   renderDashboard();
 loadHumanReviewBadge();
@@ -560,7 +560,7 @@ loadHumanReviewBadge();
   if (version) version.textContent = `Prototype v${PROTOTYPE_VERSION} · live`;
 }).catch(error => {
   console.error(error);
-  projectSelect.innerHTML = `<option>Context unavailable</option>`;
+  projectSelect.innerHTML = `<option>Konteks tidak tersedia</option>`;
   const version = document.getElementById("prototype-version");
   if (version) version.textContent = `Prototype v${PROTOTYPE_VERSION} · API error`;
 });
@@ -575,17 +575,17 @@ async function renderGapDecision(row) {
     const all = await response.json();
     const history = all.filter(d => d.primary_research_object_id === (row.research_object_id || row.gap_id));
     const latest = history[0];
-    box.innerHTML = latest ? `<p><strong>Latest HUMAN decision:</strong> ${escapeHtml(latest.decision_type)}</p><p>${escapeHtml(latest.rationale)}</p><small>${escapeHtml(latest.actor)} · ${escapeHtml(latest.decided_at)}</small><h4>Change history</h4>${history.map((d, i) => `<div class="trace"><strong>${i === 0 ? "CURRENT · " : "PRIOR · "}${escapeHtml(d.decision_type)}</strong><br>${escapeHtml(d.rationale)}<br><small>${escapeHtml(d.actor)} · ${escapeHtml(d.decided_at)} · Assessment: ${escapeHtml(d.assessment_id || "none")} · Supersedes: ${escapeHtml(d.supersedes_decision_id || "none")}</small></div>`).join("")}` : `<p>No HumanDecision persisted for this candidate.</p>`;
-    box.innerHTML += `<div class="human-review-form" style="margin-top:12px"><label>HUMAN reviewer<br><input id="human-review-actor" type="text" placeholder="Researcher name"></label><br><label>Researcher rationale / note<br><textarea id="human-review-rationale" rows="4" placeholder="Why are you taking this action based on the evidence and critic above?"></textarea></label></div><div class="decision-bar" style="margin-top:10px"><button data-decision="REVIEW">Review</button><button data-decision="MODIFY">Modify</button><button data-decision="ACCEPT_DIRECTION">Accept direction</button><button data-decision="REJECT_CANDIDATE">Reject candidate</button><button data-decision="NEED_MORE_EVIDENCE">Need more evidence</button></div><div class="callout warning" style="margin-top:10px">Accept direction means proceed with the current research direction based on current evidence; it does not establish that the gap is true or novel. Only an explicit HUMAN action writes a decision. New decisions supersede history; they do not rewrite it.</div>`;
+    box.innerHTML = latest ? `<p><strong>Keputusan HUMAN terbaru:</strong> ${escapeHtml(latest.decision_type)}</p><p>${escapeHtml(latest.rationale)}</p><small>${escapeHtml(latest.actor)} · ${escapeHtml(latest.decided_at)}</small><h4>Riwayat perubahan</h4>${history.map((d, i) => `<div class="trace"><strong>${i === 0 ? "SAAT INI · " : "SEBELUMNYA · "}${escapeHtml(d.decision_type)}</strong><br>${escapeHtml(d.rationale)}<br><small>${escapeHtml(d.actor)} · ${escapeHtml(d.decided_at)} · Asesmen: ${escapeHtml(d.assessment_id || "tidak ada")} · Menggantikan: ${escapeHtml(d.supersedes_decision_id || "tidak ada")}</small></div>`).join("")}` : `<p>Belum ada HumanDecision tersimpan untuk kandidat ini.</p>`;
+    box.innerHTML += `<div class="human-review-form" style="margin-top:12px"><label>Peninjau HUMAN<br><input id="human-review-actor" type="text" placeholder="Nama peneliti"></label><br><label>Alasan / catatan peneliti<br><textarea id="human-review-rationale" rows="4" placeholder="Mengapa Anda mengambil tindakan ini berdasarkan bukti dan kritik di atas?"></textarea></label></div><div class="decision-bar" style="margin-top:10px"><button data-decision="REVIEW">Tinjau</button><button data-decision="MODIFY">Ubah</button><button data-decision="ACCEPT_DIRECTION">Terima arah</button><button data-decision="REJECT_CANDIDATE">Tolak kandidat</button><button data-decision="NEED_MORE_EVIDENCE">Perlu bukti tambahan</button></div><div class="callout warning" style="margin-top:10px">Terima arah berarti melanjutkan arah riset saat ini berdasarkan bukti yang tersedia; ini tidak menetapkan bahwa gap benar atau baru. Hanya tindakan HUMAN eksplisit yang menulis keputusan. Keputusan baru menggantikan keputusan sebelumnya tanpa menulis ulang riwayat.</div>`;
     box.querySelectorAll("[data-decision]").forEach(btn => btn.onclick = () => submitHumanDecision(row, btn.dataset.decision));
-  } catch (error) { box.innerHTML = `<p>Decision API unavailable: ${escapeHtml(error.message)}</p>`; }
+  } catch (error) { box.innerHTML = `<p>API Keputusan tidak tersedia: ${escapeHtml(error.message)}</p>`; }
 }
 
 async function submitHumanDecision(row, decisionType) {
   const actor = document.getElementById("human-review-actor")?.value?.trim();
   const rationale = document.getElementById("human-review-rationale")?.value?.trim();
   if (!actor || !rationale) {
-    window.alert("HUMAN reviewer and rationale are required before recording a decision.");
+    window.alert("Peninjau HUMAN dan alasan wajib diisi sebelum merekam keputusan.");
     return;
   }
   const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/decisions`, {
@@ -600,25 +600,25 @@ async function submitHumanDecision(row, decisionType) {
 async function renderGapAssessment(gap) {
   const box = document.getElementById("real-gap-assessment");
   if (!box) return;
-  box.innerHTML = "<p>Loading machine assessment…</p>";
+  box.innerHTML = "<p>Memuat asesmen mesin…</p>";
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/assessments`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Assessments HTTP ${response.status}`);
     const rows = (await response.json()).filter(a => a.target_research_object_id === gap.gap_id);
-    if (!rows.length) { box.innerHTML = "<p>No persisted Assessment for this GapCandidate yet.</p>"; return; }
+    if (!rows.length) { box.innerHTML = "<p>Belum ada Asesmen tersimpan untuk GapCandidate ini.</p>"; return; }
     const a = rows[0];
     const dims = (a.dimensions || []).map(d => `<li><strong>${escapeHtml(d.dimension_type)}</strong>: ${escapeHtml(d.value_text ?? d.value_numeric)}<br><small>${escapeHtml(d.explanation || "")}</small></li>`).join("");
-    box.innerHTML = `<p><strong>${escapeHtml(a.assessment_type)}</strong></p><p>${escapeHtml(a.explanation_summary || "")}</p><ul>${dims}</ul><div class="callout warning">Machine dimensions are contextual advice, not probabilities or scientific acceptance.</div>`;
+    box.innerHTML = `<p><strong>${escapeHtml(a.assessment_type)}</strong></p><p>${escapeHtml(a.explanation_summary || "")}</p><ul>${dims}</ul><div class="callout warning">Dimensi mesin adalah saran kontekstual, bukan probabilitas atau penerimaan ilmiah.</div>`;
   } catch (error) {
     console.error(error);
-    box.innerHTML = `<p>Assessment API unavailable: ${escapeHtml(error.message)}</p>`;
+    box.innerHTML = `<p>API Asesmen tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
 }
 
 async function renderResearchQuality(row) {
   const box = document.getElementById("real-gap-quality");
   if (!box || !projectSelect.value || !row?.research_object_id) return;
-  box.innerHTML = "<p>Loading canonical quality observations…</p>";
+  box.innerHTML = "<p>Memuat observasi kualitas canonical…</p>";
   try {
     const response = await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/quality?object_id=${encodeURIComponent(row.research_object_id)}`, {cache:"no-store"});
     if (!response.ok) throw new Error(`Quality HTTP ${response.status}`);
@@ -628,35 +628,35 @@ async function renderResearchQuality(row) {
     const suggestions = Array.isArray(q.review_suggestions) ? q.review_suggestions : [];
     const fmt = value => value == null ? "—" : (typeof value === "string" ? value : JSON.stringify(value));
     box.innerHTML = `
-      <div class="callout warning">Quality observations are decomposed advisory context, not a universal score or scientific verdict.</div>
-      ${observations.map(o => `<div class="trace"><strong>${escapeHtml(o.dimension)}</strong> · <span class="state ${stateClass(o.state)}">${escapeHtml(o.state)}</span><br><small>${escapeHtml(fmt(o.value))}</small><br><small>Basis: ${escapeHtml(o.basis || "Not recorded")}</small></div>`).join("")}
-      <p><strong>Limitations</strong></p>${limitations.length ? `<ul>${limitations.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>` : "<p>No additional limitation recorded by this projection.</p>"}
-      <p><strong>Suggested HUMAN review actions</strong></p>${suggestions.length ? suggestions.map(x => `<div class="trace"><strong>${escapeHtml(x.action)}</strong><br><small>Because: ${escapeHtml((x.because || []).join("; "))}</small></div>`).join("") : "<p>No quality-triggered review suggestion.</p>"}
-      <div class="callout warning">scientific_decision=${escapeHtml(String(q.scientific_decision))}. HUMAN scientific authority remains explicit.</div>`;
+      <div class="callout warning">Observasi kualitas adalah konteks saran yang diuraikan, bukan skor universal atau keputusan ilmiah.</div>
+      ${observations.map(o => `<div class="trace"><strong>${escapeHtml(o.dimension)}</strong> · <span class="state ${stateClass(o.state)}">${escapeHtml(o.state)}</span><br><small>${escapeHtml(fmt(o.value))}</small><br><small>Basis: ${escapeHtml(o.basis || "Tidak direkam")}</small></div>`).join("")}
+      <p><strong>Keterbatasan</strong></p>${limitations.length ? `<ul>${limitations.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>` : "<p>Tidak ada keterbatasan tambahan yang direkam oleh proyeksi ini.</p>"}
+      <p><strong>Tindakan tinjauan HUMAN yang disarankan</strong></p>${suggestions.length ? suggestions.map(x => `<div class="trace"><strong>${escapeHtml(x.action)}</strong><br><small>Karena: ${escapeHtml((x.because || []).join("; "))}</small></div>`).join("") : "<p>Tidak ada saran tinjauan yang dipicu oleh kualitas.</p>"}
+      <div class="callout warning">scientific_decision=${escapeHtml(String(q.scientific_decision))}. Otoritas ilmiah HUMAN tetap eksplisit.</div>`;
   } catch (error) {
-    box.innerHTML = `<p>Research Quality unavailable: ${escapeHtml(error.message)}</p>`;
+    box.innerHTML = `<p>Kualitas Riset tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
 }
 
-async function renderEvidenceVerification(row) {
+async function renderBuktiVerification(row) {
   const box=document.getElementById("real-gap-verification");
   if(!box || !projectSelect.value || !row?.research_object_id) return;
-  box.innerHTML="<p>Loading inspectable canonical evidence…</p>";
+  box.innerHTML="<p>Memuat bukti canonical yang dapat diperiksa…</p>";
   try {
     const response=await fetch(`${API_BASE}/api/projects/${encodeURIComponent(projectSelect.value)}/evidence-verification?object_id=${encodeURIComponent(row.research_object_id)}`,{cache:"no-store"});
-    if(!response.ok) throw new Error(`Evidence verification HTTP ${response.status}`);
+    if(!response.ok) throw new Error(`Bukti verification HTTP ${response.status}`);
     const rows=await response.json();
-    box.innerHTML=`<div class="callout warning">Read what is actually stored before judging a Claim or relationship. PROJECT_LITERATURE_ONLY is candidate context, not evidence for this research object. ABSTRACT_ONLY is not full text.</div>`+
+    box.innerHTML=`<div class="callout warning">Baca apa yang benar-benar tersimpan sebelum menilai Claim atau relasi. PROJECT_LITERATURE_ONLY adalah konteks kandidat, bukan bukti untuk objek riset ini. ABSTRACT_ONLY bukan teks penuh.</div>`+
       rows.map((x,i)=>{
         const links=[x.doi_url ? `<a class="source-link source-link-doi" href="${escapeHtml(x.doi_url)}" target="_blank" rel="noopener noreferrer">DOI ↗</a>`:"",x.openalex_url ? `<a class="source-link source-link-openalex" href="${escapeHtml(x.openalex_url)}" target="_blank" rel="noopener noreferrer">OpenAlex ↗</a>`:""].filter(Boolean).join(" · ");
-        const text=x.evidence_text ? `<details ${i===0 ? "open":""}><summary>Read stored ${escapeHtml(x.fragment_type || "evidence fragment")} (${escapeHtml(x.access_level || "UNKNOWN")})</summary><p class="evidence-readable">${escapeHtml(x.evidence_text)}</p></details>` : `<p><em>No canonical EvidenceFragment text is stored for this work.</em></p>`;
-        const claim=x.claim_id ? `<p><strong>Extracted Claim:</strong> ${escapeHtml(x.claim_text)}<br><small>Claim review: ${escapeHtml(x.claim_review_state)} · extraction: ${escapeHtml(x.extraction_origin)}</small></p>` : "<p><strong>Extracted Claim:</strong> none stored.</p>";
-        const rel=x.relationship_id ? `<p><strong>Object relationship:</strong> ${escapeHtml(x.semantic_type)} · ${escapeHtml(x.relationship_review_state)}</p>` : "<p><strong>Object relationship:</strong> none asserted.</p>";
-        return `<div class="trace"><strong>${escapeHtml(x.title)}</strong><br><small>${escapeHtml(x.publication_year || "Year unavailable")} · ${escapeHtml(x.object_evidence_status)} · ${escapeHtml(x.access_level || x.current_access_level || "METADATA_ONLY")}</small>${links ? `<p>${links}</p>`:""}${text}${claim}${rel}</div>`;
+        const text=x.evidence_text ? `<details ${i===0 ? "open":""}><summary>Baca ${escapeHtml(x.fragment_type || "fragmen bukti")} (${escapeHtml(x.access_level || "UNKNOWN")})</summary><p class="evidence-readable">${escapeHtml(x.evidence_text)}</p></details>` : `<p><em>Tidak ada teks BuktiFragment canonical yang tersimpan untuk karya ini.</em></p>`;
+        const claim=x.claim_id ? `<p><strong>Claim hasil ekstraksi:</strong> ${escapeHtml(x.claim_text)}<br><small>Tinjauan Claim: ${escapeHtml(x.claim_review_state)} · ekstraksi: ${escapeHtml(x.extraction_origin)}</small></p>` : "<p><strong>Claim hasil ekstraksi:</strong> tidak ada yang tersimpan.</p>";
+        const rel=x.relationship_id ? `<p><strong>Relasi objek:</strong> ${escapeHtml(x.semantic_type)} · ${escapeHtml(x.relationship_review_state)}</p>` : "<p><strong>Relasi objek:</strong> tidak ada yang dinyatakan.</p>";
+        return `<div class="trace"><strong>${escapeHtml(x.title)}</strong><br><small>${escapeHtml(x.publication_year || "Tahun tidak tersedia")} · ${escapeHtml(x.object_evidence_status)} · ${escapeHtml(x.access_level || x.current_access_level || "METADATA_ONLY")}</small>${links ? `<p>${links}</p>`:""}${text}${claim}${rel}</div>`;
       }).join("")+
-      `<div class="callout warning">External DOI/OpenAlex links are for HUMAN source inspection. This screen does not claim access to publisher full text unless canonical access_level is FULL_TEXT.</div>`;
+      `<div class="callout warning">Tautan DOI/OpenAlex eksternal digunakan untuk pemeriksaan sumber oleh HUMAN. Layar ini tidak mengklaim akses ke teks penuh penerbit kecuali access_level canonical adalah FULL_TEXT.</div>`;
   } catch(error) {
-    box.innerHTML=`<p>Evidence Verification unavailable: ${escapeHtml(error.message)}</p>`;
+    box.innerHTML=`<p>Verifikasi Bukti tidak tersedia: ${escapeHtml(error.message)}</p>`;
   }
 }
 
@@ -668,7 +668,7 @@ applyMetricActionLabels();
 window.addEventListener("gfprojclaw-language-change", () => {
   applyMetricActionLabels();
   renderToday();
-  const activeJourney=document.getElementById("view-journey"); if (activeJourney?.classList.contains("active-view")) activeJourney.innerHTML=renderJourney();
+  const aktifJourney=document.getElementById("view-journey"); if (activeJourney?.classList.contains("active-view")) aktifJourney.innerHTML=renderJourney();
   const dark = document.documentElement.dataset.theme === "dark";
   if (themeToggle) themeToggle.textContent = `${dark ? "☀️" : "🌙"} ${window.GF_I18N.t(dark ? "light" : "dark")}`;
 });

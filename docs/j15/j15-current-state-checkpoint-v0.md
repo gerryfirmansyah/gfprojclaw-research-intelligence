@@ -241,3 +241,11 @@ HUMAN trial clarified that localization is intended to maximize researcher under
 The scientific/source boundary remains: source-origin paper titles and source evidence are displayed in their original language. Localization is presentation metadata and guidance; it does not mutate canonical records. The Research Journey remains explicitly illustrative/non-canonical in both languages.
 
 This slice is not a claim of complete application-wide translation; further explanatory surfaces can be moved into the same dictionary incrementally. Static explanatory-i18n assertions, JavaScript syntax checks, and diff checks passed. HUMAN browser re-trial remains required; J15 is not HUMAN PASS.
+
+## 17. 2026-09-20 HUMAN decision: Indonesian-first Research Copilot
+
+HUMAN trial determined that mixed EN/ID explanatory surfaces reduce researcher comprehension. Research Copilot v0.17.0 therefore uses Indonesian as the single visible UI language for the current trial. The language toggle is hidden, while the i18n infrastructure and English dictionary remain available for future reactivation.
+
+Researcher-facing navigation, guidance, explanations, warnings, empty/error states, Research Journey guidance, Opportunities, Evidence Explorer, Knowledge Evolution, Human Review, Coverage, Profile/Project, Telegram Radar, Advice & Critic, Research Quality, Evidence Verification, and HUMAN decision guidance are normalized toward Indonesian. Source-origin scientific content remains original: paper titles and stored evidence/source text are not destructively translated. Canonical machine tokens and identifiers such as ABSTRACT_ONLY, NOT_RUN, NEEDS_REVIEW, SUPPORTS, DOI, OpenAlex, UUIDs, and schema entity names remain stable, with Indonesian explanatory context around them.
+
+The canonical ChangeEvent projection regression was executed with the project virtualenv and passed with `J15_CHANGE_EVENT_MEMBER_PROJECTION_PASS`; JavaScript syntax and diff checks also passed. This remains a presentation-layer remediation only. HUMAN browser re-trial is still required and J15 is not HUMAN PASS.

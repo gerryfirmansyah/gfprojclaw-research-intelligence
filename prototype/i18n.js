@@ -10,7 +10,7 @@
     }
   };
   const normalize = value => value === "id" ? "id" : "en";
-  const current = () => normalize(localStorage.getItem("gfprojclaw-language") || "en");
+  const current = () => "id";
   const t = key => dictionaries[current()][key] || dictionaries.en[key] || key;
 
   const stageNames = {
