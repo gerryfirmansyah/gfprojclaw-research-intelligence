@@ -179,3 +179,11 @@ At this checkpoint:
 
 Next work resumes from the canonical-data/design audit, not from implementation.
 
+
+## 9. 2026-09-20 public acceptance preflight
+
+Public HTTPS contract checks now pass against the deployed API for both canonical trial profiles. Profile A exposes `ABSTRACT_ONLY` linked evidence, explicit `NOT_AVAILABLE` methodological context, `scientific_decision=false`, a canonical `SUPPORTS` relationship, `NOT_RUN` counter-search, and persisted Advice & Critic explanations. Profile B exposes all Research Quality observations as `NOT_AVAILABLE`, no canonical evidence references, six verification items explicitly marked `PROJECT_LITERATURE_ONLY` with no EvidenceRelationship, and no generalized Advice & Critic assessment.
+
+The deployed GitHub Pages `app.js` also contains the expected HUMAN-facing markers for Research Quality, Evidence Verification, `PROJECT_LITERATURE_ONLY`, unavailable-explanation handling, historical `UNKNOWN/NOT_RECORDED` ChangeEvent membership, and Assessment transition display.
+
+These are machine-verifiable deployment preflight checks, not a substitute for the acceptance criterion requiring a HUMAN to complete the end-to-end Cockpit trial for both profiles. J15 therefore remains IN PROGRESS / HUMAN TRIAL.
