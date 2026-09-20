@@ -72,3 +72,17 @@ This rerun also validates the historical UUID guard correction: GFPROJCLAW canon
 ### Deployment boundary after rerun
 
 The executable blocker for Migration 011 is cleared for controlled production deployment. This is not J15 HUMAN PASS and does not authorize continuous-pilot timer activation. Production Migration 011 must be applied first and verified in production before Migration 012 is considered.
+
+## 2026-09-20 controlled production deployment result
+
+Status: MIGRATIONS 011 + 012 PRODUCTION PASS — J15 remains IN PROGRESS / HUMAN TRIAL.
+
+Using the authorized PostgreSQL DBA identity on production `gfprojclaw` (PostgreSQL 16.15), Migration 011 completed in one transaction. The deterministic historical Assessment backfill reported `UPDATE 1`; the exact-supersession integrity function and constraint trigger were created; semantic constraints were added; and the transaction committed.
+
+The production schema verifier then returned `J15 change-event traceability schema verification passed`.
+
+The existing historical `ASSESSMENT_CHANGED` event `10d5b1f3-5248-5bba-9400-d3dd1b2de146` now has canonical `current_assessment_id = dea6a217-e8ec-49e9-9bed-0101b20185c3`, with both `previous_assessment_id` and `current_supersedes_assessment_id` NULL, consistent with the canonical initial Assessment. `change_event_evidence` contained zero rows after migration; no historical evidence-trigger membership was inferred.
+
+Migration 012 then committed. Explicit production privilege verification for `gfproj_app` returned `t|t|f|f`: SELECT and INSERT are allowed on `change_event_evidence`; UPDATE and DELETE are not.
+
+This production PASS establishes the persistence and bounded-runtime-privilege deployment checkpoint only. It does not establish scientific truth or HUMAN acceptance, does not authorize continuous-pilot timer activation, and does not by itself make ChangeEvent member traceability available through the API/UI. Writer `--apply` remains unexecuted at this checkpoint.
