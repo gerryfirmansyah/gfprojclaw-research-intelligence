@@ -16,7 +16,7 @@ def build():
         lines.append(f'{label}: {nr} NEEDS_REVIEW; {co} CONTESTED.')
         cov=x.get('coverage') or {}; cs=cov.get('counter_search_state')
         lines.append(f"  Counter-search: {cs if cs else 'NOT_AVAILABLE'}.")
-    lines += ['','STATUS RADAR','Pemeriksaan harian selesai; projection canonical dapat dibaca.','', 'WHY / INSPECT EVIDENCE','Buka GFPROJCLAW → Research Object → Claim → EvidenceFragment → Paper → Advice & Critic → Tinjauan HUMAN.','Telegram hanya radar read-only; keputusan ilmiah tetap milik HUMAN.']
+    lines += ['','STATUS RADAR','Pemeriksaan harian selesai; projection canonical dapat dibaca.','', 'WHY / INSPECT EVIDENCE','Buka GFPROJCLAW → Research Object → Claim → EvidenceFragment → Paper → Advice & Critic → Tinjauan HUMAN.','Telegram hanya radar read-only; keputusan ilmiah tetap milik HUMAN.','Buka GFPROJCLAW Research Copilot: https://gerryfirmansyah.github.io/gfprojclaw-research-intelligence/prototype/']
     return '\n'.join(lines)
 def send(text):
     token=os.environ.get('TELEGRAM_BOT_TOKEN'); chat=os.environ.get('TELEGRAM_CHAT_ID')

@@ -34,3 +34,12 @@ J16 does not add new scientific intelligence, prove gaps/novelty/significance/ca
 
 ## Acceptance evidence
 J16 is ready for final HUMAN production acceptance only when deployment/restart, backup/restore, secrets/permissions, health monitoring, scheduler reliability, replication/setup, operational runbook, Profile A/B regression, and scientific-boundary checks have executable evidence. Final production readiness is declared only by HUMAN.
+
+## 2026-09-20 J16 baseline hardening evidence
+- Cockpit API runtime identity changed from `root` to dedicated `gfproj:gfproj`; API remained active and `/api/context` returned both canonical profiles after restart.
+- Runtime DB secret file remains owned by `gfproj:gfproj` with mode `0600`; configuration directory is `0700`; application DB identity is `gfproj_app`.
+- Telegram daily attention radar remains enabled/active and now includes the public Research Copilot prototype link for cross-device follow-through.
+- Continuous-pilot timer remains `not-found` / `inactive`; J16 entry does not authorize scientific automation.
+- Existing Profile/Project, ChangeEvent, and Daily Attention regressions remain PASS after service-identity hardening.
+
+Admin Copilot is the J16 operational acceptance surface. Its current J15 shell is not yet considered complete J16 operational coverage; deployment/service, scheduler, backup/recovery, storage, source/failure visibility, activity/audit, and replication readiness must be projected there before final J16 HUMAN acceptance.
