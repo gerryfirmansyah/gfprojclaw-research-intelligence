@@ -1,0 +1,64 @@
+name: J15 ChangeEvent Traceability PostgreSQL Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'db/migrations/001_canonical_vertical_slice.sql'
+      - 'db/fixtures/001_vertical_slice_reference.sql'
+      - 'db/migrations/011_change_event_canonical_traceability.sql'
+      - 'db/migrations/012_change_event_traceability_privileges.sql'
+      - 'db/verify/011_change_event_traceability_verify.sql'
+      - 'db/verify/011_change_event_traceability_negative.sql'
+      - '.github/workflows/j15-change-event-traceability-postgres.yml'
+
+jobs:
+  postgres-16:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Create disposable database
+        run: createdb gfprojclaw_j15_test
+      - name: Apply canonical baseline
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/migrations/001_canonical_vertical_slice.sql
+      - name: Apply deterministic fixture
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/fixtures/001_vertical_slice_reference.sql
+      - name: Apply J15 migration
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/migrations/011_change_event_canonical_traceability.sql
+      - name: Create runtime role for privilege migration
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -c "CREATE ROLE gfproj_app NOLOGIN;"
+      - name: Apply J15 runtime privileges
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/migrations/012_change_event_traceability_privileges.sql
+      - name: Verify J15 schema
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/verify/011_change_event_traceability_verify.sql
+      - name: Run J15 negative tests
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j15_test -f db/verify/011_change_event_traceability_negative.sql
+      - name: Verify no historical evidence backfill
+        run: |
+          test "$(psql -At -d gfprojclaw_j15_test -c 'select count(*) from change_event_evidence')" = "0"
+      - name: Verify bounded runtime privileges
+        run: |
+          test "$(psql -At -d gfprojclaw_j15_test -c "select has_table_privilege('gfproj_app','change_event_evidence','SELECT') and has_table_privilege('gfproj_app','change_event_evidence','INSERT') and not has_table_privilege('gfproj_app','change_event_evidence','UPDATE') and not has_table_privilege('gfproj_app','change_event_evidence','DELETE')")" = "t"

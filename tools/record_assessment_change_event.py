@@ -98,13 +98,17 @@ def main():
                 INSERT INTO change_event (
                     id, project_id, primary_research_object_id,
                     coverage_context_id, change_type, observed_at,
-                    previous_state_jsonb, current_state_jsonb, reasoning_delta
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    previous_state_jsonb, current_state_jsonb, reasoning_delta,
+                    previous_assessment_id, current_assessment_id,
+                    current_supersedes_assessment_id
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """, (
                 event_id, row["project_id"], row["object_id"],
                 row["coverage_context_id"], CHANGE_TYPE, row["assessed_at"],
                 Jsonb(previous_state) if previous_state is not None else None,
                 Jsonb(current_state), reasoning,
+                row["supersedes_assessment_id"], row["assessment_id"],
+                row["supersedes_assessment_id"],
             ))
             created = True
 
