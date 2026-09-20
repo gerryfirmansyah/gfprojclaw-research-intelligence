@@ -1,6 +1,6 @@
 # J16 Production & Replication Contract v0
 
-Status: IN PROGRESS — BASELINE AUDIT
+Status: IN PROGRESS — LOCAL PRODUCTION GATES PASS; REPLICATION DEFERRED TO FINAL GATE
 
 ## Purpose
 J16 makes the accepted J0–J15 GFPROJCLAW baseline safe to leave running as a production service and reproducible on a replacement environment without transferring scientific authority from HUMAN to machine.
@@ -43,3 +43,10 @@ J16 is ready for final HUMAN production acceptance only when deployment/restart,
 - Existing Profile/Project, ChangeEvent, and Daily Attention regressions remain PASS after service-identity hardening.
 
 Admin Copilot is the J16 operational acceptance surface. Its current J15 shell is not yet considered complete J16 operational coverage; deployment/service, scheduler, backup/recovery, storage, source/failure visibility, activity/audit, and replication readiness must be projected there before final J16 HUMAN acceptance.
+
+## 2026-09-20 local production freeze evidence
+- Full repository `tests/test_*.py` regression passed under the production virtualenv, including ChangeEvent, Daily Attention, canonical Profile/Project configuration, Admin authentication/same-origin, operational health/activity, Telegram identity, and HUMAN-readable quality presentation.
+- Production canonical smoke returned two contexts. Profile A retained `ABSTRACT_ONLY`, methodological context `NOT_AVAILABLE`, counter-search `NOT_RUN`, and `scientific_decision=false`; Daily Attention remained non-scientific for both profiles.
+- API, Caddy, Telegram timer, and backup timer are enabled/active. Continuous Pilot remains absent/inactive. Runtime DB config is 0700/0600 under `gfproj:gfproj`; Admin credential environment is 0600 root-only; backups are 0700 with 0600 dumps.
+- Authenticated Admin UI received HUMAN visual acceptance after showing the browser sign-in boundary and successfully rendering Production Health after authentication.
+- Replacement-environment replication is `DEFERRED — FINAL J16 GATE` by HUMAN decision. It remains mandatory before final J16 HUMAN PASS.
