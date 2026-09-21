@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import argparse,json,os,urllib.parse,urllib.request
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 API='http://127.0.0.1:8080'
 def context():
     with urllib.request.urlopen(f'{API}/api/context',timeout=10) as r:return json.load(r)
 def get(pid):
     with urllib.request.urlopen(f'{API}/api/projects/{pid}/daily-attention?hours=24',timeout=10) as r:return json.load(r)
-def build():
-    lines=['GFPROJCLAW — Radar Riset Harian','','WHAT CHANGED? (24 jam)']; states=[]; total_changes=0
+def build(now=None):
+    tz=ZoneInfo('Asia/Jakarta'); now=(now or datetime.now(tz)).astimezone(tz); start=now-timedelta(hours=24)
+    stamp=now.strftime('%d %b %Y · %H:%M WIB'); window=f"{start.strftime('%d %b %Y · %H:%M')} — {now.strftime('%d %b %Y · %H:%M')} WIB"
+    lines=['GFPROJCLAW — Radar Riset Harian',f'Radar dibuat: {stamp}',f'Jendela observasi: {window} (24 jam)','','WHAT CHANGED? (24 jam)']; states=[]; total_changes=0
     for i,c in enumerate(context(),1):
         label=f"Profile {chr(64+i)}"; x=get(c['project_id']); states.append((label,c,x))
         n=sum(len(x[k]) for k in ('new_papers','new_claims','new_contradictory_evidence','advice_critic_changes')); total_changes+=n
