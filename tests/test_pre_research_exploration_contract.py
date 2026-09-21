@@ -25,9 +25,12 @@ for table in [
 for token in [
     "scope_level IN ('L0','L1','L2','L3','L4')",
     "REFERENCES literature_source(id)",
-    "REFERENCES source_record(id)",
-    "REFERENCES continuous_pilot_run(id)",
-    "REFERENCES continuous_pilot_stage_run(id)",
+    "FOREIGN KEY (project_id, profile_id) REFERENCES research_project(id, profile_id)",
+    "FOREIGN KEY (profile_id, profile_version_id) REFERENCES research_profile_version(profile_id, id)",
+    "FOREIGN KEY (project_id, project_version_id) REFERENCES research_project_version(project_id, id)",
+    "FOREIGN KEY (literature_source_id, source_record_id) REFERENCES source_record(literature_source_id, id)",
+    "FOREIGN KEY (project_id, pilot_run_id) REFERENCES continuous_pilot_run(project_id, id)",
+    "FOREIGN KEY (pilot_run_id, pilot_stage_run_id) REFERENCES continuous_pilot_stage_run(pilot_run_id, id)",
     "REVOKE INSERT, UPDATE, DELETE",
     "GRANT SELECT",
 ]:
