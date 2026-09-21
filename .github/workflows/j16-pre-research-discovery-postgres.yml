@@ -1,6 +1,6 @@
 name: J16 Pre-Research Discovery Observation PostgreSQL Test
 
-on:
+'on':
   workflow_dispatch:
   push:
     branches: [main]
