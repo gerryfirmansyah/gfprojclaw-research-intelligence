@@ -1,0 +1,49 @@
+name: J16 Pre-Research Discovery Observation PostgreSQL Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'db/migrations/001_canonical_vertical_slice.sql'
+      - 'db/migrations/004_continuous_pilot.sql'
+      - 'db/migrations/013_pre_research_discovery_observation.sql'
+      - 'db/verify/013_pre_research_discovery_observation_verify.sql'
+      - '.github/workflows/j16-pre-research-discovery-postgres.yml'
+
+jobs:
+  postgres-16:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Create disposable database
+        run: createdb gfprojclaw_j16_exploration_test
+      - name: Apply canonical migrations through J15
+        run: |
+          for f in db/migrations/{001..012}_*.sql; do
+            psql -v ON_ERROR_STOP=1 -d gfprojclaw_j16_exploration_test -f "$f"
+          done
+      - name: Apply pre-research discovery migration
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j16_exploration_test -f db/migrations/013_pre_research_discovery_observation.sql
+      - name: Verify canonical exploration schema
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j16_exploration_test -f db/verify/013_pre_research_discovery_observation_verify.sql
