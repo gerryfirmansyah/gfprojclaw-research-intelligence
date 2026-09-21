@@ -5,10 +5,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'db/migrations/001_canonical_vertical_slice.sql'
-      - 'db/migrations/004_continuous_pilot.sql'
-      - 'db/migrations/013_pre_research_discovery_observation.sql'
+      - 'db/migrations/**'
       - 'db/verify/013_pre_research_discovery_observation_verify.sql'
+      - 'db/migrations/013_pre_research_discovery_observation.sql'
       - '.github/workflows/j16-pre-research-discovery-postgres.yml'
 
 jobs:
