@@ -7,6 +7,7 @@ name: J16 Pre-Research Discovery Observation PostgreSQL Test
     paths:
       - 'db/migrations/**'
       - 'db/verify/013_pre_research_discovery_observation_verify.sql'
+      - 'db/verify/013_pre_research_discovery_observation_negative.sql'
       - 'db/migrations/013_pre_research_discovery_observation.sql'
       - '.github/workflows/j16-pre-research-discovery-postgres.yml'
 
@@ -48,3 +49,5 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j16_exploration_test -f db/migrations/013_pre_research_discovery_observation.sql
       - name: Verify canonical exploration schema
         run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j16_exploration_test -f db/verify/013_pre_research_discovery_observation_verify.sql
+      - name: Reject cross-session exploration lineage
+        run: psql -v ON_ERROR_STOP=1 -d gfprojclaw_j16_exploration_test -f db/verify/013_pre_research_discovery_observation_negative.sql

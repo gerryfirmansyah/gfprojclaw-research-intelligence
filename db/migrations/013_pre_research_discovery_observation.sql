@@ -24,9 +24,13 @@ CREATE TABLE research_scope_node (
     scope_level text NOT NULL CHECK (scope_level IN ('L0','L1','L2','L3','L4')),
     label text NOT NULL CHECK (btrim(label) <> ''),
     scope_description text NULL,
-    parent_scope_node_id uuid NULL REFERENCES research_scope_node(id) ON DELETE RESTRICT,
+    parent_scope_node_id uuid NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT research_scope_node_session_label_uk UNIQUE (exploration_session_id, scope_level, label)
+    CONSTRAINT research_scope_node_session_label_uk UNIQUE (exploration_session_id, scope_level, label),
+    CONSTRAINT research_scope_node_session_id_uk UNIQUE (exploration_session_id, id),
+    CONSTRAINT research_scope_node_parent_same_session_fk
+      FOREIGN KEY (exploration_session_id, parent_scope_node_id)
+      REFERENCES research_scope_node(exploration_session_id, id) ON DELETE RESTRICT
 );
 
 CREATE INDEX research_scope_node_session_level_idx
@@ -35,20 +39,29 @@ CREATE INDEX research_scope_node_session_level_idx
 CREATE TABLE discovery_query_family (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     exploration_session_id uuid NOT NULL REFERENCES research_exploration_session(id) ON DELETE RESTRICT,
-    scope_node_id uuid NULL REFERENCES research_scope_node(id) ON DELETE RESTRICT,
+    scope_node_id uuid NULL,
     family_key text NOT NULL CHECK (btrim(family_key) <> ''),
     label text NOT NULL CHECK (btrim(label) <> ''),
     rationale text NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT discovery_query_family_session_key_uk UNIQUE (exploration_session_id, family_key)
+    CONSTRAINT discovery_query_family_session_key_uk UNIQUE (exploration_session_id, family_key),
+    CONSTRAINT discovery_query_family_session_id_uk UNIQUE (exploration_session_id, id),
+    CONSTRAINT discovery_query_family_scope_same_session_fk
+      FOREIGN KEY (exploration_session_id, scope_node_id)
+      REFERENCES research_scope_node(exploration_session_id, id) ON DELETE RESTRICT
 );
 
 CREATE TABLE discovery_query (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    query_family_id uuid NOT NULL REFERENCES discovery_query_family(id) ON DELETE RESTRICT,
+    exploration_session_id uuid NOT NULL,
+    query_family_id uuid NOT NULL,
     query_text text NOT NULL CHECK (btrim(query_text) <> ''),
     query_parameters_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
-    created_at timestamptz NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT discovery_query_session_id_uk UNIQUE (exploration_session_id, id),
+    CONSTRAINT discovery_query_family_same_session_fk
+      FOREIGN KEY (exploration_session_id, query_family_id)
+      REFERENCES discovery_query_family(exploration_session_id, id) ON DELETE RESTRICT
 );
 
 CREATE INDEX discovery_query_family_idx ON discovery_query(query_family_id);
@@ -56,8 +69,8 @@ CREATE INDEX discovery_query_family_idx ON discovery_query(query_family_id);
 CREATE TABLE discovery_observation (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     exploration_session_id uuid NOT NULL REFERENCES research_exploration_session(id) ON DELETE RESTRICT,
-    scope_node_id uuid NULL REFERENCES research_scope_node(id) ON DELETE RESTRICT,
-    discovery_query_id uuid NOT NULL REFERENCES discovery_query(id) ON DELETE RESTRICT,
+    scope_node_id uuid NULL,
+    discovery_query_id uuid NOT NULL,
     literature_source_id uuid NOT NULL REFERENCES literature_source(id) ON DELETE RESTRICT,
     pilot_run_id uuid NULL REFERENCES continuous_pilot_run(id) ON DELETE RESTRICT,
     pilot_stage_run_id uuid NULL REFERENCES continuous_pilot_stage_run(id) ON DELETE RESTRICT,
@@ -67,6 +80,12 @@ CREATE TABLE discovery_observation (
     position_or_rank integer NULL CHECK (position_or_rank IS NULL OR position_or_rank >= 1),
     observation_metadata_jsonb jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT discovery_observation_scope_same_session_fk
+      FOREIGN KEY (exploration_session_id, scope_node_id)
+      REFERENCES research_scope_node(exploration_session_id, id) ON DELETE RESTRICT,
+    CONSTRAINT discovery_observation_query_same_session_fk
+      FOREIGN KEY (exploration_session_id, discovery_query_id)
+      REFERENCES discovery_query(exploration_session_id, id) ON DELETE RESTRICT,
     CONSTRAINT discovery_observation_unique_uk UNIQUE (
         exploration_session_id, discovery_query_id, literature_source_id, source_record_id, observed_at
     )
