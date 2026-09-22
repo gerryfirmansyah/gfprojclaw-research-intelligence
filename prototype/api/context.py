@@ -727,6 +727,14 @@ def update_profile_project_configuration(profile_id, project_id, profile, projec
 def get_project_seed_universe(project_id):
     """Read-only seed-to-universe projection. Project Works are seeds, never the asserted universe."""
     papers = list_project_papers(project_id, limit=100)
+    with db() as conn:
+        approved_row=conn.execute("""SELECT v.version_no,v.id::text AS project_version_id,
+          v.project_configuration_jsonb->'discovery_overrides'->'human_approved_query_v1' AS approved_query,
+          v.project_configuration_jsonb->'discovery_overrides'->'approval' AS approval
+          FROM research_project p JOIN research_project_version v ON v.id=p.current_version_id
+          WHERE p.id=%s AND p.status='ACTIVE'""",(project_id,)).fetchone()
+    approved_query=(approved_row or {}).get('approved_query') if approved_row else None
+    approval=(approved_row or {}).get('approval') if approved_row else None
     seeds=[]
     for p in papers:
         ids=p.get('identifiers') or {}
@@ -780,6 +788,10 @@ def get_project_seed_universe(project_id):
       'terminology_limitation':'Title tokens and exact seed-title phrases only; not semantic validation, scope selection, relevance judgment, or HUMAN approval.',
       'phrase_candidates':phrase_candidates,'query_family_candidates':query_family_candidates,
       'query_family_state':'OPTIONS_NOT_HUMAN_APPROVED' if query_family_candidates else 'NOT_AVAILABLE',
+      'canonical_discovery_query_state':'HUMAN_APPROVED' if approved_query else 'NOT_APPROVED',
+      'canonical_discovery_query':approved_query,
+      'canonical_discovery_approval':approval,
+      'canonical_discovery_project_version':({'version_no':approved_row.get('version_no'),'project_version_id':approved_row.get('project_version_id')} if approved_row else None),
       'explanation':('Project Corpus Works are available as exploration seeds. They do not define the Research Universe. '
         'Canonical seed-triggered discovery has not been run, so the observed Research Universe remains NOT_RUN.' if seeds and not observations else
         'Seed Works and canonical discovery observations are available for HUMAN inspection.' if observations else
