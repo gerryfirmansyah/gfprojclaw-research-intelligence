@@ -721,3 +721,54 @@ def update_profile_project_configuration(profile_id, project_id, profile, projec
         qn=conn.execute("INSERT INTO research_project_version(project_id,version_no,research_intent,provisional_rq_text,project_configuration_jsonb,supersedes_version_id,created_by) VALUES(%s,%s,%s,%s,%s::jsonb,%s,%s) RETURNING id",(project_id,qv,project.get('research_intent'),project.get('provisional_rq_text'),json.dumps(qc),pj['current_version_id'],audit_actor)).fetchone()['id']
         conn.execute("UPDATE research_profile SET name=%s,current_version_id=%s WHERE id=%s",(profile['name'].strip(),pn,profile_id)); conn.execute("UPDATE research_project SET name=%s,current_version_id=%s WHERE id=%s",(project['name'].strip(),qn,project_id)); conn.commit()
     return {'profile_id':profile_id,'profile_version':pv,'project_id':project_id,'project_version':qv,'scientific_decision':False,'atomic':True}
+
+
+def get_project_exploration(project_id):
+    """Read-only Research Explorer projection. Empty canonical state remains explicit."""
+    with db() as conn:
+        sessions = conn.execute("""
+            SELECT s.id AS exploration_session_id, s.research_interest, s.status,
+                   s.started_at, s.closed_at, s.profile_id, s.profile_version_id,
+                   s.project_version_id,
+                   COALESCE(nodes.nodes, '[]'::jsonb) AS scope_nodes,
+                   COALESCE(families.families, '[]'::jsonb) AS query_families,
+                   COALESCE(obs.observations, '[]'::jsonb) AS observations
+            FROM research_exploration_session s
+            LEFT JOIN LATERAL (
+              SELECT jsonb_agg(jsonb_build_object('id',n.id,'scope_level',n.scope_level,
+                'label',n.label,'scope_description',n.scope_description,
+                'parent_scope_node_id',n.parent_scope_node_id) ORDER BY n.scope_level DESC,n.label) nodes
+              FROM research_scope_node n WHERE n.exploration_session_id=s.id
+            ) nodes ON TRUE
+            LEFT JOIN LATERAL (
+              SELECT jsonb_agg(jsonb_build_object('id',f.id,'family_key',f.family_key,
+                'label',f.label,'rationale',f.rationale,'scope_node_id',f.scope_node_id,
+                'queries',COALESCE(q.queries,'[]'::jsonb)) ORDER BY f.family_key) families
+              FROM discovery_query_family f
+              LEFT JOIN LATERAL (
+                SELECT jsonb_agg(jsonb_build_object('id',dq.id,'query_text',dq.query_text,
+                  'query_parameters',dq.query_parameters_jsonb) ORDER BY dq.id) queries
+                FROM discovery_query dq WHERE dq.query_family_id=f.id AND dq.exploration_session_id=s.id
+              ) q ON TRUE WHERE f.exploration_session_id=s.id
+            ) families ON TRUE
+            LEFT JOIN LATERAL (
+              SELECT jsonb_agg(jsonb_build_object('id',o.id,'scope_node_id',o.scope_node_id,
+                'discovery_query_id',o.discovery_query_id,'source_key',ls.source_key,
+                'source_record_id',o.source_record_id,'observed_at',o.observed_at,
+                'observation_state',o.observation_state,'position_or_rank',o.position_or_rank,
+                'pilot_run_id',o.pilot_run_id,'pilot_stage_run_id',o.pilot_stage_run_id,
+                'metadata',o.observation_metadata_jsonb) ORDER BY o.observed_at DESC) observations
+              FROM discovery_observation o JOIN literature_source ls ON ls.id=o.literature_source_id
+              WHERE o.exploration_session_id=s.id AND o.project_id=s.project_id
+            ) obs ON TRUE
+            WHERE s.project_id=%s ORDER BY s.started_at DESC
+        """, (project_id,)).fetchall()
+    return {
+      'stage':'RESEARCH_EXPLORER',
+      'project_id':project_id,
+      'state':'AVAILABLE' if sessions else 'NOT_RECORDED',
+      'explanation': ('Canonical Research Explorer sessions are available for HUMAN inspection.' if sessions else
+        'No canonical Research Explorer session has been recorded for this project. This does not mean exploration did not occur or that coverage is complete.'),
+      'sessions':sessions,
+      'scientific_decision':False
+    }
