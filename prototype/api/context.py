@@ -753,6 +753,22 @@ def get_project_seed_universe(project_id):
             if seed['work_id'] not in terms[key]['seed_work_ids']: terms[key]['seed_work_ids'].append(seed['work_id'])
     terminology=sorted(terms.values(),key=lambda x:(-len(x['seed_work_ids']),x['term'].lower()))
     for x in terminology: x['seed_count']=len(x['seed_work_ids']); x['candidate_state']='MACHINE_DERIVED_NOT_HUMAN_APPROVED'
+    # Phrase candidates are contiguous title phrases only: inspectable observations, not semantic truth.
+    phrase_patterns=[
+      ('artificial intelligence','Artificial Intelligence'),('explainable artificial intelligence','Explainable Artificial Intelligence'),
+      ('public administration','Public Administration'),('public governance','Public Governance'),
+      ('algorithmic decision-making','Algorithmic Decision-Making'),('systematic literature review','Systematic Literature Review'),
+      ('research agenda','Research Agenda'),('responsible ai','Responsible AI')
+    ]
+    phrase_candidates=[]
+    for phrase,label in phrase_patterns:
+        members=[seed['work_id'] for seed in seeds if phrase in (seed.get('title') or '').lower()]
+        if members: phrase_candidates.append({'phrase':label,'seed_work_ids':members,'seed_count':len(members),
+          'candidate_state':'MACHINE_DERIVED_NOT_HUMAN_APPROVED','derivation':'EXACT_PHRASE_IN_SEED_TITLE'})
+    query_family_candidates=[{'label':x['phrase'],'seed_work_ids':x['seed_work_ids'],
+      'candidate_query':'\"'+x['phrase']+'\"','candidate_state':'OPTION_NOT_HUMAN_APPROVED',
+      'why_shown':'Exact phrase observed in one or more seed titles; offered as a discovery option, not as the correct research scope.'}
+      for x in phrase_candidates]
     return {
       'stage':'RESEARCH_EXPLORER','projection':'SEED_TO_UNIVERSE','project_id':project_id,
       'seed_state':'AVAILABLE' if seeds else 'NOT_AVAILABLE','seed_count':len(seeds),'seeds':seeds,
@@ -761,7 +777,9 @@ def get_project_seed_universe(project_id):
       'source_keys':source_keys,'query_family_count':len(query_families),
       'terminology_candidates':terminology,
       'terminology_method':'LEXICAL_FROM_SEED_TITLES_V1',
-      'terminology_limitation':'Title-token candidates only; not semantic validation, scope selection, relevance judgment, or HUMAN approval.',
+      'terminology_limitation':'Title tokens and exact seed-title phrases only; not semantic validation, scope selection, relevance judgment, or HUMAN approval.',
+      'phrase_candidates':phrase_candidates,'query_family_candidates':query_family_candidates,
+      'query_family_state':'OPTIONS_NOT_HUMAN_APPROVED' if query_family_candidates else 'NOT_AVAILABLE',
       'explanation':('Project Corpus Works are available as exploration seeds. They do not define the Research Universe. '
         'Canonical seed-triggered discovery has not been run, so the observed Research Universe remains NOT_RUN.' if seeds and not observations else
         'Seed Works and canonical discovery observations are available for HUMAN inspection.' if observations else
