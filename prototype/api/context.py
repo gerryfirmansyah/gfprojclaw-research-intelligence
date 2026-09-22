@@ -741,12 +741,27 @@ def get_project_seed_universe(project_id):
         observations.extend(session.get('observations') or [])
         query_families.extend(session.get('query_families') or [])
     source_keys=sorted({o.get('source_key') for o in observations if o.get('source_key')})
+    # These are transparent lexical candidates derived only from seed titles; they are not HUMAN-approved scope.
+    stop={'the','of','a','an','and','in','on','to','toward','towards','for','with','use','meets'}
+    terms={}
+    import re
+    for seed in seeds:
+        for token in re.findall(r"[A-Za-z][A-Za-z-]{2,}", seed.get('title') or ''):
+            key=token.lower()
+            if key in stop: continue
+            terms.setdefault(key,{'term':token,'seed_work_ids':[]})
+            if seed['work_id'] not in terms[key]['seed_work_ids']: terms[key]['seed_work_ids'].append(seed['work_id'])
+    terminology=sorted(terms.values(),key=lambda x:(-len(x['seed_work_ids']),x['term'].lower()))
+    for x in terminology: x['seed_count']=len(x['seed_work_ids']); x['candidate_state']='MACHINE_DERIVED_NOT_HUMAN_APPROVED'
     return {
       'stage':'RESEARCH_EXPLORER','projection':'SEED_TO_UNIVERSE','project_id':project_id,
       'seed_state':'AVAILABLE' if seeds else 'NOT_AVAILABLE','seed_count':len(seeds),'seeds':seeds,
       'observed_universe_state':'OBSERVED' if observations else 'NOT_RUN',
       'observed_record_count':len(observations) if observations else 0,
       'source_keys':source_keys,'query_family_count':len(query_families),
+      'terminology_candidates':terminology,
+      'terminology_method':'LEXICAL_FROM_SEED_TITLES_V1',
+      'terminology_limitation':'Title-token candidates only; not semantic validation, scope selection, relevance judgment, or HUMAN approval.',
       'explanation':('Project Corpus Works are available as exploration seeds. They do not define the Research Universe. '
         'Canonical seed-triggered discovery has not been run, so the observed Research Universe remains NOT_RUN.' if seeds and not observations else
         'Seed Works and canonical discovery observations are available for HUMAN inspection.' if observations else
