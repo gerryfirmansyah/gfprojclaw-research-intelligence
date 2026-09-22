@@ -21,3 +21,10 @@ if(benchPreview)benchPreview.onclick=()=>{
  const parity=params?"PARITY_REQUIRES_REVIEW":"NON_PARITY_COMPARISON";
  benchResult.innerHTML="<strong>HUMAN observation draft</strong><br>Provider reported: <strong>"+esc(total||"NOT_AVAILABLE")+"</strong> · HUMAN captured: <strong>"+esc(captured||"NOT_AVAILABLE")+"</strong> · Member identifiers: <strong>"+members.length+"</strong><br>Comparison readiness: <strong>"+parity+"</strong><br>Overlap / HUMAN-only / Machine-only: <strong>NOT_AVAILABLE</strong> sampai machine observation dan member reconciliation tersedia.<br><small>Local preview only · no canonical write · scientific decision: false</small>";
 };
+
+const initialQuery=document.getElementById("initial-human-query"),initialPreview=document.getElementById("initial-query-preview"),initialResult=document.getElementById("initial-query-result");
+if(initialPreview)initialPreview.onclick=()=>{
+ const q=initialQuery.value.trim();
+ if(!q){initialResult.innerHTML="<strong>INCOMPLETE</strong> · Query awal HUMAN diperlukan.";return;}
+ initialResult.innerHTML="<strong>Baseline preview:</strong> "+esc(q)+"<br><small>Origin: HUMAN_PROVIDED · approval state: LOCAL_PREVIEW · canonical write: false · scientific decision: false · historical J14 query unchanged</small>";
+};

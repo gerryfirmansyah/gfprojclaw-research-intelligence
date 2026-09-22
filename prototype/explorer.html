@@ -48,6 +48,13 @@
       <h3>Opsi query dari seed</h3>
       <p class="explorer-muted">Belum ada query yang disetujui atau dijalankan. Setiap opsi menunjukkan alasan dan paper pemicu.</p>
       <div id="seed-query-options" class="explorer-query-list"></div>
+      <h3>Initial HUMAN Query</h3>
+      <p class="explorer-muted">Baseline eksplorasi yang diberikan langsung oleh HUMAN. Ini bukan penggantian query historis J14 dan belum menulis canonical state.</p>
+      <label class="explorer-interest-label">Query awal HUMAN
+        <input id="initial-human-query" type="text" value="digital government" />
+      </label>
+      <div class="explorer-actions"><button id="initial-query-preview" class="primary-action" type="button">Gunakan sebagai baseline preview</button></div>
+      <div id="initial-query-result" class="callout">Belum dijalankan. Baseline yang direncanakan: <strong>digital government</strong>.</div>
     </section>
 
     <section id="discovery-benchmark" class="panel explorer-start-panel">
@@ -82,6 +89,6 @@
 
     <footer class="explorer-footer">GFPROJCLAW · Research Explorer is the Stage 1 researcher surface. Admin Copilot remains an operational plane, not a research stage.</footer>
   </main>
-  <script src="explorer.js?v=0.3.0"></script>
+  <script src="explorer.js?v=0.4.0"></script>
 </body>
 </html>
