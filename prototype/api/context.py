@@ -723,6 +723,39 @@ def update_profile_project_configuration(profile_id, project_id, profile, projec
     return {'profile_id':profile_id,'profile_version':pv,'project_id':project_id,'project_version':qv,'scientific_decision':False,'atomic':True}
 
 
+
+def get_project_seed_universe(project_id):
+    """Read-only seed-to-universe projection. Project Works are seeds, never the asserted universe."""
+    papers = list_project_papers(project_id, limit=100)
+    seeds=[]
+    for p in papers:
+        ids=p.get('identifiers') or {}
+        seeds.append({'work_id':p.get('work_id'),'title':p.get('title'),'publication_year':p.get('publication_year'),
+          'venue_name':p.get('venue_name'),'access_level':p.get('current_access_level'),'source_key':p.get('source_key'),
+          'identifiers':ids,'seed_role':'PROJECT_CORPUS_SEED'})
+    exploration=get_project_exploration(project_id)
+    sessions=exploration.get('sessions') or []
+    observations=[]
+    query_families=[]
+    for session in sessions:
+        observations.extend(session.get('observations') or [])
+        query_families.extend(session.get('query_families') or [])
+    source_keys=sorted({o.get('source_key') for o in observations if o.get('source_key')})
+    return {
+      'stage':'RESEARCH_EXPLORER','projection':'SEED_TO_UNIVERSE','project_id':project_id,
+      'seed_state':'AVAILABLE' if seeds else 'NOT_AVAILABLE','seed_count':len(seeds),'seeds':seeds,
+      'observed_universe_state':'OBSERVED' if observations else 'NOT_RUN',
+      'observed_record_count':len(observations) if observations else 0,
+      'source_keys':source_keys,'query_family_count':len(query_families),
+      'explanation':('Project Corpus Works are available as exploration seeds. They do not define the Research Universe. '
+        'Canonical seed-triggered discovery has not been run, so the observed Research Universe remains NOT_RUN.' if seeds and not observations else
+        'Seed Works and canonical discovery observations are available for HUMAN inspection.' if observations else
+        'No Project Corpus seed Works are available; no Research Universe is asserted.'),
+      'next_observation_needed': (['derive inspectable terminology/query-family candidates from seeds','run provenance-preserving multi-source discovery','show source/query coverage and blind spots','run counter-search'] if seeds and not observations else []),
+      'scientific_decision':False,
+      'constraints':{'seeds_are_universe':False,'discovery_is_evidence':False,'gap_proven':False,'novelty_proven':False}
+    }
+
 def get_project_exploration(project_id):
     """Read-only Research Explorer projection. Empty canonical state remains explicit."""
     with db() as conn:
