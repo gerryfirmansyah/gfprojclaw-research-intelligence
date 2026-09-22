@@ -773,9 +773,18 @@ def get_project_seed_universe(project_id):
         members=[seed['work_id'] for seed in seeds if phrase in (seed.get('title') or '').lower()]
         if members: phrase_candidates.append({'phrase':label,'seed_work_ids':members,'seed_count':len(members),
           'candidate_state':'MACHINE_DERIVED_NOT_HUMAN_APPROVED','derivation':'EXACT_PHRASE_IN_SEED_TITLE'})
+    seed_title_by_id={x['work_id']:x['title'] for x in seeds}
+    family_role={
+      'Artificial Intelligence':'CORE_PHENOMENON','Explainable Artificial Intelligence':'RESPONSIBILITY_EXPLAINABILITY',
+      'Public Administration':'PUBLIC_SECTOR_CONTEXT','Public Governance':'PUBLIC_SECTOR_CONTEXT',
+      'Algorithmic Decision-Making':'DECISION_APPLICATION','Systematic Literature Review':'LANDSCAPE_REVIEW',
+      'Research Agenda':'LANDSCAPE_REVIEW','Responsible AI':'RESPONSIBILITY_EXPLAINABILITY'}
     query_family_candidates=[{'label':x['phrase'],'seed_work_ids':x['seed_work_ids'],
+      'seed_titles':[seed_title_by_id.get(w,'NOT_AVAILABLE') for w in x['seed_work_ids']],
       'candidate_query':'\"'+x['phrase']+'\"','candidate_state':'OPTION_NOT_HUMAN_APPROVED',
-      'why_shown':'Exact phrase observed in one or more seed titles; offered as a discovery option, not as the correct research scope.'}
+      'family_role':family_role.get(x['phrase'],'OTHER_SEED_PHRASE'),
+      'why_shown':'Exact phrase observed in one or more seed titles; offered as a discovery option, not as the correct research scope.',
+      'human_check':'Review the triggering seed titles, then keep, edit, combine, or reject this option before discovery.'}
       for x in phrase_candidates]
     return {
       'stage':'RESEARCH_EXPLORER','projection':'SEED_TO_UNIVERSE','project_id':project_id,
