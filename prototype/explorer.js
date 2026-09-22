@@ -13,3 +13,11 @@ async function loadSeedUniverse(){
  }catch(e){state.textContent="NOT_AVAILABLE";summary.textContent=`Seed projection tidak tersedia: ${e.message}`;papers.innerHTML="";queries.innerHTML="";}
 }
 fetch(`${API_BASE}/api/context`,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}).then(rows=>{project.innerHTML=rows.map(x=>`<option value="${esc(x.project_id)}">${esc(x.profile_name)} / ${esc(x.project_name)}</option>`).join("");project.onchange=loadSeedUniverse;loadSeedUniverse();}).catch(e=>{project.innerHTML='<option>Context unavailable</option>';summary.textContent=`Context tidak tersedia: ${e.message}`;});
+const benchResult=document.getElementById("bench-result"),benchPreview=document.getElementById("bench-preview");
+if(benchPreview)benchPreview.onclick=()=>{
+ const total=document.getElementById("bench-total").value,captured=document.getElementById("bench-captured").value,query=document.getElementById("bench-query").value.trim(),time=document.getElementById("bench-time").value,params=document.getElementById("bench-params").value.trim();
+ const members=document.getElementById("bench-members").value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ if(!query||!time){benchResult.innerHTML="<strong>INCOMPLETE</strong> · Exact query dan waktu pencarian diperlukan sebelum benchmark dapat dibandingkan.";return;}
+ const parity=params?"PARITY_REQUIRES_REVIEW":"NON_PARITY_COMPARISON";
+ benchResult.innerHTML="<strong>HUMAN observation draft</strong><br>Provider reported: <strong>"+esc(total||"NOT_AVAILABLE")+"</strong> · HUMAN captured: <strong>"+esc(captured||"NOT_AVAILABLE")+"</strong> · Member identifiers: <strong>"+members.length+"</strong><br>Comparison readiness: <strong>"+parity+"</strong><br>Overlap / HUMAN-only / Machine-only: <strong>NOT_AVAILABLE</strong> sampai machine observation dan member reconciliation tersedia.<br><small>Local preview only · no canonical write · scientific decision: false</small>";
+};
