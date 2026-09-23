@@ -5,6 +5,7 @@ const roleLabel=x=>({"CORE_PHENOMENON":"Fenomena inti","PUBLIC_SECTOR_CONTEXT":"
 async function loadSeedUniverse(){
  if(!project.value)return;state.textContent="LOADING";
  try{const r=await fetch(`${API_BASE}/api/projects/${encodeURIComponent(project.value)}/seed-universe`,{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);const x=await r.json();
+ renderProgressiveFunnel({sessions:[]});
  state.textContent=x.observed_universe_state||"UNKNOWN";state.className=`state ${x.observed_universe_state==="OBSERVED"?"green":"gray"}`;
  summary.innerHTML=`<strong>${esc(x.seed_count)} seed paper</strong> · Research Universe: <strong>${esc(x.observed_universe_state)}</strong><br>${esc(x.explanation)}<br><small>Scientific decision: false · Seed ≠ Universe · Discovery ≠ Evidence</small>`;
  papers.innerHTML=(x.seeds||[]).map((p,i)=>`<article class="explorer-seed"><strong>${i+1}. ${esc(p.title)}</strong><p>${esc(p.publication_year||"NOT_RECORDED")} · ${esc(p.venue_name||"NOT_RECORDED")} · ${esc(p.access_level||"NOT_RECORDED")}</p><details><summary>Canonical detail</summary><small>Work: ${esc(p.work_id)} · source: ${esc(p.source_key||"NOT_RECORDED")}</small></details></article>`).join("")||'<div class="callout">Seed paper NOT_AVAILABLE.</div>';
@@ -28,3 +29,16 @@ if(initialPreview)initialPreview.onclick=()=>{
  if(!q){initialResult.innerHTML="<strong>INCOMPLETE</strong> · Query awal HUMAN diperlukan.";return;}
  initialResult.innerHTML="<strong>Baseline preview:</strong> "+esc(q)+"<br><small>Origin: HUMAN_PROVIDED · approval state: LOCAL_PREVIEW · canonical write: false · scientific decision: false · historical J14 query unchanged</small>";
 };
+
+function renderProgressiveFunnel(x){
+ const observations=(x.sessions||[]).flatMap(s=>s.observations||[]);
+ const retrieved=observations.length;
+ const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+ set("f-provider","NOT_AVAILABLE");
+ set("f-retrieved",retrieved);
+ set("f-remaining","NOT_AVAILABLE");
+ set("f-dedup",retrieved?"NOT_RECORDED":"NOT_RUN");
+ set("f-screened",retrieved?"NOT_RECORDED":"NOT_RUN");
+ set("f-human",retrieved?"NOT_RECORDED":"NOT_RUN");
+ set("f-project","NOT_AVAILABLE");
+}
