@@ -105,3 +105,21 @@ Reconsider or stop if the experience remains essentially:
 **Existing providers → observed universe → landscape → WHY → paper/source verification → coverage/blind spots → HUMAN learning → HUMAN decision.**
 
 Engineering work is admitted only when a step in this vertical journey cannot be tested without it.
+
+## HUMAN research augmentation identity
+
+GFPROJCLAW is a **HUMAN Research Augmentation System**, not a competitor to research search providers. It should reuse existing research information systems where useful and improve the HUMAN's ability to observe, understand, verify, and navigate research choices.
+
+The initial research journey is:
+
+**Research Interest → SEE the bounded universe → Understand scope → Advice + WHY → Explore alternatives → Verify facts → HUMAN defines research direction.**
+
+Scope advice is operational and explanatory, not a scientific verdict. The system may explain that a bounded corpus is still too large for whole-corpus inspection under current trial capabilities, or that a narrower bounded corpus is technically feasible to retrieve in full. It MUST NOT say that the narrower scope is scientifically correct.
+
+### Universe-first retrieval rule
+
+**Reduce the universe by explicit research boundaries, not by hidden retrieval ranking.**
+
+A top-N provider result is a ranked retrieval slice, not a representative Research Universe. If an explicitly bounded universe is technically feasible to retrieve, prefer whole-bounded progressive retrieval before characterizing its landscape. If it is not feasible, expose the limitation and offer HUMAN-inspectable scope/time/query alternatives.
+
+For the first Research Value Trial, the HUMAN-selected contemporary time boundary is **2022–2026**. Literature outside that window is **NOT INCLUDED IN CURRENT EXPLORATION WINDOW**, not irrelevant.
