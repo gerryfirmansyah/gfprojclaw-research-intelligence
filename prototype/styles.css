@@ -192,3 +192,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .gap-card.selected{outline:2px solid currentColor;outline-offset:2px}.gap-card.selected .gap-select{font-weight:700}
 
 #handoff-gap{margin:14px 0}#handoff-verification{margin:14px 0}#explorer-handoff .explorer-actions{margin:14px 0}.secondary-action[href]{display:inline-flex;align-items:center;text-decoration:none}
+
+.advanced-opportunity .advanced-select{margin-top:8px}.advanced-paper{padding:12px 0;border-bottom:1px solid var(--border)}.advanced-paper:last-of-type{border-bottom:0}.advanced-paper details{margin-top:8px}.advanced-paper details p{line-height:1.55}#advanced-evidence-detail{margin-top:14px}
