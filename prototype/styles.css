@@ -188,3 +188,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .trial-drilldown{margin:16px 0 22px;padding:18px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}.trial-breadcrumb{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:10px 0}.trial-breadcrumb button{border:0;background:transparent;color:var(--accent);cursor:pointer;font:inherit;padding:0;text-decoration:underline}.trial-drilldown .trial-area-grid{margin-bottom:14px}
 
 .gap-opportunities{margin-top:14px}.gap-opportunities h4{margin:0 0 10px}.gap-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0;background:var(--bg)}.gap-card p{margin:8px 0}.gap-card .gap-select{margin-top:4px}#trial-stop-drill{font-weight:700}
+
+.gap-card.selected{outline:2px solid currentColor;outline-offset:2px}.gap-card.selected .gap-select{font-weight:700}

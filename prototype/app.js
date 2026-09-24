@@ -769,6 +769,6 @@ function renderExplorerHandoff(){
  document.getElementById("handoff-summary").innerHTML=`<strong>${escapeHtml(h.member_count)} anggota teramati</strong> · ${escapeHtml(h.time_boundary)} · ${escapeHtml(h.verification?.provider||"provider tidak tercatat")}<br><small>Query: ${escapeHtml(h.query)}</small>`;
  document.getElementById("handoff-why").textContent=h.why||"Belum tersedia.";
  document.getElementById("handoff-observed").textContent=`${h.supporting_observation?.observed_title_count||h.member_count} anggota tepat berdasarkan istilah pada judul. Provenance tetap dapat ditelusuri ke Explorer.`;
- document.getElementById("handoff-human").textContent=h.human_learning_note||"Belum ada catatan HUMAN dari Explorer.";
+ document.getElementById("handoff-human").textContent=(h.selected_gap_opportunity?`Gap Opportunity dipilih HUMAN: ${h.selected_gap_opportunity.term}. ${h.selected_gap_opportunity.observation} Verifikasi berikutnya: ${h.selected_gap_opportunity.verification} `:"")+(h.human_learning_note||"Belum ada catatan HUMAN dari Explorer.");
 }
 renderExplorerHandoff();

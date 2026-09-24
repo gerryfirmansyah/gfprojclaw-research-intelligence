@@ -14,3 +14,9 @@ assert 'Pilih opportunity ini' in js
 assert 'updateDeepDive({...root,area:path.join' in js
 assert 'scientific decision: false' in js
 print('DEEP_DIVE_GAP_OPPORTUNITIES_PASS')
+
+assert 'selectedGapOpportunity' in js
+assert 'selected_gap_opportunity:selectedGapOpportunity' in js
+app=(root/'prototype/app.js').read_text()
+assert 'selected_gap_opportunity' in app
+assert 'Gap Opportunity dipilih HUMAN' in app
