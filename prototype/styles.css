@@ -208,3 +208,16 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #handoff-reasoning-trace{margin-top:14px}.reasoning-trace-list li{margin:10px 0}.reasoning-trace-list small{opacity:.8}
 
 #handoff-reflection{margin-top:14px}#handoff-reflection label{display:block;margin:10px 0}#handoff-reflection textarea,#handoff-reflection select{display:block;width:100%;box-sizing:border-box;margin-top:6px}
+/* HUMAN acceptance: wide evidence comparison workspace */
+#opportunity-analysis{margin-top:18px;overflow:visible}
+#opportunity-analysis .table-wrap{width:100%;overflow:auto;max-height:68vh;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+#opportunity-analysis table{border-collapse:separate;border-spacing:0;min-width:1540px;width:100%;table-layout:fixed}
+#opportunity-analysis th,#opportunity-analysis td{padding:11px 14px;vertical-align:top;border-bottom:1px solid var(--border);line-height:1.35;text-align:left;background:var(--panel)}
+#opportunity-analysis th{position:sticky;top:0;z-index:3;white-space:nowrap}
+#opportunity-analysis th:first-child,#opportunity-analysis td:first-child{position:sticky;left:0;z-index:2;width:390px;min-width:390px}
+#opportunity-analysis th:first-child{z-index:4}
+#opportunity-analysis th:nth-child(2),#opportunity-analysis td:nth-child(2){width:72px}
+#opportunity-analysis th:nth-child(n+3),#opportunity-analysis td:nth-child(n+3){width:190px;min-width:190px}
+#opportunity-analysis td:first-child{font-weight:600}
+#opportunity-analysis .not-verified{font-size:12px;white-space:nowrap;opacity:.68;font-weight:500}
+@media(min-width:1200px){#opportunity-analysis{width:calc(100vw - 72px);max-width:1760px;position:relative;left:50%;transform:translateX(-50%)}}
