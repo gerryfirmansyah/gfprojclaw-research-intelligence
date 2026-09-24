@@ -262,3 +262,8 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #selected-analysis th:nth-child(8),#selected-analysis td:nth-child(8){width:220px}
 #selected-analysis .analysis-sequence{max-width:1180px;margin:18px auto 0;background:#fff}
 @media(max-width:900px){#selected-analysis{width:calc(100vw - 28px)}}
+/* Equal-width evidence columns for HUMAN scanning */
+#selected-analysis table{min-width:1920px}
+#selected-analysis th:nth-child(n),#selected-analysis td:nth-child(n){width:240px!important;min-width:240px!important;max-width:240px!important}
+#selected-analysis th,#selected-analysis td{font-size:13px;line-height:1.5}
+.compare-workspace{max-width:1400px;margin:20px auto;padding:18px;background:#fff;border:1px solid var(--border);border-radius:12px}.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.compare-grid article{padding:14px;border:1px solid var(--border);border-radius:10px;background:#f8fafc}.compare-grid article strong{display:block;margin-bottom:7px;font-size:14px}.compare-grid p{margin:6px 0;line-height:1.5}.compare-next{margin-top:12px;padding:14px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:8px}@media(max-width:900px){.compare-grid{grid-template-columns:1fr}}
