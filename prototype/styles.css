@@ -200,3 +200,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #handoff-next-question{margin-top:14px}#handoff-next-question textarea{width:100%;box-sizing:border-box;margin:8px 0}
 
 #handoff-investigation-plan{margin-top:14px}#handoff-investigation-plan textarea{width:100%;box-sizing:border-box;margin:8px 0}#handoff-investigation-plan li{margin:6px 0}
+
+#handoff-execution{margin-top:14px}.execution-item{padding:8px 0;border-bottom:1px solid var(--border)}#handoff-execution label{display:block;margin:12px 0}
