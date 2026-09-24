@@ -194,3 +194,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #handoff-gap{margin:14px 0}#handoff-verification{margin:14px 0}#explorer-handoff .explorer-actions{margin:14px 0}.secondary-action[href]{display:inline-flex;align-items:center;text-decoration:none}
 
 .advanced-opportunity .advanced-select{margin-top:8px}.advanced-paper{padding:12px 0;border-bottom:1px solid var(--border)}.advanced-paper:last-of-type{border-bottom:0}.advanced-paper details{margin-top:8px}.advanced-paper details p{line-height:1.55}#advanced-evidence-detail{margin-top:14px}
+
+.evidence-review-row{padding:12px 0;border-bottom:1px solid var(--border)}.evidence-review-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.evidence-review-actions button.selected{outline:2px solid currentColor;font-weight:700}.evidence-review-row textarea{width:100%;box-sizing:border-box}#handoff-human-verdict{margin-top:14px}
