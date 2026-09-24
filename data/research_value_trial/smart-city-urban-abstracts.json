@@ -1,0 +1,178 @@
+{
+  "mode": "TRIAL_PROGRESSIVE_ABSTRACT_VERIFICATION",
+  "papers": [
+    {
+      "openalex_id": "https://openalex.org/W4405366805",
+      "title": "Integrating Technology and Urban Resilience: A Comprehensive Analysis of Smart City Initiatives in Sydney",
+      "doi": "https://doi.org/10.3390/su162410967",
+      "abstract": "This study explores the integration of smart city and resilience strategies in Sydney, focusing on the relationship between technological advancements and urban resilience. By analysing strategic documents and key projects—specifically the NSW Spatial Digital Twin, Land iQ, and SIMPaCT—this research identifies important synergies and gaps in Sydney’s urban planning efforts. The findings indicate that these projects improve urban functionality through real-time data integration, predictive planning, and adaptive infrastructure. However, there are inconsistencies between strategic objectives and actual implementation, particularly concerning stakeholder inclusivity and equity considerations. The study concludes that utilising technologies such as the Internet of Things (IoT) and artificial intelligence (AI), along with equitable stakeholder engagement, has the potential to significantly enhance Sydney’s ability to address environmental, social, and economic challenges. These insights offer practical recommendations for policymakers and urban planners who aim to balance innovation with inclusivity in smart city development.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4405366805",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4401526468",
+      "title": "Can Smart City Construction Promote Urban Green and High-Quality Development?—Validation Analysis from 156 Cities in China",
+      "doi": "https://doi.org/10.3390/buildings14082500",
+      "abstract": "The in-depth participation and application of new-generation information and communication technologies, such as big data, Internet of Things, artificial intelligence, etc., in the field of smart cities have promoted their abilities in urban fine governance, public services, ecological livability, scientific and technological innovation, etc. Smart cities are gradually becoming recognized as the best solution to “urban problems”. Smart city construction drives urban innovative development, accumulates kinetic energy for economic growth, strengthens social support functions, enhances the effectiveness of the ecological environment, and promotes the convergence and integration of urban green development and high-quality development. This paper constructs a difference-in-differences model based on propensity score matching. Additionally, fiscal science and technology investment is introduced as mediating variables to further explain the mechanism through which smart city pilot policy impacts urban green and high-quality development. This research uses panel data from 156 prefecture-level cities in China from 2006 to 2019 to empirically test that the construction of smart cities has a significant positive effect on urban green and high-quality development. The mediation effect model shows that an increase in the level of local government’s fiscal science and technology investment enhances the positive effect of smart city construction on urban green and high-quality development. This research concludes with policy recommendations: the government should seize the development opportunity presented by smart city pilot policy, providing necessary policy support and financial incentive for the construction of smart cities. This will optimize the local economic structure, transform the driving forces of urban development, and assist cities in achieving green and high-quality development.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4401526468",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4398240396",
+      "title": "Smart City Solutions: Leveraging Technology for Urban Development",
+      "doi": "https://doi.org/10.62919/hdiu9731",
+      "abstract": "This paper examines the role of technology in fostering urban development through the framework of smart city solutions. It explores how integrating advanced technologies such as IoT (Internet of Things), AI (Artificial Intelligence), and big data analytics can significantly enhance the efficiency and sustainability of urban environments. The study begins with a review of the conceptual underpinnings of smart cities and the technological components that drive them. It then discusses various case studies where cities globally have successfully implemented smart technologies to optimize energy consumption, improve transportation systems, enhance public safety, and streamline municipal services. The analysis reveals that smart city solutions not only lead to improved urban planning and management but also contribute to a higher quality of urban life. Moreover, the paper addresses the challenges and barriers to implementing such technologies, including issues of data privacy, cybersecurity, and the digital divide.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4398240396",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W7128593324",
+      "title": "Smart city strategy, China’s urban innovation and policy effectiveness",
+      "doi": "https://doi.org/10.1057/s41599-026-06673-7",
+      "abstract": "Smart city strategies are the key policy in China’s modernization. Yet how such strategies influence urban innovation remains insufficiently understood. This study employs a multi-period difference-in-differences approach within the Technology-Organization-Environment (TOE) framework to analyze panel data from 283 prefecture-level cities in China from 2006 to 2021. It seeks to evaluate the impact of smart city pilot policies on urban innovation levels and their mechanisms of action. The findings suggest that these policies are associated with higher urban innovation, with particularly pronounced effects in central and western regions and in small and medium-sized cities. The mediation effect model shows that improvements in information and communication technology, transportation infrastructure, digital government and social capital are potential channels linking smart city development to higher innovation, and that these mechanisms differ across regions. Spatial analysis further indicates the spillover effects of smart city policies, whereby innovation activities in pilot cities positively affect neighboring cities through regional networks. Overall, the research provides causal evidence and an analytical framework for evaluating place-based innovation policies and their effects on regional development disparities.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W7128593324",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4407039757",
+      "title": "Building Urban Resilience Through Smart City Planning: A Systematic Literature Review",
+      "doi": "https://doi.org/10.3390/smartcities8010022",
+      "abstract": "Smart city planning is crucial for enhancing urban resilience, especially with the contemporary challenges of rising urban population and climate change. This study conducts a systematic literature review (SLR) to examine the integration of urban resilience in smart city planning, synthesizing the current literature to identify key components, barriers, and enablers. The study found that technological integration, sustainability measures, and citizens’ participation are critical factors to the effective development of smart cities. The review emphasizes the need for an integrated approach to urban resilience, calling for continued research and collaboration among stakeholders. It highlights how urban sustainability and resilience should be addressed within an urban system and that interdisciplinary work, stakeholder consultation, and public engagement are required. It finally suggests the integration of creativity and diversity in urban planning practices and policies for improving vulnerability to modern-day challenges in urban contexts. It concludes by outlining implications for urban planning practices and policy development, advocating for innovative, inclusive strategies to enhance urban resilience.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4407039757",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4394837538",
+      "title": "Smart City Actions Integrated into Urban Planning: Management of Urban Environments by Thematic Areas",
+      "doi": "https://doi.org/10.3390/app14083351",
+      "abstract": "Over the years, the imbalance between population needs and urban spaces’ organized development has been accentuated by increasing urbanization. The implementation of smart city actions began in the 1990s, with the development of integrated solutions in cities, harmonizing social, environmental, and economic aspects. This research measures the impact of thematic areas on smart cities’ management performance. The multi-criteria Decision Making Trial and Evaluation Laboratory (DEMATEL) method was used to identify the interdependent relations between smart cities’ thematic areas, structuring a diagram of cause-and-effect relations using threshold quantification values. Considering their degree of importance in smart city management, the thematic areas of technology and innovation, living environment and infrastructure, education and training, and governance and engagement are highlighted. For the degree of influence, the most influential thematic areas are coexistence and reciprocity, living environment and infrastructure, entrepreneurship, and healthcare. Also, the cause-and-effect analysis identified governance and engagement, education and training, and mobility as central thematic areas for smart city management. Finally, the research construct was developed by ranking the thematic areas’ performance in urban space planning.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4394837538",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4403834930",
+      "title": "Insights from Smart City Initiatives for Urban Sustainability and Contemporary Urbanism",
+      "doi": "https://doi.org/10.3390/smartcities7060124",
+      "abstract": "Urbanization growth poses various challenges, such as congestion, pollution, and resource consumption, prompting city planners and governments to adopt smart systems to manage these issues more efficiently. Despite widespread adoption, there is no consensus on the defining attributes of smart cities, particularly regarding their role in urban sustainability and contemporary urbanism. This paper provides a literature review to understand the implications of smart city initiatives for sustainable urban planning, focusing on practices in Singapore, Helsinki, Barcelona, and Medellin. Based on 71 publications surveyed from Scopus and Web of Science, this paper evaluates smart, sustainable initiatives undertaken in these four cities across six smart domains: mobility, governance, environment, people, living, and economy. This review shows that most studies focus on Barcelona and Singapore, particularly in the domains of smart environment and governance. Despite differing urban contexts, the notion of “smart” is closely tied to using information and communication technologies to drive urban operations. This analysis identifies a lack of assessment studies on the benefits of smart cities in terms of urban sustainability and a lack of holistic approaches to address the complex challenges cities face in achieving sustainable development.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4403834930",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W7141743108",
+      "title": "Project Management Strategies for Smart City Initiatives: A Framework for Sustainable Urban Development",
+      "doi": "https://doi.org/10.28991/hij-2026-07-01-019",
+      "abstract": "Rapid advances in artificial intelligence (AI), the Internet of Things (IoT), and digital government platforms are accelerating the transformation of urban systems toward smart and sustainable cities, creating new challenges for managing complex urban development projects. This study proposes an integrated project management framework that aligns digital transformation technologies with sustainability principles to enhance smart city implementation in emerging economies. A qualitative research design combining systematic literature analysis and comparative case study evaluation was employed, examining smart city initiatives in Aqkol, Nur-Sultan (Astana), and Almaty, Kazakhstan. The analysis investigates how technological integration, governance mechanisms, stakeholder collaboration, and sustainability objectives interact within adaptive project management environments. Results indicate that successful smart city development depends on coordinated alignment across these four dimensions, supported by flexible governance models and data-driven decision processes. The findings further demonstrate that AI-enabled digital twin technologies and participatory digital governance significantly improve infrastructure optimization, urban decision-making efficiency, and resilience outcomes. The proposed framework contributes a structured evaluation and implementation model that bridges project management theory with smart city digitalization practices. The novelty of this research lies in integrating sustainability-driven project governance with emerging digital technologies into a unified operational framework, providing practical guidance for policymakers, urban planners, and project managers seeking scalable and resilient smart city solutions in rapidly evolving technological contexts.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W7141743108",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4296569686",
+      "title": "Progress of Standardization of Urban Infrastructure in Smart City",
+      "doi": "https://doi.org/10.3390/standards2030028",
+      "abstract": "After the Smart City initiative was put forward, cities all over the world started the pilot practice of developing Smart Cities. This triggered a series of thoughts: what is a Smart City, how do we determine the scope of work of a Smart City, and how do we formulate a new strategic agenda of the Smart City to make city smarter and more sustainable? The answer lies not only in finding Smart City solutions, but also leads to the research on the definition of Smart City terminology and the determination of corresponding tasks. Stakeholders of Smart City (e.g., policy makers, municipalities, solution providers, industry, and academia) develop technical and management standards for these tasks jointly. This paper reports the standardization planning on Smart City by the international standardization development organizations (SDOs), that is, the standardization framework of Smart City. It also presents one of the important aspects, namely, the progress of standardization activities on urban infrastructure that are being carried out by the International Telecommunication Union (ITU) via its Study Group 20, in supporting the adoption of information and communication technologies (ICTs) in Smart City. These standards include the classification of urban infrastructure, the interoperability between urban infrastructure and smart city platforms, and the requirements of detailed infrastructure from the perspective of ICT and the Internet of things (IoT). This paper also provides the use cases of application of some standards in global cities.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4296569686",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W7204273249",
+      "title": "Governing the Ethical AI City: Mitigating Algorithmic Vulnerabilities in Smart Urban Infrastructure",
+      "doi": "https://doi.org/10.59543/pj17de58",
+      "abstract": "Algorithmic governance must take a crucial urban turn in light of the swift shift from data-informed smart cities to autonomously adaptive artificial intelligence (AI) cities. Although there are international frameworks for AI ethics, they do not address the systemic, infrastructural, and spatial issues that arise when deploying AI at the city level. By presenting urban settings as dynamic ethical subjects rather than passive technology nodes, this article expands the conceptual paradigm of the Ethical AI City. We identify key vulnerabilities in existing smart-city cyber-physical systems by analyzing growing systemic occurrences ranging from algorithmic bias and autonomous car failures to mass surveillance. We contend that integrating ethical protections directly into intelligent public infrastructure is necessary to ensure democratic resilience, equality, and spatial justice. Lastly, we suggest a socio-technical roadmap that leverages cross-sectoral governance models, transparent algorithmic audits, and participatory design. This framework provides actionable insights for urban planners, system engineers, and policymakers designing the next generation of resilient, equitable, and sustainable cities.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W7204273249",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4387702371",
+      "title": "Smart City and Urban Logistics - Research Trends and Challenges: Systematic Literature Review",
+      "doi": "https://doi.org/10.26552/com.c.2023.076",
+      "abstract": "The paper presents a systematic quantitative and qualitative literature review and classification of the last decades resources for a comprehensive and coherent view of smart city and urban logistics research trends and challenges. The review fully respects a six-step systematic literature review guideline and covers ninety-nine peer-reviewed articles from Web of Science Core Collection database.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4387702371",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4411028729",
+      "title": "Smart city construction and urban livability: evidence from a quasi-natural experiment in China",
+      "doi": "https://doi.org/10.1057/s41599-025-05096-0",
+      "abstract": "As global urbanization speeds up, smart city construction has become crucial for improving urban management and elevating residents’ life quality. Its impact on urban livability is now a key issue in urban planning and public policy. This study treats smart city policy (SCP) implementation as a quasi-natural experiment, using panel data from 284 Chinese cities from 2003 to 2019. A time-varying DID model is used to quantify SCP’s effect on urban livability and to examine their transmission mechanisms. The findings show that: (1) SCP significantly improves urban livability, as verified by a series of robustness tests; (2) SCP has a stronger positive impact in larger cities, non-resource-based cities, and cities with higher human capital; (3) Technological innovation and government social governance are key pathways through which SCP enhances urban livability; (4) SCP has positive spillover effects that improve livability in surrounding non-pilot cities. These findings offer valuable insights for policymakers on optimizing resource allocation and increasing the effectiveness of smart city initiatives and provide a sound empirical basis for future urban transformation strategies in China.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4411028729",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W7131788208",
+      "title": "Smart City 2.0 governance policy model: institutional configurations and the politics of urban inclusion in India, Singapore, and Indonesia",
+      "doi": "https://doi.org/10.3389/fpos.2026.1730870",
+      "abstract": "Introduction The exponential global urbanisation has demanded advanced governance frameworks capable of attaining complex socio-technological challenges through digitally enabled urban transformation. While first-generation smart city initiatives dealt primarily with technological implementation issues, Smart City 2.0 paradigms, in their more contemporary form, require a prerequisite and deep understanding of governance effectiveness, citizen engagement mechanisms, and cross-contextual implementation strategies. This work fills an essential gap in the state of knowledge on comparative Smart City governance by presenting a study on the nature of Smart City 2.0 implementation in India, Singapore, and Indonesia as Case Studies. Methods Employing a multidimensional comparative framework, this research aims to provide a structured and systematic analysis of governance structures, technology integration strategies, sustainability approaches, and citizen participation mechanisms across three urban development contexts. The methodology combines significant analysis of policy documents, data on implementation, and synthesis of theoretical frameworks to appraise the effectiveness of Smart City 2.0 across different political, economic, and social settings. The analytical framework examines four basic dimensions: models of governance and leadership; strategies for integrating technology; motivations around sustainability and a green environment; and ways citizens are engaged. Results Key findings include a fundamental need for contextual adaptation rather than universal standardisation in Smart City 2.0. India’s driven approach to scalability uses standardised frameworks with local adaptability, achieving a 94% completion rate across 8,067 projects in 100 cities. Singapore’s AI-backed Smart Nation 2.0 has demonstrated total inter-agency coordination, met 110% of the target dates for digital literacy rates, and provided strong infrastructure, ensuring cybersecurity. Collaborative governance model - Indonesia’s dependence on hegemonic digital infrastructure is evident in collaborative initiatives such as the JAKI super-app (6.4 million downloads) in Jakarta, which has been ‘glued’ together (grafted) with over 150 government applications. Discussion This comparative analysis restructures the paradigms of smart cities from a tech-centred emphasis towards a more realistic view of the fundamental contributing factors that are driving the success of Smart City 2.0, demonstrating that it is innovations in governance, capacity building of institutions and citizen-centred service delivery that are playing the central role in the effectiveness of Smart City 2.0. The results provide an evidence-based foundation for policy formulation to navigate the complexities of urban digital transformation and to support place-based governance strategies that integrate technological capacities within local governance structures, participatory mechanisms, and environmental sustainability objectives.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W7131788208",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W7117105285",
+      "title": "ASSESSING URBAN SUSTAINABILITY: SMART CITY INDEX AND VISUAL DATA REPRESENTATION",
+      "doi": "https://doi.org/10.55452/1998-6688-2025-22-4-196-208",
+      "abstract": "This study proves that the need to assess and enhance urban sustainability becomes vital. The implications are relevant to the constant urbanization and technological progress, which calls for sustainable smart city development. On the grounds presented above, we offer and describe the model to measure and evaluate urban sustainability through SCIs. Calculations performed on the model differ across the total of 102 cities worldwide, ensuring quick and effective calculation and visualization. The model on which calculations are based uses six indicators, which are mobility, environment, government, economy, smart people, and smart living. The rationale provides an opportunity to analyze and interpret data regarding the indicators, which makes the calculation of SCI (Smart City Index) by city for each indicator possible, as well as conclusions concerning major strengths and focus areas for improvement. The obtained results are presented through promising data visualization techniques to make SCIs intuitive and enable the comparison of cities. The findings demonstrated large variations among smart cities, which points to the necessity of developing targeted policies and investments. With these contributions, we are confident that the paper will make a valuable addition to the existing knowledge and provided further guidance and recommendations for the stakeholders involved in a sustainable urban environment.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W7117105285",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W7170052474",
+      "title": "Bringing Clarity to the Smart City Definition Jungle: Toward an Integrative and a Data-Centric Conceptualization of Urban Systems",
+      "doi": "https://doi.org/10.1007/s13222-026-00543-x",
+      "abstract": "Abstract The smart city paradigm has evolved into a central framework for understanding digital transformation in urban contexts, yet it remains conceptually fragmented and architecturally heterogeneous. This paper addresses this dual fragmentation by systematically synthesizing 69 academic smart city definitions and contrasting them with empirical architectural patterns observed in leading European and North American cities. First, we derive an integrative definition that conceptualizes the smart city as a learning, cyber-socio-technical urban system integrating digital infrastructures, data resources, governance structures, and human capital to enhance quality of life, competitiveness, and ecological resilience. Second, we extend this conceptualization through a data- and database-oriented perspective that frames smart cities as heterogeneous urban data ecosystems governing the full data lifecycle via interoperable architectures and context-sensitive governance mechanisms. By linking normative theory with observable data-engineering practices, the study establishes a conceptual bridge between smart city discourse and urban data architecture, providing a structured foundation for future comparative research on adaptive urban data ecosystems.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W7170052474",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4412202331",
+      "title": "Smart City(ies) and Urban Living: The Paradox of the Good Life",
+      "doi": "https://doi.org/10.5772/intechopen.1011336",
+      "abstract": "This chapter critiques the smart city(ies) agenda(s) to identify(ies) paradoxical scenarios that limit the ability for residents to achieve a better quality of life (QoL) and a healthy, productive, prosperous and satisfying future (i.e., the good life) within city(ies). An argument is made that the approach(es) taken to smart technology(ies) deployment(s) within smart city(ies) create ‘have and have not’ situations wherein some but not all, specifically those from lower-socio-economic group(s), gain access to the benefits associated with smart city(ies) living and by association the good life. Building on these arguments the chapter concludes by recommending a fundamental re-orientation in the approach(es) to smart city(ies) agenda setting and decision making to address the paradoxes and enhance the likelihood for all to achieve a good life within their urban community(ies).",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4412202331",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4409687925",
+      "title": "A Systematic Study on the Integration of Smart City Technologies in Urban Planning and Governance in Europe",
+      "doi": "https://doi.org/10.47672/ejt.2680",
+      "abstract": "Purpose: The research examines how well innovative city technologies work in European town planning and management systems. This paper evaluates the implementation of integrated technologies starting from the 1990s to achieve social, environmental and economic targets in European cities. Materials and Methods: The researchers use the DEMATEL (Decision-Making Trial and Evaluation Laboratory) approach as part of the multi-criteria decision-making methodology to study dependencies between various thematic components of smart cities. The process constructs a diagram that visualizes cause-and-effect connections by receiving assigned threshold values. Findings: The research outlines technology, innovation, structure, life, environment, education, training, governance, and enga, which are not the core thematics in innovative city management. Establishing sustainable cities depends heavily on social cohesion, urban infrastructure, entrepreneurship systems, and healthcare infrastructure. To succeed, all innovative city initiatives need the focus elements of governance and engagement, education, training, and mobility. Unique Contribution to Theory, Practice and Policy: For European cities to achieve smart city technology, they need to focus on governance, education combined with training, citizen engagement, the path to su, and development.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4409687925",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W4407208606",
+      "title": "Right to the Smart City: Evaluating Smart Urban Policies through Lefebvrian Lens",
+      "doi": "https://doi.org/10.24251/hicss.2025.271",
+      "abstract": "This paper aims to understand and empirically measure the wellbeing of urban citizens and their ability to exercise their ‘right to the city’ in the context of smart city development and algorithmic urban governance. It develops and empirically tests the right to the smart city idea grounded in basic research and existing theories. The starting point is the concept of the right to the city as a basket of rights defining the citizenship status of urban residents in the digital era. Our study is based on representative survey data from Singapore and Warsaw, which represent different stages of technological urban development. In the context of growing criticism of smart city idea, we propose using the composite indicators of ‘right to the city index’ and ‘AI acceptance index’ as tools for monitoring a smart urban development from the human-centric perspective.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W4407208606",
+      "scientific_decision": false
+    },
+    {
+      "openalex_id": "https://openalex.org/W7140329081",
+      "title": "Smart city and e-government as drivers of community involvement in urban governance: the mediating role of digital literacy",
+      "doi": "https://doi.org/10.3389/frsc.2025.1707608",
+      "abstract": "This study examines how smart city initiatives and e-government practices influence community involvement in urban governance, with digital literacy serving as a mediating factor. Conducted in Indonesia, the research collected data from 120 respondents using a purposive sampling method and analyzed it through Partial Least Squares Structural Equation Modeling (PLS-SEM). Drawing on the perspective of urban innovation and governance, the research investigates the extent to which technological and institutional innovation foster participatory engagement in sustainable cities. The results demonstrate that smart city initiatives and e-government both exert significant positive effects on community involvement, underscoring their role as drivers of urban participation. However, digital literacy shows a negative direct effect on involvement, suggesting that while digital competence is enhanced, it does not automatically translate into deeper civic participation and may even shift engagement toward individualized rather than collective forms. Digital literacy does not consistently strengthen this relationship; while it improves citizens’ technical competence, its direct effect on participation remains limited. Mediation analysis reveals that digital literacy partially mediates the influence of e-government and smart city programs on community involvement. These findings highlight the complex relationship between technological innovation, governance mechanisms, and social participation. The study contributes to urban governance literature by uncovering how innovation in digital infrastructure interacts with civic capacities. Practically, the results suggest that policies must not only expand digital literacy programs but also align them with civic-oriented frameworks to ensure that technological innovation translates into more inclusive and sustainable governance practices.",
+      "abstract_state": "AVAILABLE",
+      "source_url": "https://openalex.org/W7140329081",
+      "scientific_decision": false
+    }
+  ],
+  "canonical_write": false,
+  "scientific_decision": false
+}

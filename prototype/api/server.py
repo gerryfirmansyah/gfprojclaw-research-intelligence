@@ -49,7 +49,7 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if path.startswith("/api/trial/research-value/"):
             name=path.rsplit("/",1)[-1]
-            allowed={"landscape":"deduplicated_researcher_landscape.json","why":"deduplicated_why_trace.json","papers":"deduplicated_paper_inspector.json","coverage":"deduplicated_coverage_learning.json"}
+            allowed={"landscape":"deduplicated_researcher_landscape.json","why":"deduplicated_why_trace.json","papers":"deduplicated_paper_inspector.json","coverage":"deduplicated_coverage_learning.json","smart-city-urban-abstracts":"smart-city-urban-abstracts.json"}
             if name not in allowed:
                 self.send_json({"error":"Not found"},status=404); return
             trial=ROOT.parent/"data"/"research_value_trial"/allowed[name]
