@@ -221,3 +221,4 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #opportunity-analysis td:first-child{font-weight:600}
 #opportunity-analysis .not-verified{font-size:12px;white-space:nowrap;opacity:.68;font-weight:500}
 @media(min-width:1200px){#opportunity-analysis{width:calc(100vw - 72px);max-width:1760px;position:relative;left:50%;transform:translateX(-50%)}}
+.screening-lenses{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:14px 0}.screening-lens{text-align:left;min-height:76px}.screening-lens small{white-space:normal}
