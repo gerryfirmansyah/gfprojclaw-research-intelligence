@@ -198,3 +198,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .evidence-review-row{padding:12px 0;border-bottom:1px solid var(--border)}.evidence-review-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.evidence-review-actions button.selected{outline:2px solid currentColor;font-weight:700}.evidence-review-row textarea{width:100%;box-sizing:border-box}#handoff-human-verdict{margin-top:14px}
 
 #handoff-next-question{margin-top:14px}#handoff-next-question textarea{width:100%;box-sizing:border-box;margin:8px 0}
+
+#handoff-investigation-plan{margin-top:14px}#handoff-investigation-plan textarea{width:100%;box-sizing:border-box;margin:8px 0}#handoff-investigation-plan li{margin:6px 0}
