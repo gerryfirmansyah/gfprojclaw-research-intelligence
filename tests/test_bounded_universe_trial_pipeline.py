@@ -31,3 +31,8 @@ for x in ['HUMAN Acceptance Gate','accept-landscape','accept-why','accept-trace'
 for x in ['READY FOR HUMAN ACCEPTANCE RECORD','cannot self-accept scientific usefulness']:assert x in js,x
 for x in ['ENGINE FREEZE EXCEPT ACCEPTANCE-BLOCKING DEFECTS','ACCEPT','PARTIAL','REJECT / REWORK','system MUST NOT assign the verdict automatically']:assert x in protocol,x
 print('HUMAN_ACCEPTANCE_GATE_CONTRACT_PASS')
+html=Path('prototype/explorer.html').read_text();js=Path('prototype/explorer.js').read_text();css=Path('prototype/styles.css').read_text()
+for x in ['Research Advice','WHY → Advice → exact member papers','trial-paper-count']:assert x in html,x
+for x in ['What we observe','Why it may matter','What to inspect next','Questions for you','Frequency alone does not establish relevance']:assert x in js,x
+for x in ['trial-paper-box','max-height:560px','overflow:auto']:assert x in css,x
+print('HUMAN_ADVICE_EXPERIMENT_CONTRACT_PASS')
