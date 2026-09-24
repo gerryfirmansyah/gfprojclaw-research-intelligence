@@ -190,3 +190,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .gap-opportunities{margin-top:14px}.gap-opportunities h4{margin:0 0 10px}.gap-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0;background:var(--bg)}.gap-card p{margin:8px 0}.gap-card .gap-select{margin-top:4px}#trial-stop-drill{font-weight:700}
 
 .gap-card.selected{outline:2px solid currentColor;outline-offset:2px}.gap-card.selected .gap-select{font-weight:700}
+
+#handoff-gap{margin:14px 0}#handoff-verification{margin:14px 0}#explorer-handoff .explorer-actions{margin:14px 0}.secondary-action[href]{display:inline-flex;align-items:center;text-decoration:none}
