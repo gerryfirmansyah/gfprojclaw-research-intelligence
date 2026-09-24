@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Research Workspace · GFPROJCLAW Research Explorer</title>
+  <link rel="stylesheet" href="styles.css?v=0.19.0" />
+</head>
+<body class="research-workspace">
+<div class="workspace-banner"><strong>GFPROJCLAW · Research Workspace</strong><span>HUMAN–MACHINE research journey · focused trial</span><nav>1 Explore → 2 Screen → 3 Select Evidence → 4 Analyze → 5 Investigate → 6 Copilot</nav></div>
+  <main class="explorer-entry">
+    <section class="explorer-hero">
+      <div class="brand explorer-brand"><div class="brand-mark">GF</div><div><strong>GFPROJCLAW</strong><span>Research Explorer</span></div></div>
+      <p class="eyebrow">Stage 1 · Explore → Understand → Decide</p>
+      <h1>Mulai dari ide riset, bukan dari kesimpulan.</h1>
+      <p class="explorer-lead">Research Explorer membantu HUMAN memahami landscape, istilah, sumber, cakupan, dan alternatif scope sebelum membentuk Research Project. Mesin menyediakan observasi dan pilihan; keputusan ilmiah tetap milik HUMAN.</p>
+      <div class="explorer-actions">
+        <a class="primary-action" href="#start">Eksplorasi ide baru</a>
+        <a class="secondary-action" href="index.html">Lanjutkan Research Copilot</a>
+      </div>
+    </section>
+
+    <section class="explorer-entry-grid" aria-label="Two-stage researcher journey">
+      <article class="panel explorer-stage-card">
+        <span class="stage-number">01</span><h2>Research Explorer</h2>
+        <p>Petakan Research Universe yang teramati, domain, terminologi, Scope Ladder L4–L0, query families, sumber, Discovery Corpus, blind spots, dan counter-search.</p>
+        <div class="callout">Discovery bukan Evidence. Jumlah paper yang sedikit bukan bukti bahwa field sempit atau research gap telah terbukti.</div>
+      </article>
+      <article class="panel explorer-transition-card">
+        <span class="stage-number">HUMAN</span><h2>HUMAN Scope Decision</h2>
+        <p>HUMAN menilai apakah landscape yang terlihat cukup untuk tujuan saat ini, memilih scope, dan memutuskan apakah sebuah Research Project akan dibentuk.</p>
+        <strong>Explorer → HUMAN Decision → Research Project</strong>
+      </article>
+      <article class="panel explorer-stage-card">
+        <span class="stage-number">02</span><h2>Research Copilot</h2>
+        <p>Setelah proyek terbentuk, lanjutkan research journey, evidence inspection, opportunities, Human Review, coverage, knowledge evolution, dan Living Research Radar.</p>
+        <a class="text-button" href="index.html">Buka project workspace →</a>
+      </article>
+    </section>
+
+    <section id="seed-universe" class="panel explorer-start-panel">
+      <div class="panel-header"><div><p class="eyebrow">Seed → Research Universe</p><h2>Dari paper awal, apa yang dapat dieksplorasi?</h2></div><span id="seed-universe-state" class="state gray">MEMUAT</span></div>
+      <p>GFPROJCLAW memperlakukan paper project sebagai <strong>seed</strong>, bukan sebagai semesta riset. Opsi di bawah harus dapat ditelusuri kembali ke paper pemicunya sebelum HUMAN memilih atau mengubah query.</p>
+      <label class="explorer-interest-label">Project yang menjadi seed
+        <select id="explorer-project"></select>
+      </label>
+      <div id="seed-universe-summary" class="callout">Memuat canonical seed projection…</div>
+      <div id="seed-paper-list" class="explorer-seed-list"></div>
+      <h3>Opsi query dari seed</h3>
+      <p class="explorer-muted">Belum ada query yang disetujui atau dijalankan. Setiap opsi menunjukkan alasan dan paper pemicu.</p>
+      <div id="seed-query-options" class="explorer-query-list"></div>
+      <h3>Initial HUMAN Query</h3>
+      <p class="explorer-muted">Baseline eksplorasi yang diberikan langsung oleh HUMAN. Ini bukan penggantian query historis J14 dan belum menulis canonical state.</p>
+      <label class="explorer-interest-label">Query awal HUMAN
+        <input id="initial-human-query" type="text" value="digital government" />
+      </label>
+      <div class="explorer-actions"><button id="initial-query-preview" class="primary-action" type="button">Gunakan sebagai baseline preview</button></div>
+      <div id="initial-query-result" class="callout">Belum dijalankan. Baseline yang direncanakan: <strong>digital government</strong>.</div>
+    </section>
+
+      <section id="progressive-retrieval" class="progressive-retrieval">
+        <h3>Progressive Retrieval Funnel</h3>
+        <p class="explorer-muted">Batas batch adalah batas operasional, bukan batas Research Universe. Angka di bawah hanya boleh diisi dari observasi yang dapat ditelusuri.</p>
+        <div class="retrieval-funnel">
+          <article><span>Provider reported</span><strong id="f-provider">NOT_AVAILABLE</strong><small>Hasil yang dilaporkan provider; bukan corpus relevan.</small></article>
+          <article><span>Retrieved</span><strong id="f-retrieved">0</strong><small>Record yang benar-benar diambil.</small></article>
+          <article><span>Not retrieved</span><strong id="f-remaining">NOT_AVAILABLE</strong><small>Sisa coverage; bukan berarti tidak relevan.</small></article>
+          <article><span>Deduplicated</span><strong id="f-dedup">NOT_RUN</strong><small>Unique Works setelah rekonsiliasi.</small></article>
+          <article><span>Screened</span><strong id="f-screened">NOT_RUN</strong><small>Machine-assisted screening; advisory.</small></article>
+          <article><span>HUMAN reviewed</span><strong id="f-human">NOT_RUN</strong><small>Keputusan ilmiah tetap HUMAN.</small></article>
+          <article><span>Project Corpus</span><strong id="f-project">NOT_AVAILABLE</strong><small>Hanya hubungan project yang canonical.</small></article>
+        </div>
+        <details><summary>Apa yang harus diperiksa HUMAN?</summary><p>Periksa exact query, provider, waktu retrieval, pagination/cursor, jumlah requested/retrieved, member identifiers, error/truncation, alasan screening, dan record yang belum diretrieve.</p></details>
+      </section>
+
+    <section id="trial-landscape" class="panel explorer-start-panel">
+      <div class="panel-header"><div><p class="eyebrow">Uji Nilai Riset · LIHAT → PETAKAN → MENGAPA → VERIFIKASI</p><h2>Lanskap seluruh semesta terbatas yang teramati</h2></div><span id="trial-state" class="state gray">MEMUAT</span></div>
+      <div id="trial-coverage" class="callout">Memuat uji non-canonical…</div>
+      <div id="trial-years" class="trial-metrics"></div>
+      <h3>Area teramati — navigasi mesin, bukan kebenaran ilmiah</h3>
+      <div id="trial-areas" class="trial-area-grid"></div>
+      <div id="trial-area-detail" class="callout">Pilih area untuk melihat MENGAPA → pendalaman global-ke-detail.</div>
+      <section id="trial-drilldown" class="trial-drilldown" hidden>
+        <div class="panel-header"><div><p class="eyebrow">GLOBAL → DETAIL</p><h3>Sub-area / konteks teramati</h3></div><span id="trial-drill-count" class="state blue">0 PAPER</span></div>
+        <div id="trial-breadcrumb" class="trial-breadcrumb"></div>
+        <p class="explorer-muted">Diamati ulang hanya dari paper dalam jalur yang Anda pilih. Ini navigasi mesin, bukan taxonomy ilmiah.</p>
+        <div id="trial-subareas" class="trial-area-grid"></div>
+        <div class="explorer-actions"><button id="trial-stop-drill" class="primary-action" type="button">Cukup — berikan Saran Riset untuk konteks ini</button><button id="trial-reset-drill" class="secondary-action" type="button">Kembali ke area global</button></div>
+      </section>
+      <section id="trial-deep-dive" class="trial-deep-dive">
+        <div class="panel-header"><div><p class="eyebrow">AREA DEEP DIVE</p><h3 id="deep-dive-title">Pilih area untuk memulai pendalaman</h3></div><span id="deep-dive-state" class="state gray">BELUM DIPILIH</span></div>
+        <div id="deep-dive-summary" class="callout">Pendalaman menjaga konteks area, MENGAPA, provenance, dan paper anggota sebelum dibawa ke Research Copilot.</div>
+        <div id="deep-dive-opportunities" class="gap-opportunities"><h4>Gap Opportunities</h4><p class="explorer-muted">Pilih jalur HUMAN untuk melihat beberapa sinyal peluang yang dapat diverifikasi. Sistem tidak menetapkan research gap.</p></div>
+        <div id="opportunity-analysis" class="callout" hidden></div><div id="deep-dive-advanced" class="callout" hidden></div>
+        <div id="deep-dive-actions" class="explorer-actions"><button id="deep-dive-inspect" class="secondary-action" type="button" disabled>Periksa paper area ini</button><button id="deep-dive-copilot" class="primary-action" type="button" disabled>Bawa area ini ke Research Copilot →</button></div>
+        <small>Eksperimen HUMAN: perpindahan ini membawa konteks eksplorasi, bukan keputusan ilmiah atau canonical write.</small>
+      </section>
+      <div id="research-flow-review" class="callout"><strong>Alur review HUMAN</strong><br>1. Pilih area → 2. Perdalam konteks → 3. Pilih opportunity → 4. Baca supporting + challenge evidence → 5. Bawa ke Copilot → 6. Bandingkan konteks/metode/unit/outcome/mekanisme → 7. Rumuskan pertanyaan berikutnya → 8. Tentukan kriteria cukup → 9. Jika perlu, izinkan retrieval → 10. Tentukan apa yang harus dianggap benar-benar baru.<br><small>Tujuan alur ini adalah memperbaiki pemahaman HUMAN; bukan membuat keputusan gap/novelty secara otomatis.</small></div>
+      <div id="trial-advice" class="trial-advice">
+        <h3>Saran Riset</h3>
+        <p>Pilih area teramati untuk mendapatkan saran pemeriksaan. Saran adalah navigasi berbasis observasi, bukan keputusan ilmiah.</p>
+      </div>
+      <div class="paper-inspector-head"><div><h3>Pemeriksa Paper</h3><p class="explorer-muted">Paper anggota yang tepat untuk area terpilih. Gulir di dalam kotak; ini bukan peringkat paper.</p></div><span id="trial-paper-count" class="state gray">0 DITAMPILKAN</span></div>
+      <div id="trial-papers" class="explorer-seed-list trial-paper-box"></div>
+      <details class="callout"><summary><strong>Batas yang perlu Anda ketahui</strong></summary><h3>Cakupan & pembelajaran HUMAN</h3>
+      <div id="trial-blindspots" class="callout">Memuat titik buta…</div>
+      <label class="explorer-interest-label">Apa yang Anda pelajari / apa yang masih tidak pasti?
+        <textarea id="trial-learning" rows="4" placeholder="Catatan HUMAN lokal; belum menulis status ilmiah canonical."></textarea>
+      </label>
+      <div id="trial-decisions" class="explorer-actions"></div>
+      <div id="trial-decision-state" class="callout">Belum ada keputusan scope. HUMAN yang memutuskan.</div></details>
+      <details class="callout"><summary><strong>Evaluasi sistem — buka setelah selesai melakukan flow riset</strong></summary><h3>Gerbang Penerimaan HUMAN</h3>
+      <p class="explorer-muted">Penerimaan hanya dapat diberikan oleh HUMAN setelah pemeriksaan. Sistem tidak dapat menerima dirinya sendiri.</p>
+      <div class="acceptance-grid">
+        <label><input id="accept-landscape" type="checkbox"> Lanskap membantu saya memahami ruang riset.</label>
+        <label><input id="accept-why" type="checkbox"> MENGAPA membantu saya memahami alasan area/paper ditampilkan.</label>
+        <label><input id="accept-trace" type="checkbox"> Saya dapat menelusuri MENGAPA ke paper dan sumber/DOI.</label>
+        <label><input id="accept-limits" type="checkbox"> Cakupan dan titik buta cukup jelas.</label>
+      </div>
+      <label class="explorer-interest-label">Bukti / alasan penilaian HUMAN<textarea id="accept-rationale" rows="4" placeholder="Tuliskan apa yang berguna, membingungkan, atau masih kurang."></textarea></label>
+      <div class="explorer-actions"><button id="accept-preview" class="primary-action" type="button">Evaluasi kesiapan untuk penerimaan HUMAN</button></div>
+      <div id="accept-result" class="callout">MENUNGGU · HUMAN belum menyelesaikan tinjauan penerimaan.</div></details>
+    </section>
+
+    <section id="discovery-benchmark" class="panel explorer-start-panel">
+      <div class="panel-header"><div><p class="eyebrow">Discovery Verification</p><h2>Bandingkan pencarian HUMAN dengan mesin</h2></div><span class="state gray">LOCAL DRAFT</span></div>
+      <p>Catat observasi pencarian manual dengan kondisi yang dapat dibandingkan. Draft ini belum menulis canonical state dan tidak menjadi keputusan ilmiah.</p>
+      <div class="benchmark-grid">
+        <label>Source / provider<select id="bench-source"><option value="openalex">OpenAlex</option></select></label>
+        <label>Channel HUMAN<select id="bench-channel"><option>Web UI</option><option>Export</option><option>Other</option></select></label>
+        <label>Waktu pencarian<input id="bench-time" type="datetime-local"></label>
+        <label>Provider reported total<input id="bench-total" type="number" min="0" placeholder="Contoh: 143"></label>
+        <label>HUMAN captured count<input id="bench-captured" type="number" min="0" placeholder="Contoh: 137"></label>
+      </div>
+      <label>Exact query yang digunakan<textarea id="bench-query" rows="4" placeholder="Salin query persis seperti yang dijalankan di provider."></textarea></label>
+      <label>Filters / sort / pagination / catatan kondisi<textarea id="bench-params" rows="3" placeholder="Contoh: no year filter; relevance sort; web UI."></textarea></label>
+      <label>Captured identifiers (opsional, satu DOI/OpenAlex ID per baris)<textarea id="bench-members" rows="5" placeholder="W3139363371&#10;10.1016/j.giq.2021.101577"></textarea></label>
+      <div class="explorer-actions"><button id="bench-preview" class="primary-action" type="button">Preview benchmark</button></div>
+      <div id="bench-result" class="callout">Belum ada HUMAN observation. Tanpa member identifiers, overlap akan tetap NOT_AVAILABLE.</div>
+    </section>
+
+    <section id="start" class="panel explorer-start-panel">
+      <div class="panel-header"><div><p class="eyebrow">Research interest</p><h2>Apa yang ingin Anda pahami?</h2></div><span class="state gray">FOUNDATION</span></div>
+      <p>Entry experience ini belum menulis canonical scientific state. Pembuatan exploration session akan diaktifkan hanya setelah workflow HUMAN dan provenance-nya diverifikasi.</p>
+      <label class="explorer-interest-label">Ide / fenomena / masalah awal
+        <textarea id="explorer-interest" rows="5" placeholder="Contoh: Saya ingin memahami bagaimana AI digunakan dalam digital government, termasuk risiko, governance, dan explainability."></textarea>
+      </label>
+      <div class="explorer-actions">
+        <button class="primary-action" type="button" disabled aria-disabled="true">Mulai observasi — belum diaktifkan</button>
+        <a class="secondary-action" href="index.html">Pilih project yang sudah ada</a>
+      </div>
+      <div class="callout">Canonical state saat ini: <strong>NOT_RECORDED</strong> untuk project lama tidak berarti eksplorasi tidak pernah terjadi atau coverage lengkap.</div>
+    </section>
+
+    <footer class="explorer-footer">GFPROJCLAW · Research Explorer is the Stage 1 researcher surface. Admin Copilot remains an operational plane, not a research stage.</footer>
+  </main>
+  <script src="research-workspace.js?v=0.11.0"></script>
+</body>
+</html>
