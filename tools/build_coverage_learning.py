@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+import argparse,json
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--corpus',required=True);p.add_argument('--landscape',required=True);p.add_argument('--output',required=True);a=p.parse_args()
+ c=json.load(open(a.corpus));l=json.load(open(a.landscape));rows=c.get('records') or []
+ out={'mode':'COVERAGE_AND_HUMAN_LEARNING_TRIAL','coverage':{'searched_sources':['OpenAlex'],'not_searched_sources':['Crossref whole-bounded metadata','ScienceDirect','other domain indexes'],'provider_reported_total':c.get('provider_reported_total'),'raw_retrieved_count':c.get('raw_retrieved_count',c.get('retrieved_count')),'deduplicated_count':len(rows),'retrieval_complete_against_provider_reported_total':c.get('complete_against_reported_total'),'missing_doi':sum(not r.get('doi') for r in rows),'missing_title':sum(not r.get('title') for r in rows),'abstracts_retrieved':False,'full_text_checked':False},'blind_spot_statement':'Absence from this observed OpenAlex/query/time-bounded corpus is not evidence of absence from research.','observed_areas':[x.get('term') for x in l.get('observed_areas') or []],'human_learning_prompts':['What did I learn from this landscape?','What surprised me?','Which observed areas need deeper exploration?','What remains uncertain?','Should I narrow, broaden, branch, or keep the current scope?'],'human_decision_options':['NARROW','BROADEN','BRANCH','KEEP_SCOPE','RECONSIDER_QUERY','INSPECT_MORE'],'canonical_write':False,'scientific_decision':False}
+ json.dump(out,open(a.output,'w'),ensure_ascii=False,indent=2);print(json.dumps({'coverage':out['coverage'],'human_decision_options':out['human_decision_options']},indent=2))
+if __name__=='__main__':main()
