@@ -23,3 +23,6 @@ for x in ["/api/trial/research-value/","deduplicated_researcher_landscape.json",
 for x in ["Observed whole-bounded landscape","Coverage & HUMAN learning","HUMAN decides"]:assert x in html,x
 for x in ["showTrialArea","exact title-term members","not a machine scientific decision"]:assert x in js,x
 print("RESEARCHER_TRIAL_SURFACE_PASS")
+audit=Path('tools/audit_research_value_trial.py').read_text()
+for x in ['raw_coverage_complete','paper_inspector_covers_corpus','why_members_are_corpus_members','why_has_provenance','no_scientific_decision','no_canonical_write']:assert x in audit,x
+print('RESEARCH_VALUE_EXECUTABLE_AUDIT_CONTRACT_PASS')
