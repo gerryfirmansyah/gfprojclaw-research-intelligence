@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GFPROJCLAW Research Copilot</title>
-  <link rel="stylesheet" href="styles.css?v=0.17.7" />
+  <link rel="stylesheet" href="styles.css?v=0.17.8" />
 </head>
 <body>
   <div class="app-shell">
@@ -65,6 +65,13 @@
           <span id="prototype-version" class="sync-status">Prototype v0.17.1 · Indonesian presentation layer</span>
         </div>
       </header>
+
+      <section id="explorer-handoff" class="card real-surface" hidden>
+        <div class="panel-header"><div><p class="eyebrow">DARI RESEARCH EXPLORER</p><h2 id="handoff-title">Konteks area terpilih</h2></div><span class="state blue">NON-CANONICAL CONTEXT</span></div>
+        <div id="handoff-summary" class="callout">Konteks Explorer belum tersedia.</div>
+        <div class="advice-grid"><div class="advice-card"><strong>MENGAPA area ini dibawa</strong><p id="handoff-why"></p></div><div class="advice-card"><strong>Apa yang sudah diamati</strong><p id="handoff-observed"></p></div><div class="advice-card"><strong>Catatan HUMAN</strong><p id="handoff-human"></p></div><div class="advice-card"><strong>Langkah Copilot berikutnya</strong><p>Gunakan konteks ini untuk reasoning dan inspeksi lebih dalam. Jangan menganggap area ini relevan, gap, novelty, atau evidence tanpa keputusan HUMAN.</p></div></div>
+        <div class="callout warning">Konteks handoff ini hanya berasal dari eksplorasi. Belum ada canonical write dan belum ada keputusan ilmiah.</div>
+      </section>
 
       <section id="view-today" class="view active-view">
         <div class="page-heading">

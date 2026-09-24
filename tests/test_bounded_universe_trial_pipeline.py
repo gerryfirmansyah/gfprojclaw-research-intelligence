@@ -36,3 +36,9 @@ for x in ['Saran Riset','MENGAPA → Saran → paper anggota yang tepat','trial-
 for x in ['Apa yang kami amati','Mengapa ini mungkin penting','Apa yang perlu diperiksa berikutnya','Pertanyaan untuk Anda','Frekuensi saja tidak membuktikan relevansi']:assert x in js,x
 for x in ['trial-paper-box','max-height:560px','overflow:auto']:assert x in css,x
 print('HUMAN_ADVICE_EXPERIMENT_CONTRACT_PASS')
+html=Path('prototype/explorer.html').read_text();js=Path('prototype/explorer.js').read_text();copilot_html=Path('prototype/index.html').read_text();copilot_js=Path('prototype/app.js').read_text()
+for x in ['AREA DEEP DIVE','Bawa area ini ke Research Copilot','deep-dive-summary']:assert x in html,x
+for x in ['GFPROJCLAW_EXPLORER_HANDOFF_V0','gfprojclaw-explorer-handoff','index.html?from=explorer&view=handoff']:assert x in js,x
+for x in ['DARI RESEARCH EXPLORER','NON-CANONICAL CONTEXT','Konteks handoff ini hanya berasal dari eksplorasi']:assert x in copilot_html,x
+for x in ['renderExplorerHandoff','gfprojclaw-explorer-handoff','Provenance tetap dapat ditelusuri ke Explorer.']:assert x in copilot_js,x
+print('AREA_DEEP_DIVE_COPILOT_HANDOFF_PASS')

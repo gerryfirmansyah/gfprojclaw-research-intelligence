@@ -759,3 +759,16 @@ window.addEventListener("gfprojclaw-language-change", () => {
   const dark = document.documentElement.dataset.theme === "dark";
   if (themeToggle) themeToggle.textContent = `${dark ? "☀️" : "🌙"} ${window.GF_I18N.t(dark ? "light" : "dark")}`;
 });
+
+function renderExplorerHandoff(){
+ const box=document.getElementById("explorer-handoff");if(!box)return;
+ const params=new URLSearchParams(window.location.search);if(params.get("from")!=="explorer")return;
+ let h=null;try{h=JSON.parse(sessionStorage.getItem("gfprojclaw-explorer-handoff")||"null");}catch(_){h=null;}
+ box.hidden=false;if(!h){document.getElementById("handoff-summary").textContent="Konteks Explorer tidak ditemukan pada sesi browser ini. Kembali ke Research Explorer dan pilih area lagi.";return;}
+ document.getElementById("handoff-title").textContent=`Area terpilih: ${h.area}`;
+ document.getElementById("handoff-summary").innerHTML=`<strong>${escapeHtml(h.member_count)} anggota teramati</strong> · ${escapeHtml(h.time_boundary)} · ${escapeHtml(h.verification?.provider||"provider tidak tercatat")}<br><small>Query: ${escapeHtml(h.query)}</small>`;
+ document.getElementById("handoff-why").textContent=h.why||"Belum tersedia.";
+ document.getElementById("handoff-observed").textContent=`${h.supporting_observation?.observed_title_count||h.member_count} anggota tepat berdasarkan istilah pada judul. Provenance tetap dapat ditelusuri ke Explorer.`;
+ document.getElementById("handoff-human").textContent=h.human_learning_note||"Belum ada catatan HUMAN dari Explorer.";
+}
+renderExplorerHandoff();
