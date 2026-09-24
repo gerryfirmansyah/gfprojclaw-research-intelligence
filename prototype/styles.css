@@ -242,3 +242,4 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 @media(max-width:1050px){#opportunity-analysis .screening-lenses{grid-template-columns:1fr 1fr}}
 #opportunity-analysis .screening-lens .lens-advice{display:block;font-size:14px;line-height:1.45;font-weight:500;margin-top:7px;white-space:normal}
 #screen-summary{margin-top:14px}#analyze-selected{margin-top:12px;font-size:15px;padding:11px 16px}.analysis-sequence{margin-top:14px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+.analysis-roadmap{margin-top:14px;padding:14px 18px;border-left:4px solid #2563eb;background:#f8fafc;border-radius:8px}.analysis-roadmap ol{margin:10px 0 0 20px;padding:0}.analysis-roadmap li{margin:7px 0;line-height:1.45}#confirm-screen:not(:disabled){font-weight:750}.screening-lens .lens-advice{font-size:15px!important;line-height:1.5!important}
