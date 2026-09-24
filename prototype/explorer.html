@@ -38,7 +38,7 @@
     </section>
 
     <section id="seed-universe" class="panel explorer-start-panel">
-      <div class="panel-header"><div><p class="eyebrow">Seed → Research Universe</p><h2>Dari paper awal, apa yang dapat dieksplorasi?</h2></div><span id="seed-universe-state" class="state gray">LOADING</span></div>
+      <div class="panel-header"><div><p class="eyebrow">Seed → Research Universe</p><h2>Dari paper awal, apa yang dapat dieksplorasi?</h2></div><span id="seed-universe-state" class="state gray">MEMUAT</span></div>
       <p>GFPROJCLAW memperlakukan paper project sebagai <strong>seed</strong>, bukan sebagai semesta riset. Opsi di bawah harus dapat ditelusuri kembali ke paper pemicunya sebelum HUMAN memilih atau mengubah query.</p>
       <label class="explorer-interest-label">Project yang menjadi seed
         <select id="explorer-project"></select>
@@ -73,36 +73,36 @@
       </section>
 
     <section id="trial-landscape" class="panel explorer-start-panel">
-      <div class="panel-header"><div><p class="eyebrow">Research Value Trial · SEE → MAP → WHY → VERIFY</p><h2>Observed whole-bounded landscape</h2></div><span id="trial-state" class="state gray">LOADING</span></div>
-      <div id="trial-coverage" class="callout">Memuat trial non-canonical…</div>
+      <div class="panel-header"><div><p class="eyebrow">Uji Nilai Riset · LIHAT → PETAKAN → MENGAPA → VERIFIKASI</p><h2>Lanskap seluruh semesta terbatas yang teramati</h2></div><span id="trial-state" class="state gray">MEMUAT</span></div>
+      <div id="trial-coverage" class="callout">Memuat uji non-canonical…</div>
       <div id="trial-years" class="trial-metrics"></div>
-      <h3>Observed areas — machine navigation, not scientific truth</h3>
+      <h3>Area teramati — navigasi mesin, bukan kebenaran ilmiah</h3>
       <div id="trial-areas" class="trial-area-grid"></div>
-      <div id="trial-area-detail" class="callout">Pilih area untuk melihat WHY → Advice → exact member papers.</div>
+      <div id="trial-area-detail" class="callout">Pilih area untuk melihat MENGAPA → Saran → paper anggota yang tepat.</div>
       <div id="trial-advice" class="trial-advice">
-        <h3>Research Advice</h3>
-        <p>Pilih observed area untuk mendapatkan advice inspeksi. Advice adalah navigasi berbasis observasi, bukan keputusan ilmiah.</p>
+        <h3>Saran Riset</h3>
+        <p>Pilih area teramati untuk mendapatkan saran pemeriksaan. Saran adalah navigasi berbasis observasi, bukan keputusan ilmiah.</p>
       </div>
-      <div class="paper-inspector-head"><div><h3>Paper Inspector</h3><p class="explorer-muted">Exact members untuk area terpilih. Scroll di dalam box; bukan ranking paper.</p></div><span id="trial-paper-count" class="state gray">0 SHOWN</span></div>
+      <div class="paper-inspector-head"><div><h3>Pemeriksa Paper</h3><p class="explorer-muted">Paper anggota yang tepat untuk area terpilih. Gulir di dalam kotak; ini bukan peringkat paper.</p></div><span id="trial-paper-count" class="state gray">0 DITAMPILKAN</span></div>
       <div id="trial-papers" class="explorer-seed-list trial-paper-box"></div>
-      <h3>Coverage & HUMAN learning</h3>
-      <div id="trial-blindspots" class="callout">Memuat blind spots…</div>
+      <h3>Cakupan & pembelajaran HUMAN</h3>
+      <div id="trial-blindspots" class="callout">Memuat titik buta…</div>
       <label class="explorer-interest-label">Apa yang Anda pelajari / apa yang masih tidak pasti?
-        <textarea id="trial-learning" rows="4" placeholder="Catatan HUMAN lokal; belum menulis canonical scientific state."></textarea>
+        <textarea id="trial-learning" rows="4" placeholder="Catatan HUMAN lokal; belum menulis status ilmiah canonical."></textarea>
       </label>
       <div id="trial-decisions" class="explorer-actions"></div>
-      <div id="trial-decision-state" class="callout">Belum ada keputusan scope. HUMAN decides.</div>
-      <h3>HUMAN Acceptance Gate</h3>
-      <p class="explorer-muted">Acceptance hanya dapat diberikan oleh HUMAN setelah inspeksi. Sistem tidak dapat menerima dirinya sendiri.</p>
+      <div id="trial-decision-state" class="callout">Belum ada keputusan scope. HUMAN yang memutuskan.</div>
+      <h3>Gerbang Penerimaan HUMAN</h3>
+      <p class="explorer-muted">Penerimaan hanya dapat diberikan oleh HUMAN setelah pemeriksaan. Sistem tidak dapat menerima dirinya sendiri.</p>
       <div class="acceptance-grid">
-        <label><input id="accept-landscape" type="checkbox"> Landscape membantu saya memahami ruang riset.</label>
-        <label><input id="accept-why" type="checkbox"> WHY membantu saya memahami mengapa area/paper ditampilkan.</label>
-        <label><input id="accept-trace" type="checkbox"> Saya dapat menelusuri WHY ke paper dan source/DOI.</label>
-        <label><input id="accept-limits" type="checkbox"> Coverage dan blind spots cukup jelas.</label>
+        <label><input id="accept-landscape" type="checkbox"> Lanskap membantu saya memahami ruang riset.</label>
+        <label><input id="accept-why" type="checkbox"> MENGAPA membantu saya memahami alasan area/paper ditampilkan.</label>
+        <label><input id="accept-trace" type="checkbox"> Saya dapat menelusuri MENGAPA ke paper dan sumber/DOI.</label>
+        <label><input id="accept-limits" type="checkbox"> Cakupan dan titik buta cukup jelas.</label>
       </div>
       <label class="explorer-interest-label">Bukti / alasan penilaian HUMAN<textarea id="accept-rationale" rows="4" placeholder="Tuliskan apa yang berguna, membingungkan, atau masih kurang."></textarea></label>
-      <div class="explorer-actions"><button id="accept-preview" class="primary-action" type="button">Evaluasi readiness untuk HUMAN acceptance</button></div>
-      <div id="accept-result" class="callout">PENDING · HUMAN belum menyelesaikan acceptance review.</div>
+      <div class="explorer-actions"><button id="accept-preview" class="primary-action" type="button">Evaluasi kesiapan untuk penerimaan HUMAN</button></div>
+      <div id="accept-result" class="callout">MENUNGGU · HUMAN belum menyelesaikan tinjauan penerimaan.</div>
     </section>
 
     <section id="discovery-benchmark" class="panel explorer-start-panel">
@@ -137,6 +137,6 @@
 
     <footer class="explorer-footer">GFPROJCLAW · Research Explorer is the Stage 1 researcher surface. Admin Copilot remains an operational plane, not a research stage.</footer>
   </main>
-  <script src="explorer.js?v=0.8.0"></script>
+  <script src="explorer.js?v=0.9.0"></script>
 </body>
 </html>
