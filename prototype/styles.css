@@ -206,3 +206,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #handoff-retrieval-brief{margin-top:14px}#handoff-retrieval-brief input[type=text]{width:100%;box-sizing:border-box;margin:8px 0}
 
 #handoff-reasoning-trace{margin-top:14px}.reasoning-trace-list li{margin:10px 0}.reasoning-trace-list small{opacity:.8}
+
+#handoff-reflection{margin-top:14px}#handoff-reflection label{display:block;margin:10px 0}#handoff-reflection textarea,#handoff-reflection select{display:block;width:100%;box-sizing:border-box;margin-top:6px}
