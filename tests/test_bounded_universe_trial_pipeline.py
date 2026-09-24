@@ -26,3 +26,8 @@ print("RESEARCHER_TRIAL_SURFACE_PASS")
 audit=Path('tools/audit_research_value_trial.py').read_text()
 for x in ['raw_coverage_complete','paper_inspector_covers_corpus','why_members_are_corpus_members','why_has_provenance','no_scientific_decision','no_canonical_write']:assert x in audit,x
 print('RESEARCH_VALUE_EXECUTABLE_AUDIT_CONTRACT_PASS')
+html=Path('prototype/explorer.html').read_text();js=Path('prototype/explorer.js').read_text();protocol=Path('docs/j16/research-value-trial-human-acceptance-protocol-v0.md').read_text()
+for x in ['HUMAN Acceptance Gate','accept-landscape','accept-why','accept-trace','accept-limits','accept-rationale']:assert x in html,x
+for x in ['READY FOR HUMAN ACCEPTANCE RECORD','cannot self-accept scientific usefulness']:assert x in js,x
+for x in ['ENGINE FREEZE EXCEPT ACCEPTANCE-BLOCKING DEFECTS','ACCEPT','PARTIAL','REJECT / REWORK','system MUST NOT assign the verdict automatically']:assert x in protocol,x
+print('HUMAN_ACCEPTANCE_GATE_CONTRACT_PASS')

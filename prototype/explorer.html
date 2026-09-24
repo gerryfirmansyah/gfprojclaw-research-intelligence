@@ -88,6 +88,17 @@
       </label>
       <div id="trial-decisions" class="explorer-actions"></div>
       <div id="trial-decision-state" class="callout">Belum ada keputusan scope. HUMAN decides.</div>
+      <h3>HUMAN Acceptance Gate</h3>
+      <p class="explorer-muted">Acceptance hanya dapat diberikan oleh HUMAN setelah inspeksi. Sistem tidak dapat menerima dirinya sendiri.</p>
+      <div class="acceptance-grid">
+        <label><input id="accept-landscape" type="checkbox"> Landscape membantu saya memahami ruang riset.</label>
+        <label><input id="accept-why" type="checkbox"> WHY membantu saya memahami mengapa area/paper ditampilkan.</label>
+        <label><input id="accept-trace" type="checkbox"> Saya dapat menelusuri WHY ke paper dan source/DOI.</label>
+        <label><input id="accept-limits" type="checkbox"> Coverage dan blind spots cukup jelas.</label>
+      </div>
+      <label class="explorer-interest-label">Bukti / alasan penilaian HUMAN<textarea id="accept-rationale" rows="4" placeholder="Tuliskan apa yang berguna, membingungkan, atau masih kurang."></textarea></label>
+      <div class="explorer-actions"><button id="accept-preview" class="primary-action" type="button">Evaluasi readiness untuk HUMAN acceptance</button></div>
+      <div id="accept-result" class="callout">PENDING · HUMAN belum menyelesaikan acceptance review.</div>
     </section>
 
     <section id="discovery-benchmark" class="panel explorer-start-panel">
@@ -122,6 +133,6 @@
 
     <footer class="explorer-footer">GFPROJCLAW · Research Explorer is the Stage 1 researcher surface. Admin Copilot remains an operational plane, not a research stage.</footer>
   </main>
-  <script src="explorer.js?v=0.6.0"></script>
+  <script src="explorer.js?v=0.7.0"></script>
 </body>
 </html>

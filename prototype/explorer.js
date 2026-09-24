@@ -68,3 +68,10 @@ async function loadResearchValueTrial(){
  }catch(e){trialState.textContent="NOT_AVAILABLE";trialCoverage.textContent=`Trial landscape tidak tersedia: ${e.message}`;}
 }
 loadResearchValueTrial();
+
+const acceptPreview=document.getElementById("accept-preview"),acceptResult=document.getElementById("accept-result");
+if(acceptPreview)acceptPreview.onclick=()=>{
+ const ids=["accept-landscape","accept-why","accept-trace","accept-limits"],passed=ids.filter(id=>document.getElementById(id)?.checked).length,rationale=document.getElementById("accept-rationale")?.value.trim()||"";
+ if(passed<4||!rationale){acceptResult.innerHTML=`<strong>PENDING</strong> · ${passed}/4 acceptance checks confirmed. Rationale HUMAN ${rationale?"recorded":"required"}.<br><small>GFPROJCLAW cannot self-accept scientific usefulness.</small>`;return;}
+ acceptResult.innerHTML=`<strong>READY FOR HUMAN ACCEPTANCE RECORD</strong> · 4/4 checks confirmed with rationale.<br><small>This local preview is not canonical acceptance. HUMAN must explicitly record the final verdict.</small>`;
+};
