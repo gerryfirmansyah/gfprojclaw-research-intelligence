@@ -42,3 +42,29 @@ function renderProgressiveFunnel(x){
  set("f-human",retrieved?"NOT_RECORDED":"NOT_RUN");
  set("f-project","NOT_AVAILABLE");
 }
+
+const trialState=document.getElementById("trial-state"),trialCoverage=document.getElementById("trial-coverage"),trialYears=document.getElementById("trial-years"),trialAreas=document.getElementById("trial-areas"),trialAreaDetail=document.getElementById("trial-area-detail"),trialPapers=document.getElementById("trial-papers"),trialBlindspots=document.getElementById("trial-blindspots"),trialDecisions=document.getElementById("trial-decisions"),trialDecisionState=document.getElementById("trial-decision-state");
+let trialWhy=null,trialPaperMap=new Map();
+function renderTrialPapers(members){
+ trialPapers.innerHTML=(members||[]).slice(0,30).map(m=>{const p=trialPaperMap.get(m.openalex_id)||m;return `<article class="explorer-seed"><strong>${esc(p.title||"TITLE NOT_AVAILABLE")}</strong><p>${esc(p.publication_year||"NOT_RECORDED")} · ${esc(p.venue||"VENUE NOT_RECORDED")} · DOI ${esc(p.doi||"NOT_AVAILABLE")}</p><div class="trial-paper-links">${p.source_url?`<a href="${esc(p.source_url)}" target="_blank" rel="noopener">OpenAlex ↗</a>`:""}${p.doi_url?`<a href="${esc(p.doi_url)}" target="_blank" rel="noopener">DOI ↗</a>`:""}</div><small>Abstract: ${esc(p.abstract_state||"NOT_RETRIEVED_IN_THIS_TRIAL")} · Full text: ${esc(p.full_text_state||"NOT_CHECKED")}</small></article>`}).join("")||'<div class="callout">Member paper NOT_AVAILABLE.</div>';
+}
+function showTrialArea(term){
+ const t=(trialWhy?.traces||[]).find(x=>x.area===term);if(!t)return;
+ trialAreaDetail.innerHTML=`<strong>WHY ${esc(term)}</strong><br>${esc(t.why_shown)}<br><strong>Supporting observation:</strong> ${esc(t.supporting_observation?.observed_title_count)} exact title-term members.<br><small>Machine observation only · HUMAN must inspect abstract/method/context.</small>`;
+ renderTrialPapers(t.members);
+}
+async function loadResearchValueTrial(){
+ if(!trialState)return;
+ try{
+  const [lr,wr,pr,cr]=await Promise.all(["landscape","why","papers","coverage"].map(x=>fetch(`${API_BASE}/api/trial/research-value/${x}`,{cache:"no-store"})));if([lr,wr,pr,cr].some(r=>!r.ok))throw new Error("trial payload unavailable");
+  const [l,w,p,c]=await Promise.all([lr.json(),wr.json(),pr.json(),cr.json()]);trialWhy=w;trialPaperMap=new Map((p.papers||[]).map(x=>[x.openalex_id,x]));
+  trialState.textContent="WHOLE BOUNDED";trialState.className="state green";
+  const cv=l.coverage||{};trialCoverage.innerHTML=`<strong>${esc(cv.raw_retrieved_count)} / ${esc(cv.provider_reported_total)} raw OpenAlex records retrieved</strong> · ${esc(cv.retrieved_count)} deduplicated members<br><small>Query/time-bounded provider observation · not scientifically relevant count · canonical write: false</small>`;
+  trialYears.innerHTML=Object.entries(l.year_landscape||{}).sort().map(([y,n])=>`<article class="trial-metric"><span>${esc(y)}</span><strong>${esc(n)}</strong></article>`).join("");
+  trialAreas.innerHTML=(l.observed_areas||[]).map(a=>`<button class="trial-area" type="button" data-term="${esc(a.term)}"><strong>${esc(a.term)}</strong><br><small>${esc(a.observed_count)} title observations</small></button>`).join("");trialAreas.querySelectorAll("button").forEach(b=>b.onclick=()=>showTrialArea(b.dataset.term));
+  const cov=c.coverage||{};trialBlindspots.innerHTML=`<strong>Observed:</strong> ${esc((cov.searched_sources||[]).join(", "))}<br><strong>Not searched whole-bounded:</strong> ${esc((cov.not_searched_sources||[]).join(", "))}<br>${esc(c.blind_spot_statement)}<br><small>Abstracts retrieved: ${esc(cov.abstracts_retrieved)} · Full text checked: ${esc(cov.full_text_checked)}</small>`;
+  trialDecisions.innerHTML=(c.human_decision_options||[]).map(x=>`<button class="secondary-action" type="button" data-decision="${esc(x)}">${esc(x.replaceAll("_"," "))}</button>`).join("");trialDecisions.querySelectorAll("button").forEach(b=>b.onclick=()=>{trialDecisionState.innerHTML=`<strong>Local HUMAN scope reflection: ${esc(b.dataset.decision)}</strong><br><small>Preview only · no canonical write · not a machine scientific decision.</small>`});
+  if(l.observed_areas?.length)showTrialArea(l.observed_areas[0].term);
+ }catch(e){trialState.textContent="NOT_AVAILABLE";trialCoverage.textContent=`Trial landscape tidak tersedia: ${e.message}`;}
+}
+loadResearchValueTrial();

@@ -47,6 +47,15 @@ class Handler(SimpleHTTPRequestHandler):
         if path == "/api/context":
             self.send_json(list_context())
             return
+        if path.startswith("/api/trial/research-value/"):
+            name=path.rsplit("/",1)[-1]
+            allowed={"landscape":"deduplicated_researcher_landscape.json","why":"deduplicated_why_trace.json","papers":"deduplicated_paper_inspector.json","coverage":"deduplicated_coverage_learning.json"}
+            if name not in allowed:
+                self.send_json({"error":"Not found"},status=404); return
+            trial=ROOT.parent/"data"/"research_value_trial"/allowed[name]
+            if not trial.exists():
+                self.send_json({"error":"TRIAL_NOT_AVAILABLE","scientific_decision":False},status=404); return
+            self.send_json(json.loads(trial.read_text())); return
         parts = path.strip("/").split("/")
         if len(parts) == 4 and parts[0] == "api" and parts[1] == "projects" and parts[3] == "daily-attention":
             try:

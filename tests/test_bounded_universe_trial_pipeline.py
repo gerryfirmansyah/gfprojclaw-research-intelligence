@@ -17,3 +17,9 @@ for f,required in {
 }.items():
  s=Path(f).read_text()
  for x in required: assert x in s,(f,x)
+
+server=Path("prototype/api/server.py").read_text();html=Path("prototype/explorer.html").read_text();js=Path("prototype/explorer.js").read_text()
+for x in ["/api/trial/research-value/","deduplicated_researcher_landscape.json","deduplicated_why_trace.json","deduplicated_paper_inspector.json","deduplicated_coverage_learning.json"]:assert x in server,x
+for x in ["Observed whole-bounded landscape","Coverage & HUMAN learning","HUMAN decides"]:assert x in html,x
+for x in ["showTrialArea","exact title-term members","not a machine scientific decision"]:assert x in js,x
+print("RESEARCHER_TRIAL_SURFACE_PASS")
