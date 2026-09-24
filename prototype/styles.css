@@ -222,3 +222,21 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #opportunity-analysis .not-verified{font-size:12px;white-space:nowrap;opacity:.68;font-weight:500}
 @media(min-width:1200px){#opportunity-analysis{width:calc(100vw - 72px);max-width:1760px;position:relative;left:50%;transform:translateX(-50%)}}
 .screening-lenses{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:14px 0}.screening-lens{text-align:left;min-height:76px}.screening-lens small{white-space:normal}
+/* HUMAN screening readability acceptance */
+#opportunity-analysis .screening-lenses{grid-template-columns:repeat(3,minmax(280px,1fr));gap:12px}
+#opportunity-analysis .screening-lens{padding:14px 16px;min-height:92px;border:1px solid var(--border);border-radius:12px;line-height:1.3}
+#opportunity-analysis .screening-lens strong{display:block;font-size:14px;margin-bottom:7px}
+#opportunity-analysis .screening-lens.selected{outline:3px solid #2563eb;background:#eff6ff}
+#opportunity-analysis #screening-table .table-wrap{max-height:66vh;overflow:auto}
+#opportunity-analysis #screening-table table{min-width:1320px;table-layout:fixed}
+#opportunity-analysis #screening-table th,#opportunity-analysis #screening-table td{padding:12px 14px;vertical-align:top;line-height:1.35}
+#opportunity-analysis #screening-table th:nth-child(1),#opportunity-analysis #screening-table td:nth-child(1){width:70px}
+#opportunity-analysis #screening-table th:nth-child(2),#opportunity-analysis #screening-table td:nth-child(2){width:440px;min-width:440px}
+#opportunity-analysis #screening-table th:nth-child(3),#opportunity-analysis #screening-table td:nth-child(3){width:85px}
+#opportunity-analysis #screening-table th:nth-child(4),#opportunity-analysis #screening-table td:nth-child(4){width:260px}
+#opportunity-analysis #screening-table th:nth-child(5),#opportunity-analysis #screening-table td:nth-child(5){width:150px}
+#opportunity-analysis #screening-table th:nth-child(6),#opportunity-analysis #screening-table td:nth-child(6){width:180px}
+#opportunity-analysis #screening-table td:nth-child(2){font-weight:600;overflow-wrap:normal;word-break:normal}
+#opportunity-analysis #screening-table tr.human-picked td{background:#f0fdf4}
+#opportunity-analysis #screening-table tr.human-picked td:nth-child(2)::after{content:'  ✓ dipilih HUMAN';display:block;margin-top:5px;font-size:11px;font-weight:700}
+@media(max-width:1050px){#opportunity-analysis .screening-lenses{grid-template-columns:1fr 1fr}}
