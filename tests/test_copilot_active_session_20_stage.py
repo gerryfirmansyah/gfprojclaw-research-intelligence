@@ -20,7 +20,7 @@ checks=[
 ("17 old profile selector suppressed",'Active Research Session' in A and 'profileSelect.disabled=true' in A),
 ("18 old project selector suppressed",'Focused Investigation / IO aktif' in A and 'projectSelect.disabled=true' in A),
 ("19 noncanonical boundary explicit",'NON-CANONICAL sampai HUMAN membuat explicit scientific write/decision.' in A),
-("20 readable active-session surface",'.active-session-strip' in C and 'font-size:19px' in C and 'Prototype v0.19.0' in H),
+("20 readable active-session surface",'.active-session-strip' in C and 'font-size:19px' in C and 'Prototype v0.19.1' in H),
 ]
 for name,ok in checks:
     assert ok,name
