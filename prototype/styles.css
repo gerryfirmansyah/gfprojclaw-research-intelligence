@@ -321,3 +321,20 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 #explorer-handoff .copilot-evidence-table th{position:sticky;top:0;z-index:2;background:#14243a;color:#fff}
 #explorer-handoff .copilot-evidence-table strong,#explorer-handoff .copilot-evidence-table b{color:#fff}
 #explorer-handoff .copilot-evidence-table tr:last-child td{border-bottom:0}
+/* HUMAN PASS desktop readability: one-screen dashboard, readable type, internal table scrolling only. */
+@media (min-width:1181px){
+  .app-shell{grid-template-columns:210px minmax(0,1fr)}
+  .view{padding:22px 24px}
+  .page-heading h1{font-size:32px}.page-heading p{font-size:15px;line-height:1.5}
+  .nav-item{font-size:15px}.brand strong{font-size:15px}.brand span{font-size:12px}
+  .context-switchers label,.workspace-link,.theme-toggle{font-size:14px}
+  .coverage-pill{font-size:14px}
+  .metric-card{padding:16px}.metric-card span{font-size:14px}.metric-card strong{font-size:30px}.metric-card small{font-size:13px;line-height:1.4}
+  .panel-header h2{font-size:17px}.text-button{font-size:13px}
+  .change-main strong,.change-main>div,.paper-row strong,.health-row strong,.evolution-row strong,.telegram-row strong{font-size:14px}
+  .change-main small,.paper-row small,.journey-row small{font-size:13px}
+  .journey-row strong{font-size:14px}.table{font-size:14px}.state{font-size:11px}
+}
+/* Any data table owns its frame; the page itself must not widen. */
+.table-frame,.panel>.table-wrap,.card>.table-wrap,.callout>.table-wrap{width:100%;max-width:100%;max-height:62vh;overflow:auto;border:1px solid var(--border);border-radius:10px}
+.table-frame table,.panel>.table-wrap table,.card>.table-wrap table,.callout>.table-wrap table{min-width:1200px}
