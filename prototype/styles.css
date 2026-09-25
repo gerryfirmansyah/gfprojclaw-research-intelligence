@@ -272,3 +272,11 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .deep-io{display:flex;flex-direction:column;gap:7px}.deep-io details{padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:#f8fafc}.deep-io summary{cursor:pointer;font-weight:700}.deep-io.selected{outline:3px solid #2563eb;background:#eff6ff}.choose-io{margin-top:auto;padding:10px 12px;border:1px solid #2563eb;border-radius:8px;background:#fff;font-weight:750;cursor:pointer}.io-choice{margin:14px 0;padding:14px 16px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:8px}
 .focused-investigation{margin-top:16px;padding:18px;border:1px solid var(--border);border-radius:12px;background:#fff}.focused-investigation .table-wrap{overflow-x:auto;max-height:70vh}.focused-investigation table{min-width:2160px;table-layout:fixed}.focused-investigation th,.focused-investigation td{width:240px;min-width:240px;padding:12px 14px;vertical-align:top;line-height:1.45}.focused-investigation select{width:100%;padding:8px;border:1px solid var(--border);border-radius:7px}.focused-synthesis{margin-top:16px;padding:15px 17px;border-left:4px solid #2563eb;background:#f8fafc}.focused-balance{margin-top:12px;padding:12px;border-radius:8px;background:#eff6ff}.focused-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .research-workspace .workspace-banner{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:22px;padding:13px 24px;background:#fff;border-bottom:1px solid #dbe4f0;box-shadow:0 3px 12px #0f172a12}.research-workspace .workspace-banner strong{font-size:16px}.research-workspace .workspace-banner span{font-size:13px;color:#475569}.research-workspace .workspace-banner nav{margin-left:auto;font-size:13px;font-weight:700;color:#1d4ed8}.research-workspace .acceptance-gate,.research-workspace [id*="acceptance"]{display:none!important}
+/* Research Workspace: keep only the accepted HUMAN research journey visible. Legacy/trial capabilities remain in explorer.html. */
+.research-workspace #seed-universe,
+.research-workspace #progressive-retrieval,
+.research-workspace #deep-dive-actions,
+.research-workspace #research-flow-review,
+.research-workspace #discovery-verification,
+.research-workspace #research-interest {display:none!important}
+.research-workspace .workspace-hidden-legacy{display:none!important}
