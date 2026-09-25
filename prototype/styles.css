@@ -340,3 +340,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .table-frame table,.panel>.table-wrap table,.card>.table-wrap table,.callout>.table-wrap table{min-width:1200px}
 
 .focused-context{margin:0 0 16px;border-left:4px solid #60a5fa;background:#10243a;color:#eaf2ff;font-size:16px;line-height:1.5}.focused-context strong{font-size:18px;color:#fff}.focused-context small{color:#c5d5e8}
+
+.active-session-strip{margin:0 0 16px;padding:14px 16px;border:1px solid #31506f;border-left:5px solid #60a5fa;border-radius:10px;background:#10243a;color:#eaf2ff;font-size:16px;line-height:1.5}.active-session-strip strong{font-size:19px;color:#fff}.active-session-strip small{color:#c5d5e8}.active-session-card{border-color:#31506f;background:#0f1b2d}.active-session-table{margin-top:14px}

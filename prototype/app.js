@@ -162,6 +162,21 @@ function renderProjects() {
 }
 
 function renderDashboard() {
+  const sf=activeFocused();
+  if(sf){
+    const n=(sf.assessments||[]).length, set=(id,v,d)=>{const e=document.getElementById(id);if(e){e.querySelector("strong").textContent=v;e.querySelector("small").textContent=d;e.dataset.metricMembers="";}};
+    set("metric-papers",n,`Evidence aktif dari ${sf.io_id} · NON-CANONICAL`); set("metric-decisions",1,`HUMAN direction: ${sf.human_direction||"NOT_RECORDED"}`); set("metric-changes",0,"Belum ada canonical ChangeEvent dari sesi aktif"); set("metric-coverage",1,`Focused evidence set: ${n} paper; bounded context dipertahankan`); set("metric-radar",0,"Belum diproyeksikan: tidak ada ChangeEvent canonical");
+    const summary=`<div class="active-session-strip"><strong>${escapeHtml(sf.io_id)} · ${escapeHtml(sf.io_title)}</strong><br>${escapeHtml(sf.question)}<br><small>${sf.supports||0} mendukung · ${sf.challenges||0} menantang · ${sf.unclear||0} belum jelas · ${sf.not_reviewed||0} belum direview.</small></div>`;
+    document.getElementById("change-list").innerHTML=summary+`<p>Belum ada ChangeEvent canonical. State lama tidak dirender pada sesi ini.</p>`;
+    document.getElementById("opportunity-table").innerHTML=summary;
+    document.getElementById("paper-list").innerHTML=sessionEvidenceRows();
+    document.getElementById("evolution-mini").innerHTML=`<p>Focused Investigation selesai; canonical knowledge change belum dibuat.</p>`;
+    document.getElementById("telegram-mini").innerHTML=`<p>0 item sesi aktif — belum ada canonical ChangeEvent.</p>`;
+    document.getElementById("health-mini").innerHTML=`<p>Cakupan sesi: ${n} evidence pada Focused Investigation. Project coverage lama tidak dicampur.</p>`;
+    document.getElementById("journey-mini").innerHTML=`<div class="journey-row"><span class="r-code">IO</span><div><strong>Focused Investigation → Research Copilot</strong><small>Context aktif berasal dari keputusan HUMAN.</small></div><span class="state blue">ACTIVE</span></div>`;
+    const pill=document.getElementById("today-coverage-pill");if(pill)pill.textContent=`ACTIVE SESSION · ${sf.io_id} · ${n} evidence · NON-CANONICAL`;
+    bindOpenButtons(); return;
+  }
   document.getElementById("change-list").innerHTML = `<div class="change-row"><div class="change-main"><strong>Memuat ChangeEvent canonical…</strong><small>Status proyek tersimpan</small></div></div>`;
   loadTodayChanges();
 
@@ -576,6 +591,19 @@ async function loadProjectRadar() {
   }
 }
 
+function activeSession(){try{return JSON.parse(sessionStorage.getItem("gfprojclaw-explorer-handoff")||"null")}catch(_){return null}}
+function activeFocused(){return activeSession()?.selected_gap_opportunity?.focused_investigation||null}
+function sessionHeader(title,subtitle){const f=activeFocused();return commonHeader(title,subtitle,"real")+`<div class="active-session-strip"><strong>ACTIVE RESEARCH SESSION · ${escapeHtml(f?.io_id||"IO")}: ${escapeHtml(f?.io_title||"")}</strong><br>${escapeHtml(f?.question||"")}<br><small>NON-CANONICAL sampai HUMAN membuat explicit scientific write/decision.</small></div>`}
+function sessionEvidenceRows(filter=null){const f=activeFocused(),rows=(f?.assessments||[]).filter(filter||(()=>true));return `<div class="table-frame active-session-table"><table><thead><tr><th>Paper</th><th>Surfaced as</th><th>Assessment HUMAN</th><th>Catatan HUMAN</th></tr></thead><tbody>${rows.map(a=>`<tr><td>${escapeHtml(a.paper||"Paper")}</td><td>${escapeHtml(a.surfaced_as||"—")}</td><td>${escapeHtml(a.status||"NOT_REVIEWED")}</td><td>${escapeHtml(a.note||"—")}</td></tr>`).join("")||`<tr><td colspan="4">Tidak ada evidence pada state ini.</td></tr>`}</tbody></table></div>`}
+function renderActiveOpportunities(){const f=activeFocused();return sessionHeader("Peluang Riset","Investigation Opportunity yang benar-benar dipilih HUMAN pada Research Workspace.")+`<div class="card active-session-card"><h3>${escapeHtml(f.io_id)} · ${escapeHtml(f.io_title)}</h3><p><strong>Pertanyaan:</strong> ${escapeHtml(f.question)}</p><p><strong>Evidence balance:</strong> ${f.supports||0} mendukung · ${f.challenges||0} menantang · ${f.unclear||0} belum jelas.</p><div class="callout warning">Ini investigation direction aktif, bukan validated research gap atau novelty claim.</div></div>${sessionEvidenceRows()}`}
+function renderActiveEvidence(){return sessionHeader("Penjelajah Bukti","Hanya evidence set yang dibawa oleh IO aktif ditampilkan pada mode sesi ini.")+sessionEvidenceRows()}
+function renderActiveEvolution(){const f=activeFocused();return sessionHeader("Evolusi Pengetahuan","State perubahan untuk investigasi aktif; histori proyek lama tidak dicampur.")+`<div class="card active-session-card"><h3>Current reasoning state</h3><p>Focused Investigation telah menghasilkan assessment HUMAN: ${f.supports||0} mendukung · ${f.challenges||0} menantang · ${f.unclear||0} belum jelas · ${f.not_reviewed||0} belum direview.</p><p><strong>Canonical ChangeEvent:</strong> BELUM DIBUAT.</p><div class="callout warning">Tidak ada perubahan pengetahuan canonical yang dihalusinasikan dari handoff ini.</div></div>`}
+function renderActiveReview(){return sessionHeader("Tinjauan HUMAN","Assessment HUMAN aktual dari Focused Investigation.")+sessionEvidenceRows(a=>a.status!=="NOT_REVIEWED")+`<div class="callout">Assessment di atas berasal dari tindakan HUMAN pada Research Workspace; surfaced-as tetap provenance mesin, bukan verdict.</div>`}
+function renderActiveCoverage(){const h=activeSession(),f=activeFocused(),area=h?.selected_area||h?.area||{};return sessionHeader("Cakupan Riset","Cakupan yang benar-benar diketahui dari handoff aktif.")+`<div class="card active-session-card"><h3>Known session coverage</h3><p><strong>Evidence set Focused Investigation:</strong> ${(f.assessments||[]).length} paper.</p><p><strong>Area/trace:</strong> ${escapeHtml(h?.selected_gap_opportunity?.path?.join(" → ")||area?.path?.join?.(" → ")||"NOT_RECORDED")}</p><p><strong>Provider/corpus:</strong> ${escapeHtml(h?.provider||"OpenAlex / bounded trial context")}</p><div class="callout warning">Coverage canonical proyek lama sengaja tidak digabung ke sesi aktif. Ketiadaan pada evidence set bukan evidence of absence.</div></div>`}
+function renderActiveProfiles(){const h=activeSession(),f=activeFocused();return sessionHeader("Profil & Proyek","Research session aktif belum otomatis menjadi canonical Project baru.")+`<div class="card active-session-card"><h3>Session research context</h3><p><strong>IO:</strong> ${escapeHtml(f.io_id)} · ${escapeHtml(f.io_title)}</p><p><strong>Question:</strong> ${escapeHtml(f.question)}</p><p><strong>HUMAN direction:</strong> ${escapeHtml(f.human_direction||"NOT_RECORDED")}</p><p><strong>Canonical Project write:</strong> NOT_WRITTEN.</p><div class="callout warning">Profil/proyek lama tidak digunakan untuk mengisi fakta sesi baru. HUMAN menentukan kapan investigasi ini layak dibentuk menjadi Research Project/RQ.</div></div>`}
+function renderActiveTelegram(){return sessionHeader("Telegram Radar","Radar hanya boleh memproyeksikan ChangeEvent canonical.")+`<div class="card active-session-card"><h3>Projection state</h3><p><strong>0 item dari IO aktif.</strong></p><p>Focused Investigation belum menghasilkan canonical ChangeEvent, sehingga tidak ada item Telegram yang dirender untuk sesi ini.</p></div>`}
+const activeRenderers={opportunities:renderActiveOpportunities,evidence:renderActiveEvidence,evolution:renderActiveEvolution,review:renderActiveReview,coverage:renderActiveCoverage,profiles:renderActiveProfiles,telegram:renderActiveTelegram};
+
 const renderers = { journey:renderJourney, opportunities:renderOpportunities, evidence:renderEvidence, evolution:renderEvolution, review:renderReview, coverage:renderCoverage, profiles:renderProfiles, telegram:renderTelegram };
 
 function showView(name) {
@@ -587,15 +615,21 @@ function showView(name) {
   document.querySelectorAll(".nav-item").forEach(v => v.classList.toggle("active", v.dataset.view === name));
   const view = document.getElementById(`view-${name}`);
   if (!view) return;
-  if (name !== "today" && renderers[name]) view.innerHTML = renderers[name]();
+  const sessionMode=!!activeFocused();
+  if (name !== "today") {
+    const renderer=sessionMode&&activeRenderers[name]?activeRenderers[name]:renderers[name];
+    if(renderer) view.innerHTML=renderer();
+  }
   view.classList.add("active-view");
   view.scrollIntoView({block:"start"});
-  if (name === "evidence") loadProjectBukti();
-  if (name === "review") loadHumanReview();
-  if (name === "opportunities") loadProjectOpportunities();
-  if (name === "coverage") loadProjectCoverage();
-  if (name === "evolution") loadProjectChanges();
-  if (name === "telegram") loadProjectRadar();
+  if (!sessionMode) {
+    if (name === "evidence") loadProjectBukti();
+    if (name === "review") loadHumanReview();
+    if (name === "opportunities") loadProjectOpportunities();
+    if (name === "coverage") loadProjectCoverage();
+    if (name === "evolution") loadProjectChanges();
+    if (name === "telegram") loadProjectRadar();
+  }
 }
 
 function bindOpenButtons() {
@@ -625,8 +659,9 @@ fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) t
   const bindProjects = () => {
     const projects = rows.filter(r => r.profile_id === profileSelect.value);
     projectSelect.innerHTML = projects.map(r => `<option value="${r.project_id}">${r.project_name}</option>`).join("");
-    renderLatestPapers();
-    applyProfileTheme(rows);
+    if(activeFocused()){profileSelect.innerHTML='<option value="ACTIVE_SESSION">Active Research Session</option>';projectSelect.innerHTML='<option value="ACTIVE_IO">Focused Investigation / IO aktif</option>';profileSelect.disabled=true;projectSelect.disabled=true;}
+    else {profileSelect.disabled=false;projectSelect.disabled=false;renderLatestPapers();applyProfileTheme(rows);}
+
   };
   profileSelect.onchange = () => { bindProjects(); loadHumanReviewBadge(); const aktif = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || aktif === "today") renderDashboard(); else showView(active); };
   bindProjects();
