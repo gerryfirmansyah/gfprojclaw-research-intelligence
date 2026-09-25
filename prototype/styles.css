@@ -280,3 +280,7 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .research-workspace #discovery-verification,
 .research-workspace #research-interest {display:none!important}
 .research-workspace .workspace-hidden-legacy{display:none!important}
+/* Accepted workspace flow: generic advice/paper inspector are superseded by Screening Advice + HUMAN evidence selection. */
+.research-workspace #trial-advice,
+.research-workspace .paper-inspector-head,
+.research-workspace #trial-papers {display:none!important}
