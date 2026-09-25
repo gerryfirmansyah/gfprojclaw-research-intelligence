@@ -575,11 +575,17 @@ async function loadProjectRadar() {
 const renderers = { journey:renderJourney, opportunities:renderOpportunities, evidence:renderEvidence, evolution:renderEvolution, review:renderReview, coverage:renderCoverage, profiles:renderProfiles, telegram:renderTelegram };
 
 function showView(name) {
+  // The Explorer handoff is an arrival stage, not a permanent layer above every Copilot menu.
+  // Collapse it as soon as HUMAN navigates so the selected Copilot view becomes the visible stage.
+  const handoff = document.getElementById("explorer-handoff");
+  if (handoff && !handoff.hidden) { handoff.hidden = true; document.body.classList.add("copilot-handoff-collapsed"); }
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active-view"));
   document.querySelectorAll(".nav-item").forEach(v => v.classList.toggle("active", v.dataset.view === name));
   const view = document.getElementById(`view-${name}`);
+  if (!view) return;
   if (name !== "today" && renderers[name]) view.innerHTML = renderers[name]();
   view.classList.add("active-view");
+  view.scrollIntoView({block:"start"});
   if (name === "evidence") loadProjectBukti();
   if (name === "review") loadHumanReview();
   if (name === "opportunities") loadProjectOpportunities();
