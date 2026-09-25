@@ -299,3 +299,15 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .io-decision-gate{margin:18px 0 0;padding:14px 16px;border-top:1px solid var(--border);background:#f8fafc;border-radius:8px}.io-decision-gate p{margin:6px 0 10px}.copilot-focused-list{display:grid;gap:9px;margin-top:10px}.copilot-focused-list article{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff}.copilot-focused-list p{margin:6px 0 0}
 
 .workspace-current-flow{margin-top:18px;padding:12px 14px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:8px;max-width:760px;line-height:1.5}
+/* HUMAN decision surface: larger, high-contrast controls for Focused Synthesis. */
+.research-workspace .focused-synthesis{font-size:18px;line-height:1.6;padding:24px 28px}
+.research-workspace .focused-synthesis>strong{font-size:22px}
+.research-workspace .focused-synthesis>p{font-size:18px;margin:10px 0 18px}
+.research-workspace #summarize-focused{font-size:18px;min-height:54px;padding:14px 22px;color:#fff;background:#1d4ed8;border-color:#1d4ed8}
+.research-workspace .focused-balance{font-size:18px;line-height:1.6;padding:22px 24px}
+.research-workspace .focused-balance>strong,.research-workspace .focused-balance h4{font-size:22px}
+.research-workspace .focused-synthesis-reading{font-size:18px;line-height:1.65;padding:18px 20px}
+.research-workspace .focused-synthesis-reading>strong{font-size:21px}
+.research-workspace .focused-actions{gap:14px;margin-top:16px}
+.research-workspace .focused-actions button{font-size:18px;min-height:58px;padding:14px 24px}
+.research-workspace #focused-continue{color:#fff;background:#1d4ed8;border-color:#1d4ed8;opacity:1}
