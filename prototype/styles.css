@@ -311,3 +311,13 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .research-workspace .focused-actions{gap:14px;margin-top:16px}
 .research-workspace .focused-actions button{font-size:18px;min-height:58px;padding:14px 24px}
 .research-workspace #focused-continue{color:#fff;background:#1d4ed8;border-color:#1d4ed8;opacity:1}
+
+/* Copilot HUMAN-pass readability: evidence stays inside one viewport frame and scrolls horizontally. */
+#explorer-handoff .handoff-table-frame{color:#e5edf8;background:#0b1423;border:1px solid #31506f;border-left:4px solid #60a5fa;padding:14px 16px;max-width:100%;overflow:hidden}
+#explorer-handoff .handoff-table-hint{color:#b9c9dd;margin:6px 0 10px}
+#explorer-handoff .copilot-evidence-scroll{width:100%;max-height:52vh;overflow:auto;border:1px solid #31506f;border-radius:8px;background:#0f1b2d}
+#explorer-handoff .copilot-evidence-table{min-width:1500px;width:100%;border-collapse:collapse;table-layout:fixed;color:#e5edf8}
+#explorer-handoff .copilot-evidence-table th,#explorer-handoff .copilot-evidence-table td{width:375px;padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid #29425f;line-height:1.45;color:#e5edf8;background:#0f1b2d}
+#explorer-handoff .copilot-evidence-table th{position:sticky;top:0;z-index:2;background:#14243a;color:#fff}
+#explorer-handoff .copilot-evidence-table strong,#explorer-handoff .copilot-evidence-table b{color:#fff}
+#explorer-handoff .copilot-evidence-table tr:last-child td{border-bottom:0}
