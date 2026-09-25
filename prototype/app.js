@@ -342,8 +342,12 @@ function renderJourney() {
     <div class="stack"><div class="card dummy-surface"><h3>Contoh tindakan HUMAN — ILUSTRATIF</h3><div class="callout warning">Bukan tombol tindakan dan tidak menulis state apa pun. Contoh ini hanya menunjukkan jenis pemeriksaan yang mungkin relevan pada tahap R6.</div><ul><li>Bandingkan teori</li><li>Periksa mekanisme</li><li>Cari bukti pembanding</li><li>Tandai kebutuhan bukti tambahan</li></ul></div><div class="card"><h3>Dampak tahap terkini</h3><p>CE-0048 memengaruhi R4, R5, R6, R11, dan R12. Ini adalah sinyal perhatian, bukan transisi yang dipaksakan.</p></div></div></div>`;
 }
 
+function focusedHandoffState(){try{return JSON.parse(sessionStorage.getItem("gfprojclaw-explorer-handoff")||"null")?.selected_gap_opportunity?.focused_investigation||null}catch(_){return null}}
+function focusedContextBanner(label){const f=focusedHandoffState();return f?`<div class="callout focused-context"><strong>${escapeHtml(label)} · ${escapeHtml(f.io_id)} ${escapeHtml(f.io_title)}</strong><br>${escapeHtml(f.question)}<br><small>${(f.assessments||[]).length} evidence · ${f.supports||0} mendukung · ${f.challenges||0} menantang · konteks aktif NON-CANONICAL dari Research Workspace.</small></div>`:""}
+function focusedEvidenceTable(){const f=focusedHandoffState();if(!f)return"";return `<div class="table-frame"><table><thead><tr><th>Paper</th><th>Surfaced as</th><th>Assessment HUMAN</th><th>Catatan HUMAN</th></tr></thead><tbody>${(f.assessments||[]).map(a=>`<tr><td>${escapeHtml(a.paper||"Paper")}</td><td>${escapeHtml(a.surfaced_as||"—")}</td><td>${escapeHtml(a.status||"NOT_REVIEWED")}</td><td>${escapeHtml(a.note||"—")}</td></tr>`).join("")}</tbody></table></div>`}
+
 function renderOpportunities() {
-  return commonHeader("Peluang Riset", "Prioritas berbasis bukti untuk tinjauan ilmiah oleh HUMAN.", "real") + `
+  return commonHeader("Peluang Riset", "Investigation Opportunity aktif dari HUMAN; state canonical proyek ditampilkan terpisah sebagai konteks historis.", "real") + focusedContextBanner("IO aktif") + focusedEvidenceTable() + `
   <div class="callout warning">Prioritas hanya merupakan konteks saran. Ini tidak menetapkan kebaruan, signifikansi, kelayakan, penerimaan, atau keputusan ilmiah.</div>
   <div class="card real-surface"><h3>Peluang Riset <span class="data-badge real">DATA NYATA</span></h3><div id="real-gap-list">Memuat informasi peluang riset yang tersimpan…</div></div>
   <div class="detail-grid" style="margin-top:14px"><div class="card real-surface"><h3>Detail Objek Riset</h3><div id="real-gap-detail">Pilih peluang riset yang tersimpan.</div></div><div class="card real-surface"><h3>Bukti & Cakupan</h3><div id="real-gap-relationship">Konteks bukti belum dimuat.</div></div><div class="card real-surface"><h3>Dimensi Saran</h3><div id="real-gap-assessment">Pilih peluang riset yang tersimpan.</div></div><div class="card real-surface"><h3>Saran & Kritik</h3><div id="real-gap-critic">Pilih peluang riset yang tersimpan.</div></div><div class="card real-surface"><h3>Kualitas Riset <span class="data-badge real">DATA NYATA</span></h3><div id="real-gap-quality">Pilih objek riset yang tersimpan.</div></div><div class="card real-surface"><h3>Verifikasi Bukti <span class="data-badge real">DATA NYATA</span></h3><div id="real-gap-verification">Pilih objek riset yang tersimpan.</div></div><div class="card real-surface"><h3>Otoritas HUMAN</h3><div id="real-gap-decision">Pilih peluang riset yang tersimpan.</div></div></div>`;
@@ -402,7 +406,7 @@ function escapeHtml(value) {
 }
 
 function renderEvidence() {
-  return commonHeader("Penjelajah Bukti", "Record EvidenceFragment dan Claim nyata untuk Proyek yang dipilih.", "real") + `
+  return commonHeader("Penjelajah Bukti", "Evidence IO aktif lebih dahulu; evidence canonical proyek lama tetap tersedia sebagai pembanding.", "real") + focusedContextBanner("Evidence set aktif") + focusedEvidenceTable() + `
   <div class="detail-grid evidence-layout"><div class="card evidence-list-card"><h3>Hasil Bukti</h3><div id="real-evidence-list">Memuat bukti canonical…</div></div>
   <div class="card"><h3>Detail Bukti</h3><div id="real-evidence-detail">Pilih Claim yang tersimpan.</div></div>
   <div class="card"><h3>Batas canonical</h3><div class="trace">Project → Work → EvidenceFragment → Claim</div><p>Hanya EvidenceRelationship yang tersimpan yang ditampilkan atau diimplikasikan; tidak ada relasi tambahan yang disimpulkan.</p></div></div>`;
@@ -445,7 +449,7 @@ function humanAssessmentTransition(r){
 function technicalAssessmentState(state){return state==null?"null":JSON.stringify(state,null,2);}
 
 function renderEvolution() {
-  return commonHeader("Evolusi Pengetahuan", "ChangeEvent tersimpan menjelaskan apa yang berubah dan alasannya tanpa menulis ulang keputusan HUMAN.", "real") + `
+  return commonHeader("Evolusi Pengetahuan", "Perubahan pemahaman dari IO aktif belum canonical; ChangeEvent proyek lama dipisahkan sebagai histori.", "real") + focusedContextBanner("Current investigation context") + `
   <div class="detail-grid"><div class="card real-surface"><h3>Linimasa ChangeEvent <span class="data-badge real">DATA NYATA</span></h3><div id="real-change-list">Memuat ChangeEvent canonical…</div></div>
   <div class="card real-surface"><h3>Delta Penalaran</h3><div id="real-change-detail">Pilih ChangeEvent yang tersimpan.</div></div>
   <div class="card real-surface"><h3>Batas Otoritas Ilmiah</h3><div class="callout warning">ChangeEvent merekam evolusi pengetahuan historis. ChangeEvent tidak otomatis mengubah status GapCandidate atau HumanDecision.</div></div></div>`;
@@ -472,7 +476,7 @@ async function loadProjectChanges() {
 }
 
 function renderReview() {
-  return commonHeader("Tinjauan HUMAN", "Claim canonical yang memerlukan tinjauan ilmiah HUMAN untuk Proyek yang dipilih.", "real") + `
+  return commonHeader("Tinjauan HUMAN", "Assessment HUMAN dari Focused Investigation adalah konteks review aktif; antrean canonical lama dipisahkan di bawah.", "real") + focusedContextBanner("Review aktif") + focusedEvidenceTable() + `
   <div class="detail-grid review-layout"><div class="card real-surface review-list-card"><h3>Antrean Tinjauan <span class="data-badge real">DATA NYATA</span></h3><div id="real-review-list">Memuat antrean tinjauan canonical…</div></div>
   <div class="card real-surface"><h3>Konteks Tinjauan</h3><div id="real-review-detail">Pilih Claim yang tersimpan.</div></div>
   <div class="card"><h3>Batas Keputusan</h3><p>Antrean ini mendukung pemeriksaan Claim canonical. HumanDecision hanya ditulis melalui tindakan HUMAN eksplisit pada alur kerja yang menyediakan kontrol keputusan.</p><div class="callout warning">NEEDS_REVIEW adalah status yang memerlukan perhatian, bukan penerimaan atau penolakan ilmiah.</div></div></div>`;
@@ -501,7 +505,7 @@ async function loadHumanReview() {
 }
 
 function renderCoverage() {
-  return commonHeader("Cakupan Riset", "Batas cakupan ilmiah dari CoverageContext tersimpan terbaru; kesehatan operasional berada di Admin Copilot.", "real") + `
+  return commonHeader("Cakupan Riset", "Cakupan IO aktif dibawa dari bounded universe; CoverageContext proyek lama tetap ditampilkan sebagai histori canonical.", "real") + focusedContextBanner("Cakupan investigasi aktif") + `
   <div id="real-coverage-detail" class="detail-grid"><div class="card real-surface"><h3>Memuat cakupan…</h3></div></div>`;
 }
 
@@ -538,14 +542,14 @@ async function loadProjectCoverageSummary() {
 
 function renderProfiles() {
   const ctx=(window.GF_CONTEXT_ROWS||[]).find(r=>r.project_id===projectSelect.value)||{};
-  return commonHeader("Profil Riset / Konteks Proyek", "Konteks canonical aktif. Konfigurasi dikelola oleh Admin Copilot dan bersifat read-only di Research Copilot.", "real") + `
+  return commonHeader("Profil Riset / Konteks Proyek", "IO aktif adalah konteks investigasi sesi; profil/proyek canonical lama belum otomatis ditimpa.", "real") + focusedContextBanner("Konteks sesi aktif") + `
   <div class="detail-grid"><div class="card"><h3>Profil Riset · v${escapeHtml(ctx.profile_version||"—")}</h3><p><strong>Nama profil</strong><br>${escapeHtml(ctx.profile_name||"NOT_AVAILABLE")}</p><p><strong>Ringkasan</strong><br>${escapeHtml(ctx.profile_summary||"NOT_AVAILABLE")}</p></div>
   <div class="card"><h3>Proyek · v${escapeHtml(ctx.project_version||"—")}</h3><p><strong>Nama proyek</strong><br>${escapeHtml(ctx.project_name||"NOT_AVAILABLE")}</p><p><strong>Tujuan / research intent</strong><br>${escapeHtml(ctx.research_intent||"NOT_AVAILABLE")}</p><p><strong>RQ sementara</strong><br>${escapeHtml(ctx.provisional_rq_text||"NOT_AVAILABLE")}</p></div>
   <div class="card"><h3>Otoritas Konfigurasi</h3><div class="callout">Profile dan Project hanya dapat dikonfigurasi melalui Admin Copilot. Perubahan dibuat sebagai versi baru; Research Copilot tidak menyediakan kontrol mutasi.</div><p>Keputusan ilmiah tetap memerlukan tindakan HUMAN dan tidak dibuat otomatis oleh konfigurasi administratif.</p></div></div>`;
 }
 
 function renderTelegram() {
-  return commonHeader("Radar Riset Telegram", "Proyeksi read-only dari ChangeEvent canonical. Telegram tidak pernah menjadi status ilmiah.", "real") + `
+  return commonHeader("Radar Riset Telegram", "IO aktif belum menjadi ChangeEvent canonical dan belum diproyeksikan ke Radar.", "real") + focusedContextBanner("Belum diproyeksikan ke Radar") + `
   <div id="radar-live" class="card"><p>Memuat proyeksi Radar canonical…</p></div>
   <div class="card"><h3>Aturan Radar</h3><ul><li>Tidak ada log crawler mentah</li><li>Tidak ada keputusan ilmiah otomatis</li><li>Tidak ada status canonical di Telegram</li><li>Kegagalan pengiriman tetap lokal</li><li>Periksa konteks lengkap di Dashboard</li></ul></div>`;
 }

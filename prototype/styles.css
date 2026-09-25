@@ -338,3 +338,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 /* Any data table owns its frame; the page itself must not widen. */
 .table-frame,.panel>.table-wrap,.card>.table-wrap,.callout>.table-wrap{width:100%;max-width:100%;max-height:62vh;overflow:auto;border:1px solid var(--border);border-radius:10px}
 .table-frame table,.panel>.table-wrap table,.card>.table-wrap table,.callout>.table-wrap table{min-width:1200px}
+
+.focused-context{margin:0 0 16px;border-left:4px solid #60a5fa;background:#10243a;color:#eaf2ff;font-size:16px;line-height:1.5}.focused-context strong{font-size:18px;color:#fff}.focused-context small{color:#c5d5e8}
