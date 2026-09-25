@@ -284,3 +284,12 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .research-workspace #trial-advice,
 .research-workspace .paper-inspector-head,
 .research-workspace #trial-papers {display:none!important}
+/* Focused Investigation is a full-width HUMAN reading surface; only its evidence table scrolls. */
+.research-workspace #opportunity-analysis{border:0!important;border-radius:0!important;background:transparent!important;padding:0!important;box-shadow:none!important}
+.research-workspace .trial-deep-dive{overflow:visible}
+.research-workspace .focused-investigation{width:calc(100vw - 96px);max-width:none;position:relative;left:50%;transform:translateX(-50%);border:0;border-radius:0;padding:22px 0;background:transparent}
+.research-workspace .focused-investigation>.table-wrap{background:#fff;border:1px solid var(--border);border-radius:12px}
+.focused-investigation .focused-note{width:100%;box-sizing:border-box;margin-top:8px;padding:8px;border:1px solid var(--border);border-radius:7px;resize:vertical;font:inherit;line-height:1.4}
+.focused-synthesis-reading{margin:12px 0;padding:13px 15px;border-left:4px solid #2563eb;background:#fff;border-radius:8px}
+#focused-direction-state{margin-top:12px}
+@media(max-width:900px){.research-workspace .focused-investigation{width:calc(100vw - 28px)}}
