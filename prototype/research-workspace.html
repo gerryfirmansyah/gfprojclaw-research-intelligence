@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Research Workspace · GFPROJCLAW Research Explorer</title>
-  <link rel="stylesheet" href="styles.css?v=0.22.0" />
+  <link rel="stylesheet" href="styles.css?v=0.23.0" />
 </head>
 <body class="research-workspace">
 <div class="workspace-banner"><strong>GFPROJCLAW · Research Workspace</strong><span>HUMAN–MACHINE research journey · focused trial</span><nav>1 Explore → 2 Screen → 3 Evidence → 4 Analyze → 5 Focused Investigation → 6 HUMAN Direction → 7 Copilot</nav></div>
@@ -14,10 +14,7 @@
       <p class="eyebrow">Stage 1 · Explore → Understand → Decide</p>
       <h1>Mulai dari ide riset, bukan dari kesimpulan.</h1>
       <p class="explorer-lead">Research Explorer membantu HUMAN memahami landscape, istilah, sumber, cakupan, dan alternatif scope sebelum membentuk Research Project. Mesin menyediakan observasi dan pilihan; keputusan ilmiah tetap milik HUMAN.</p>
-      <div class="explorer-actions">
-        <a class="primary-action" href="#start">Eksplorasi ide baru</a>
-        <a class="secondary-action" href="index.html">Lanjutkan Research Copilot</a>
-      </div>
+      <div class="workspace-current-flow"><strong>Trial aktif:</strong> mulai dari lanskap seluruh semesta terbatas di bawah, lalu HUMAN memilih area → evidence → investigation direction.</div>
     </section>
 
     <section class="explorer-entry-grid" aria-label="Two-stage researcher journey">
@@ -122,38 +119,8 @@
       <div id="accept-result" class="callout">MENUNGGU · HUMAN belum menyelesaikan tinjauan penerimaan.</div></details>
     </section>
 
-    <section id="discovery-benchmark" class="panel explorer-start-panel workspace-hidden-legacy" aria-hidden="true">
-      <div class="panel-header"><div><p class="eyebrow">Discovery Verification</p><h2>Bandingkan pencarian HUMAN dengan mesin</h2></div><span class="state gray">LOCAL DRAFT</span></div>
-      <p>Catat observasi pencarian manual dengan kondisi yang dapat dibandingkan. Draft ini belum menulis canonical state dan tidak menjadi keputusan ilmiah.</p>
-      <div class="benchmark-grid">
-        <label>Source / provider<select id="bench-source"><option value="openalex">OpenAlex</option></select></label>
-        <label>Channel HUMAN<select id="bench-channel"><option>Web UI</option><option>Export</option><option>Other</option></select></label>
-        <label>Waktu pencarian<input id="bench-time" type="datetime-local"></label>
-        <label>Provider reported total<input id="bench-total" type="number" min="0" placeholder="Contoh: 143"></label>
-        <label>HUMAN captured count<input id="bench-captured" type="number" min="0" placeholder="Contoh: 137"></label>
-      </div>
-      <label>Exact query yang digunakan<textarea id="bench-query" rows="4" placeholder="Salin query persis seperti yang dijalankan di provider."></textarea></label>
-      <label>Filters / sort / pagination / catatan kondisi<textarea id="bench-params" rows="3" placeholder="Contoh: no year filter; relevance sort; web UI."></textarea></label>
-      <label>Captured identifiers (opsional, satu DOI/OpenAlex ID per baris)<textarea id="bench-members" rows="5" placeholder="W3139363371&#10;10.1016/j.giq.2021.101577"></textarea></label>
-      <div class="explorer-actions"><button id="bench-preview" class="primary-action" type="button">Preview benchmark</button></div>
-      <div id="bench-result" class="callout">Belum ada HUMAN observation. Tanpa member identifiers, overlap akan tetap NOT_AVAILABLE.</div>
-    </section>
-
-    <section id="start" class="panel explorer-start-panel workspace-hidden-legacy" aria-hidden="true">
-      <div class="panel-header"><div><p class="eyebrow">Research interest</p><h2>Apa yang ingin Anda pahami?</h2></div><span class="state gray">FOUNDATION</span></div>
-      <p>Entry experience ini belum menulis canonical scientific state. Pembuatan exploration session akan diaktifkan hanya setelah workflow HUMAN dan provenance-nya diverifikasi.</p>
-      <label class="explorer-interest-label">Ide / fenomena / masalah awal
-        <textarea id="explorer-interest" rows="5" placeholder="Contoh: Saya ingin memahami bagaimana AI digunakan dalam digital government, termasuk risiko, governance, dan explainability."></textarea>
-      </label>
-      <div class="explorer-actions">
-        <button class="primary-action" type="button" disabled aria-disabled="true">Mulai observasi — belum diaktifkan</button>
-        <a class="secondary-action" href="index.html">Pilih project yang sudah ada</a>
-      </div>
-      <div class="callout">Canonical state saat ini: <strong>NOT_RECORDED</strong> untuk project lama tidak berarti eksplorasi tidak pernah terjadi atau coverage lengkap.</div>
-    </section>
-
     <footer class="explorer-footer">GFPROJCLAW · Research Explorer is the Stage 1 researcher surface. Admin Copilot remains an operational plane, not a research stage.</footer>
   </main>
-  <script src="research-workspace.js?v=0.14.0"></script>
+  <script src="research-workspace.js?v=0.15.0"></script>
 </body>
 </html>

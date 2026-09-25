@@ -297,3 +297,5 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 @media(max-width:900px){.research-workspace .focused-investigation{width:calc(100vw - 28px)}}
 
 .io-decision-gate{margin:18px 0 0;padding:14px 16px;border-top:1px solid var(--border);background:#f8fafc;border-radius:8px}.io-decision-gate p{margin:6px 0 10px}.copilot-focused-list{display:grid;gap:9px;margin-top:10px}.copilot-focused-list article{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff}.copilot-focused-list p{margin:6px 0 0}
+
+.workspace-current-flow{margin-top:18px;padding:12px 14px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:8px;max-width:760px;line-height:1.5}
