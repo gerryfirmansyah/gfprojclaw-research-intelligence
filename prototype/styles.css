@@ -361,3 +361,15 @@ body { font-family: var(--font-ui); font-weight: var(--font-weight-body); }
 .journey-loop-row>span{display:grid;place-items:center;min-height:32px;border-radius:8px;background:#4a3210;color:#fde68a;font-weight:900}
 .journey-loop-row b{display:inline-block;margin-left:10px;color:#fbbf24;font-size:12px}
 .journey-loop-row strong{font-size:14px}
+
+/* Research Copilot reasoning workbench */
+.reasoning-stage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}
+.reasoning-stage-grid .card{margin:0}
+.reasoning-stage-grid .eyebrow,.reasoning-decision .eyebrow{color:#93c5fd;font-weight:900;letter-spacing:.08em;font-size:11px}
+.reasoning-stage-grid h3,.reasoning-decision h3{margin:7px 0}
+.reasoning-decision{margin:14px 0;border-left:4px solid #60a5fa}
+.reasoning-choice-row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.reasoning-choice-row button{padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
+.reasoning-choice-row button:hover{border-color:#60a5fa}
+#candidate-rq{width:100%;box-sizing:border-box;margin-top:8px}
+@media(max-width:900px){.reasoning-stage-grid{grid-template-columns:1fr}}
