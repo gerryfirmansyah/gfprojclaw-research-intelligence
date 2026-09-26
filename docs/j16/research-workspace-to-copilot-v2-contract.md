@@ -16,3 +16,6 @@ Carries discovery query/boundary, selected path, HUMAN-selected evidence, per-pa
 
 ## Copilot v2 purpose
 Compress with provenance: what is observed → what pattern/tension appears → what changed after HUMAN review → what remains unknown → what must be verified → what HUMAN may decide next. It never converts an investigation opportunity into a validated gap/novelty claim.
+
+## Visible journey boundary
+The Copilot v2 Research Journey MUST render two explicit zones. Workspace W1–W8 ends at Focused Synthesis/HUMAN Direction. Copilot C1–C8 begins only after the Research Reasoning Package handoff. Legacy illustrative R0–R16 status is not rendered for an active v2 session because it can be mistaken for actual scientific state.
