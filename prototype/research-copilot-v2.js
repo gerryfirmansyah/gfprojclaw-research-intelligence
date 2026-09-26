@@ -353,27 +353,42 @@ function renderJourney() {
   if(f){
     const rows=f.assessments||[], reviewed=rows.filter(x=>x.status&&x.status!=="NOT_REVIEWED").length;
     const ws=[
-      ["W1","Semesta & Landscape","SELESAI","Bounded universe, area, dan jalur eksplorasi dibentuk di Research Workspace."],
-      ["W2","Area / Sub-area Deep Dive","SELESAI",`Jalur HUMAN: ${h?.selected_gap_opportunity?.path?.join(" → ")||h?.path?.join?.(" → ")||"tercatat pada handoff"}.`],
-      ["W3","Screening Advice","SELESAI",`Lensa: ${f.screening_lens||h?.selected_gap_opportunity?.screening_lens||"tercatat pada evidence selection"}.`],
-      ["W4","HUMAN Evidence Set","SELESAI",`${rows.length} paper dibawa ke Focused Investigation.`],
-      ["W5","Model Analysis & Compare","SELESAI","Context, method, unit, finding, mechanism, limitation + compare/cross-dimensional dibaca sebelum IO."],
-      ["W6","Candidate Investigation Opportunity","SELESAI",`${f.io_id} · ${f.io_title} dipilih HUMAN.`],
-      ["W7","Focused Investigation","SELESAI",`${reviewed}/${rows.length} paper memiliki assessment HUMAN.`],
-      ["W8","Focused Synthesis & Direction","HANDOFF",`HUMAN direction: ${f.human_direction||"NOT_RECORDED"}.`]
+      ["W1","Research Universe & Landscape","SELESAI","Memetakan bounded universe, landscape, area, sumber, dan coverage awal."],
+      ["W2","Area / Sub-area Exploration","SELESAI",`Jalur HUMAN: ${h?.selected_gap_opportunity?.path?.join(" → ")||h?.path?.join?.(" → ")||"tercatat pada handoff"}.`],
+      ["W3","Screening Strategy","SELESAI",`Lensa: ${f.screening_lens||h?.selected_gap_opportunity?.screening_lens||"tercatat pada evidence selection"}.`],
+      ["W4","HUMAN Evidence Selection","SELESAI",`${rows.length} paper dipilih HUMAN untuk diperiksa.`],
+      ["W5","Evidence Qualification","PERLU DIPERKUAT","Uji availability, study type, method, unit, context, source quality, dan evidence readiness sebelum comparison."],
+      ["W6","Model Analysis","SELESAI","Ekstraksi context, method, data/sample, unit, finding, mechanism, limitation, dan provenance."],
+      ["W7","Compare / Contrast / Cross-dimensional Synthesis","SELESAI","Mencari pola, perbedaan, tension, contradiction, dan uncertainty lintas paper."],
+      ["W8","Candidate Investigation Opportunities","SELESAI",`${f.io_id} · ${f.io_title} muncul sebagai candidate IO, bukan research gap.`],
+      ["W9","HUMAN IO Selection","SELESAI",`${f.io_id} dipilih HUMAN untuk investigasi terfokus.`],
+      ["W10","Focused Investigation + Counter-search","PERLU DIPERKUAT","Uji supporting evidence terhadap challenge/counter-evidence dan kondisi yang dapat membatalkan interpretasi."],
+      ["W11","HUMAN Evidence Assessment","SELESAI",`${reviewed}/${rows.length} paper memiliki assessment HUMAN.`],
+      ["W12","Focused Synthesis","SELESAI","Synthesis mengikuti assessment HUMAN; bukan probability of truth, validated gap, atau novelty claim."],
+      ["W13","HUMAN Direction","HANDOFF",`Arah HUMAN: ${f.human_direction||"NOT_RECORDED"}. Research Reasoning Package dibentuk.`]
     ];
     const cp=[
-      ["C1","Research Session Brief","AKTIF","Menerima Research Reasoning Package tanpa mencampur state proyek lama."],
-      ["C2","Investigation Reasoning","AKTIF","Menguji observation, compare signal, reclassification, counter-evidence, dan uncertainty."],
-      ["C3","Evidence Reasoning Explorer","SIAP","Menelusuri provenance paper, DOI/OpenAlex, surfaced-as, assessment, dan catatan HUMAN."],
-      ["C4","Knowledge Evolution","MENUNGGU KEPUTUSAN","Belum ada canonical ChangeEvent dari sesi ini."],
-      ["C5","HUMAN Decision Checkpoint","MENUNGGU HUMAN","Continue / revise / evidence insufficient / bentuk Research Question bila evidence memadai."],
-      ["C6","Research Boundary & Coverage","AKTIF","Menjaga batas corpus, evidence set, provider, full-text, dan uncertainty tetap eksplisit."],
-      ["C7","Research Project Formation","BELUM CANONICAL","IO tidak otomatis menjadi gap, novelty, RQ, atau project."],
-      ["C8","Ongoing Copilot / Radar","BELUM AKTIF","Baru berjalan setelah HUMAN membuat scientific write/decision canonical."]
+      ["C1","Research Session Brief / Problem Context","AKTIF","Menerima Research Reasoning Package tanpa mencampur state project atau sesi lama."],
+      ["C2","Investigation Reasoning","AKTIF","Mempertajam observation, mechanism, outcome, tension, contradiction, dan uncertainty."],
+      ["C3","Evidence Verification & Provenance","SIAP","Menelusuri paper, DOI/OpenAlex, surfaced-as, assessment HUMAN, dan batas evidence."],
+      ["C4","Boundary / Coverage / Falsification","AKTIF","Menguji coverage dan mencari evidence yang dapat menantang atau membatasi interpretasi."],
+      ["C5","HUMAN Decision Checkpoint","MENUNGGU HUMAN","Continue, revise, evidence insufficient, atau lanjut ke problem/RQ formulation."],
+      ["C6","Research Problem + Candidate RQ","BELUM CANONICAL","Menyusun candidate problem/RQ yang traceable ke evidence, contradiction, context, dan uncertainty."],
+      ["C7","HUMAN RQ Decision","MENUNGGU HUMAN","HUMAN memilih, merevisi, menolak, atau menunda candidate Research Question."],
+      ["C8","Concept / Construct Clarification","BELUM AKTIF","Definisikan construct, relation, mechanism, unit, scope, dan boundary secara eksplisit."],
+      ["C9","Theory Positioning","BELUM AKTIF","Bandingkan explanatory lenses dan theoretical fit berdasarkan daya jelas dan evidence."],
+      ["C10","Method Intelligence","BELUM AKTIF","Hubungkan RQ dengan method, data, measurement, assumptions, validity, dan limitations."],
+      ["C11","Research Design","BELUM AKTIF","Susun desain yang menghubungkan RQ, data, method, analysis, validity, ethics, dan feasibility."],
+      ["C12","Contribution Formation","BELUM AKTIF","Rumuskan potential contribution dan batasnya; belum dianggap kontribusi tervalidasi."],
+      ["C13","Novelty Challenge","BELUM AKTIF","Counter-search untuk menguji apakah novelty/contribution candidate telah dijawab literature lain."],
+      ["C14","Argument / Evidence Audit","BELUM AKTIF","Audit claim-evidence alignment, unsupported leap, contradiction, provenance, dan missing verification."],
+      ["C15","Research Readiness","BELUM AKTIF","HUMAN menilai apakah problem, RQ, theory, method, evidence, boundary, dan contribution siap."],
+      ["C16","Knowledge Evolution / Radar","BELUM AKTIF","Canonical ChangeEvent dan monitoring baru aktif setelah explicit HUMAN scientific write/decision."]
     ];
     const cards=(xs,kind)=>xs.map(([id,n,state,d])=>`<div class="journey-v2-row ${kind}"><span class="journey-v2-code">${id}</span><div><strong>${escapeHtml(n)}</strong><p>${escapeHtml(d)}</p></div><span class="journey-v2-state">${escapeHtml(state)}</span></div>`).join('');
-    return sessionHeader("Perjalanan Riset","Peta end-to-end yang memisahkan dengan jelas pekerjaan Research Workspace dan reasoning Research Copilot v2.")+`<div class="journey-v2-boundary"><div><span>RESEARCH WORKSPACE</span><h2>Explore → Screen → Analyze → Investigate</h2><p>Mesin memperluas penglihatan dan menyusun evidence. HUMAN memilih evidence, IO, assessment, dan arah.</p></div><div class="journey-v2-arrow">Research Reasoning Package →</div><div><span>RESEARCH COPILOT v2</span><h2>Reason → Verify → Decide → Evolve</h2><p>Copilot mempertajam reasoning dari package yang sama; tidak membuat fakta atau state ilmiah baru tanpa tindakan HUMAN.</p></div></div><div class="journey-v2-grid"><section class="card"><h3>1 · Research Workspace · selesai sebelum handoff</h3>${cards(ws,'workspace')}</section><section class="card"><h3>2 · Research Copilot v2 · sesi reasoning aktif</h3>${cards(cp,'copilot')}</section></div><div class="callout warning"><strong>Batas keputusan:</strong> ${escapeHtml(f.io_id)} tetap Investigation Opportunity. Validated gap, novelty, Research Question, contribution, dan canonical knowledge change hanya muncul setelah verifikasi tambahan dan keputusan eksplisit HUMAN.</div>`;
+    const loops=[["L1","Evidence tidak cukup","C5 → W4/W5"],["L2","Counter-evidence mengubah pola","C4 → W2/W3/W4"],["L3","IO tidak bertahan","W10/W12 → W8"],["L4","RQ tidak defensible","C7 → C2/C4/C6"],["L5","Theory tidak cukup menjelaskan","C9 → C2/C8"],["L6","Novelty challenged","C13 → C4/C6/C9"],["L7","Design tidak feasible/valid","C11/C15 → C10/C6"],["L8","Bukti baru setelah project berjalan","C16 → C3/C4/C5"]];
+    const loopCards=loops.map(([id,n,path])=>`<div class="journey-loop-row"><span>${id}</span><div><strong>${escapeHtml(n)}</strong><b>${escapeHtml(path)}</b></div></div>`).join('');
+    return sessionHeader("Perjalanan Riset","Peta end-to-end scientific reasoning: Workspace membangun evidence; Copilot v2 mengubah evidence pilihan HUMAN menjadi reasoning, RQ, design, dan readiness.")+`<div class="journey-role-banner"><span>ANDA SEDANG BERADA DI RESEARCH COPILOT v2</span><strong>Reason → Verify → Formulate → Design → Challenge → Decide → Evolve</strong><p>Jika tugas Anda masih memetakan semesta, screening, memilih paper, atau memilih IO, kembali ke Research Workspace.</p></div><div class="journey-v2-boundary"><div><span>RESEARCH WORKSPACE · DISCOVERY + EVIDENCE CONSTRUCTION</span><h2>Explore → Screen → Qualify → Analyze → Synthesize → Investigate</h2><p>Menjawab: “apa yang layak saya investigasi dan mengapa?” HUMAN memilih evidence, IO, assessment, dan arah.</p></div><div class="journey-v2-arrow">Research Reasoning Package →</div><div><span>RESEARCH COPILOT v2 · SCIENTIFIC REASONING + PROJECT FORMATION</span><h2>Reason → Verify → Formulate → Design → Challenge → Evolve</h2><p>Menjawab: “bagaimana investigasi ini menjadi problem, defensible RQ, theory positioning, method, design, dan contribution?”</p></div></div><div class="journey-v2-grid"><section class="card"><h3>1 · Research Workspace · W1–W13</h3>${cards(ws,'workspace')}</section><section class="card"><h3>2 · Research Copilot v2 · C1–C16</h3>${cards(cp,'copilot')}</section></div><section class="card journey-loops"><h3>Research is iterative · loop yang disengaja</h3><p>Flow bukan waterfall. Evidence baru atau contradiction dapat membawa HUMAN kembali ke tahap sebelumnya.</p>${loopCards}</section><div class="callout warning"><strong>Batas keputusan:</strong> ${escapeHtml(f.io_id)} tetap Investigation Opportunity. Validated gap, novelty, Research Question, contribution, dan canonical knowledge change hanya muncul setelah verification tambahan dan keputusan eksplisit HUMAN.</div>`;
   }
   return commonHeader("Perjalanan Riset","Belum ada Research Reasoning Package aktif.")+`<div class="card"><h3>Mulai dari Research Workspace</h3><p>Research Copilot v2 tidak membuat perjalanan riset dari data demonstrasi atau project lama. Selesaikan eksplorasi, evidence selection, Candidate IO, Focused Investigation, dan HUMAN direction di Research Workspace terlebih dahulu.</p><a class="primary-action" href="research-workspace.html">Buka Research Workspace →</a></div>`;
 }
