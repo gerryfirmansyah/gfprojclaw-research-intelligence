@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GFPROJCLAW Research Copilot</title>
+  <link rel="stylesheet" href="styles.css?v=0.17.8" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">GF</div>
+        <div>
+          <strong>GFPROJCLAW</strong>
+          <span>Research Copilot</span>
+          <a class="stage-back-link" href="explorer.html">← Research Explorer</a>
+        </div>
+      </div>
+
+      <nav id="main-nav" class="nav-list">
+        <button class="nav-item active" data-view="today" data-i18n="today">Today</button>
+        <button class="nav-item" data-view="journey" data-i18n="journey">Research Journey</button>
+        <button class="nav-item" data-view="opportunities" data-i18n="opportunities">Opportunities</button>
+        <button class="nav-item" data-view="evidence" data-i18n="evidence">Evidence Explorer</button>
+        <button class="nav-item" data-view="evolution" data-i18n="evolution">Knowledge Evolution</button>
+        <button class="nav-item" data-view="review">Human Review <span id="human-review-badge" class="badge">…</span></button>
+        <button class="nav-item" data-view="coverage" data-i18n="coverage">Research Coverage</button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-title" data-i18n="profile">Profile</div>
+      <nav class="nav-list small">
+        <button class="nav-item" data-view="profiles" data-i18n="profiles">Profiles & Projects</button>
+        <button class="nav-item" data-view="telegram">Telegram Radar</button>
+      </nav>
+
+      <div class="researcher-card">
+        <div class="avatar">GF</div>
+        <div>
+          <strong>Gerry Firmansyah</strong>
+          <span>Researcher</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="context-switchers">
+          <label><span data-i18n="profile">Profile</span>
+            <select id="profile-select">
+              <option value="A">A — Computer / Information Systems</option>
+              <option value="B">B — Management / Organization Studies</option>
+            </select>
+          </label>
+          <label><span data-i18n="project">Project</span>
+            <select id="project-select"></select>
+          </label>
+        </div>
+        <div class="topbar-actions">
+          <input id="global-search" type="search" placeholder="Search papers, concepts, gaps…" data-i18n-placeholder="searchPlaceholder" />
+          <a class="workspace-link" href="admin.html" data-i18n="admin">Admin Copilot</a>
+
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">🌙 Dark</button>
+          <span id="prototype-version" class="sync-status">Prototype v0.19.2 · Indonesian presentation layer</span>
+        </div>
+      </header>
+
+      <section id="explorer-handoff" class="card real-surface" hidden>
+        <div class="panel-header"><div><p class="eyebrow">DARI RESEARCH EXPLORER</p><h2 id="handoff-title">Konteks area terpilih</h2></div><span class="state blue">NON-CANONICAL CONTEXT</span></div>
+        <div id="handoff-summary" class="callout">Konteks Explorer belum tersedia.</div>
+        <div class="advice-grid"><div class="advice-card"><strong>MENGAPA area ini dibawa</strong><p id="handoff-why"></p></div><div class="advice-card"><strong>Apa yang sudah diamati</strong><p id="handoff-observed"></p></div><div class="advice-card"><strong>Catatan HUMAN</strong><p id="handoff-human"></p></div><div class="advice-card"><strong>Langkah Copilot berikutnya</strong><p>Gunakan konteks ini untuk reasoning dan inspeksi lebih dalam. Jangan menganggap area ini relevan, gap, novelty, atau evidence tanpa keputusan HUMAN.</p></div></div>
+        <div id="handoff-gap" class="callout" hidden></div>
+        <div id="handoff-verification" class="advice-grid" hidden></div>
+        <div id="handoff-evidence" class="callout" hidden></div>
+        <div id="handoff-evidence-matrix" class="callout" hidden></div>
+        <div id="handoff-human-verdict" class="callout" hidden></div>
+        <div id="handoff-next-question" class="callout" hidden></div>
+        <div id="handoff-investigation-plan" class="callout" hidden></div>
+        <div id="handoff-execution" class="callout" hidden></div>
+        <div id="handoff-retrieval-brief" class="callout" hidden></div>
+        <div id="handoff-reasoning-trace" class="callout" hidden></div>
+        <div id="handoff-reflection" class="callout" hidden></div>
+        <div class="explorer-actions"><a id="handoff-back" class="secondary-action" href="research-workspace.html">← Kembali ke Research Workspace</a><button id="handoff-start" class="primary-action" type="button">Mulai verifikasi opportunity</button></div>
+        <div class="callout warning">Konteks handoff ini hanya berasal dari eksplorasi. Belum ada canonical write dan belum ada keputusan ilmiah.</div>
+      </section>
+
+      <section id="view-today" class="view active-view">
+        <div class="page-heading">
+          <div>
+            <h1 data-i18n="todayTitle">Today</h1>
+            <p data-i18n="todaySubtitle">What changed, why it matters, and where HUMAN attention is useful.</p>
+          </div>
+          <div class="coverage-pill" id="today-coverage-pill">Loading persisted coverage context…</div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card metric-action" id="metric-papers" tabindex="0" role="button" data-metric-open="evidence" aria-label="Open persisted papers"><span data-i18n="persistedPapers">Persisted Papers</span><strong>…</strong><small>Loading canonical project data</small></article>
+          <article class="metric-card metric-action" id="metric-decisions" tabindex="0" role="button" data-metric-open="review" aria-label="Open HUMAN review and decisions"><span data-i18n="humanDecisions">HUMAN Decisions</span><strong>…</strong><small>Loading persisted decisions</small></article>
+          <article class="metric-card metric-action" id="metric-changes" tabindex="0" role="button" data-metric-open="evolution" aria-label="Open knowledge changes"><span data-i18n="knowledgeChanges">Knowledge Changes</span><strong>…</strong><small>Loading canonical ChangeEvents</small></article>
+          <article class="metric-card metric-action" id="metric-coverage" tabindex="0" role="button" data-metric-open="coverage" aria-label="Open research coverage"><span data-i18n="coverageContext">Coverage Context</span><strong>…</strong><small>Loading persisted coverage state</small></article>
+          <article class="metric-card metric-action" id="metric-radar" tabindex="0" role="button" data-metric-open="telegram" aria-label="Open radar items"><span data-i18n="radarItems">Radar Items</span><strong>…</strong><small>Loading canonical projection</small></article>
+        </div>
+        <section id="metric-members" class="metric-members" hidden aria-live="polite">
+          <div class="panel-header"><div><h2 id="metric-members-title" data-i18n="canonicalMembers">Canonical members</h2><p id="metric-members-summary" data-i18n="selectMetric">Select a metric to inspect its exact members.</p></div><button id="metric-members-close" class="text-button" type="button" data-i18n="close">Close</button></div>
+          <div id="metric-members-list"></div>
+        </section>
+
+        <div class="dashboard-grid">
+          <article class="panel span-2">
+            <div class="panel-header"><h2 data-i18n="recentChanges">Recent Important Changes</h2><button class="text-button" data-open="evolution" data-i18n="viewAll">View all</button></div>
+            <div id="change-list" class="change-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2 data-i18n="stageGuide">Research Stage Guide</h2><button class="text-button" data-open="journey" data-i18n="viewAll">View all</button></div>
+            <div id="journey-mini" class="journey-mini"></div>
+          </article>
+
+          <article class="panel span-2">
+            <div class="panel-header"><h2 data-i18n="topOpportunities">Top Research Opportunities</h2><button class="text-button" data-open="opportunities" data-i18n="viewAll">View all</button></div>
+            <div id="opportunity-table"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2 data-i18n="latestPapers">Latest Papers</h2><button class="text-button" data-open="evidence" data-i18n="viewAll">View all</button></div>
+            <div id="paper-list" class="paper-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2 data-i18n="coverage">Research Coverage</h2><button class="text-button" data-open="coverage" data-i18n="viewAll">View all</button></div>
+            <div id="health-mini"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2 data-i18n="evolution">Knowledge Evolution</h2><button class="text-button" data-open="evolution" data-i18n="viewAll">View all</button></div>
+            <div id="evolution-mini"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header"><h2 data-i18n="radar">Telegram Research Radar</h2><button class="text-button" data-open="telegram" data-i18n="viewAll">View all</button></div>
+            <div id="telegram-mini"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-journey" class="view"></section>
+      <section id="view-opportunities" class="view"></section>
+      <section id="view-evidence" class="view"></section>
+      <section id="view-evolution" class="view"></section>
+      <section id="view-review" class="view"></section>
+      <section id="view-coverage" class="view"></section>
+      <section id="view-profiles" class="view"></section>
+      <section id="view-telegram" class="view"></section>
+    </main>
+  </div>
+
+  <script src="i18n.js?v=0.17.1"></script>
+  <script src="research-copilot-v2.js?v=0.1.0"></script>
+</body>
+</html>
