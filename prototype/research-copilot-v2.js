@@ -761,6 +761,7 @@ fetch(`${API_BASE}/api/context`, { cache: "no-store" }).then(r => { if (!r.ok) t
   profileSelect.onchange = () => { bindProjects(); loadHumanReviewBadge(); const aktif = document.querySelector(".active-view")?.id.replace("view-",""); if (!active || aktif === "today") renderDashboard(); else showView(active); };
   bindProjects();
   renderDashboard();
+  const returnView=new URLSearchParams(window.location.search).get("view"); if(activeFocused()&&returnView&&document.getElementById(`view-${returnView}`)) showView(returnView);
 loadHumanReviewBadge();
   const version = document.getElementById("prototype-version");
   if (version) version.textContent = `Prototype v${PROTOTYPE_VERSION} · live`;
